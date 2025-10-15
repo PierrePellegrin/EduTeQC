@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CLIENT
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  testResults TestResult[]
+
+  @@map("users")
+}
+
+model Course {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  category    String
+  imageUrl    String?
+  content     String   @db.Text
+  order       Int      @default(0)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tests Test[]
+
+  @@map("courses")
+}
+
+model Test {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  courseId    String
+  duration    Int      // durée en minutes
+  passingScore Int     @default(70) // score minimum pour réussir (en %)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions Question[]
+  results   TestResult[]
+
+  @@map("tests")
+}
+
+model Question {
+  id       String       @id @default(uuid())
+  testId   String
+  question String       @db.Text
+  type     QuestionType @default(SINGLE_CHOICE)
+  points   Int          @default(1)
+  order    Int          @default(0)
+
+  test    Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  options Option[]
+
+  @@map("questions")
+}
+
+model Option {
+  id         String  @id @default(uuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+  order      Int     @default(0)
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("options")
+}
+
+model TestResult {
+  id          String   @id @default(uuid())
+  userId      String
+  testId      String
+  score       Float    // score en pourcentage
+  answers     Json     // Stocke les réponses de l'utilisateur
+  passed      Boolean
+  completedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@map("test_results")
+}

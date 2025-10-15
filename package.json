@@ -1,0 +1,33 @@
+{
+  "name": "eduteqc",
+  "version": "1.0.0",
+  "description": "Plateforme d'apprentissage mobile avec cours et tests QCM",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix mobile",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:mobile": "cd mobile && npm start",
+    "android": "cd mobile && npm run android",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:mobile\"",
+    "build:backend": "cd backend && npm run build",
+    "prisma:generate": "cd backend && npm run prisma:generate",
+    "prisma:migrate": "cd backend && npm run prisma:migrate",
+    "prisma:seed": "cd backend && npm run prisma:seed",
+    "prisma:studio": "cd backend && npm run prisma:studio"
+  },
+  "keywords": [
+    "education",
+    "react-native",
+    "expo",
+    "nodejs",
+    "typescript",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {}
+}
