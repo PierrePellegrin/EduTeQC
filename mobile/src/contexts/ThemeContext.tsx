@@ -10,20 +10,20 @@ import {
   DarkTheme as NavigationDarkTheme,
 } from '@react-navigation/native';
 
-// Couleurs Material Design 3 - 2025
+// Couleurs Material Design 3 (palette bleue autour de #173278)
 const customLightColors = {
-  primary: 'rgb(103, 80, 164)',
-  onPrimary: 'rgb(255, 255, 255)',
-  primaryContainer: 'rgb(234, 221, 255)',
-  onPrimaryContainer: 'rgb(33, 0, 93)',
-  secondary: 'rgb(98, 91, 113)',
-  onSecondary: 'rgb(255, 255, 255)',
-  secondaryContainer: 'rgb(232, 222, 248)',
-  onSecondaryContainer: 'rgb(30, 25, 43)',
-  tertiary: 'rgb(125, 82, 96)',
-  onTertiary: 'rgb(255, 255, 255)',
-  tertiaryContainer: 'rgb(255, 216, 228)',
-  onTertiaryContainer: 'rgb(55, 11, 30)',
+  primary: '#173278',
+  onPrimary: '#FFFFFF',
+  primaryContainer: '#D5E1FF',
+  onPrimaryContainer: '#0A1C44',
+  secondary: '#2E5AAC',
+  onSecondary: '#FFFFFF',
+  secondaryContainer: '#D7E3FF',
+  onSecondaryContainer: '#0A1C44',
+  tertiary: '#2E7DAF',
+  onTertiary: '#FFFFFF',
+  tertiaryContainer: '#CAE8FF',
+  onTertiaryContainer: '#062A3D',
   error: 'rgb(186, 26, 26)',
   onError: 'rgb(255, 255, 255)',
   errorContainer: 'rgb(255, 218, 214)',
@@ -40,7 +40,7 @@ const customLightColors = {
   scrim: 'rgb(0, 0, 0)',
   inverseSurface: 'rgb(50, 47, 53)',
   inverseOnSurface: 'rgb(245, 239, 244)',
-  inversePrimary: 'rgb(208, 188, 255)',
+  inversePrimary: '#AFC6FF',
   elevation: {
     level0: 'transparent',
     level1: 'rgb(248, 242, 251)',
@@ -55,18 +55,18 @@ const customLightColors = {
 };
 
 const customDarkColors = {
-  primary: 'rgb(208, 188, 255)',
-  onPrimary: 'rgb(56, 30, 114)',
-  primaryContainer: 'rgb(79, 55, 139)',
-  onPrimaryContainer: 'rgb(234, 221, 255)',
-  secondary: 'rgb(204, 194, 220)',
-  onSecondary: 'rgb(51, 45, 65)',
-  secondaryContainer: 'rgb(74, 68, 88)',
-  onSecondaryContainer: 'rgb(232, 222, 248)',
-  tertiary: 'rgb(239, 184, 200)',
-  onTertiary: 'rgb(73, 37, 50)',
-  tertiaryContainer: 'rgb(99, 59, 72)',
-  onTertiaryContainer: 'rgb(255, 216, 228)',
+  primary: '#AFC6FF',
+  onPrimary: '#0B234E',
+  primaryContainer: '#173278',
+  onPrimaryContainer: '#D5E1FF',
+  secondary: '#B8CCFF',
+  onSecondary: '#0B234E',
+  secondaryContainer: '#2E5AAC',
+  onSecondaryContainer: '#FFFFFF',
+  tertiary: '#A5D8FF',
+  onTertiary: '#00324D',
+  tertiaryContainer: '#2E7DAF',
+  onTertiaryContainer: '#FFFFFF',
   error: 'rgb(255, 180, 171)',
   onError: 'rgb(105, 0, 5)',
   errorContainer: 'rgb(147, 0, 10)',
@@ -83,7 +83,7 @@ const customDarkColors = {
   scrim: 'rgb(0, 0, 0)',
   inverseSurface: 'rgb(231, 225, 230)',
   inverseOnSurface: 'rgb(50, 47, 53)',
-  inversePrimary: 'rgb(103, 80, 164)',
+  inversePrimary: '#173278',
   elevation: {
     level0: 'transparent',
     level1: 'rgb(37, 35, 42)',
@@ -134,7 +134,20 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const theme = isDark ? darkTheme : lightTheme;
-  const navTheme = isDark ? NavDarkTheme : NavLightTheme;
+  const baseNav = isDark ? NavDarkTheme : NavLightTheme;
+  // Aligner la navigation avec les couleurs du thème Paper
+  const navTheme = {
+    ...baseNav,
+    colors: {
+      ...baseNav.colors,
+      primary: theme.colors.primary,
+      background: theme.colors.background,
+      card: theme.colors.surface,
+      text: theme.colors.onSurface,
+      border: theme.colors.outline,
+      notification: theme.colors.primary,
+    },
+  } as typeof baseNav;
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme, theme, navTheme }}>
