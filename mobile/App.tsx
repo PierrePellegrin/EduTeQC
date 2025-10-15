@@ -17,6 +17,7 @@ import { CourseDetailScreen } from './src/screens/CourseDetailScreen';
 import { TestScreen } from './src/screens/TestScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
 import { AdminDashboardScreen } from './src/screens/AdminDashboardScreen';
+import { AdminTestsScreen } from './src/screens/AdminTestsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -93,6 +94,8 @@ function AdminTabs() {
             iconName = focused ? 'view-dashboard' : 'view-dashboard-outline';
           } else if (route.name === 'CoursesAdminTab') {
             iconName = focused ? 'book-open' : 'book-open-outline';
+          } else if (route.name === 'TestsAdminTab') {
+            iconName = focused ? 'file-document' : 'file-document-outline';
           } else if (route.name === 'ProfileTab') {
             iconName = focused ? 'account' : 'account-outline';
           }
@@ -112,6 +115,11 @@ function AdminTabs() {
         name="CoursesAdminTab"
         component={CoursesStack}
         options={{ title: 'Cours', headerShown: false }}
+      />
+      <Tab.Screen
+        name="TestsAdminTab"
+        component={AdminTestsScreen}
+        options={{ title: 'Tests' }}
       />
       <Tab.Screen
         name="ProfileTab"

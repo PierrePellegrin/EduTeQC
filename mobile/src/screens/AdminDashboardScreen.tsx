@@ -72,7 +72,7 @@ export const AdminDashboardScreen = ({ navigation }: Props) => {
 
           <Button
             mode="contained"
-            onPress={() => navigation.navigate('DashboardTab')}
+            onPress={() => navigation.navigate('TestsAdminTab')}
             style={styles.actionButton}
             icon="file-document"
           >
