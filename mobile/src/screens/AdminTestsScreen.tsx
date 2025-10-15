@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Card, Text, Button, TextInput, FAB, List, IconButton, Chip } from 'react-native-paper';
+import { Card, Text, Button, TextInput, FAB, List, IconButton, Chip, Menu } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from '../services/api';
+import { adminApi, coursesApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type Props = {
@@ -13,9 +13,11 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTest, setEditingTest] = useState<any>(null);
+  const [courseMenuVisible, setCourseMenuVisible] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
+    description: '',
     courseId: '',
     duration: '',
     passingScore: '',
@@ -24,6 +26,11 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   const { data: tests, isLoading } = useQuery({
     queryKey: ['adminTests'],
     queryFn: adminApi.getAllTests,
+  });
+
+  const { data: courses } = useQuery({
+    queryKey: ['adminCourses'],
+    queryFn: adminApi.getAllCourses,
   });
 
   const createMutation = useMutation({
@@ -66,6 +73,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   const resetForm = () => {
     setFormData({
       title: '',
+      description: '',
       courseId: '',
       duration: '',
       passingScore: '',
@@ -75,6 +83,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   const handleSubmit = () => {
     const data = {
       title: formData.title,
+      description: formData.description,
       courseId: formData.courseId,
       duration: parseInt(formData.duration),
       passingScore: parseInt(formData.passingScore),
@@ -91,6 +100,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     setEditingTest(test);
     setFormData({
       title: test.title,
+      description: test.description || '',
       courseId: test.courseId,
       duration: test.duration.toString(),
       passingScore: test.passingScore.toString(),
@@ -140,13 +150,44 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
               />
 
               <TextInput
-                label="ID du cours"
-                value={formData.courseId}
-                onChangeText={(text) => setFormData({ ...formData, courseId: text })}
+                label="Description"
+                value={formData.description}
+                onChangeText={(text) => setFormData({ ...formData, description: text })}
                 mode="outlined"
+                multiline
+                numberOfLines={3}
                 style={styles.input}
-                placeholder="Copier l'ID depuis la liste des cours"
               />
+
+              <Menu
+                visible={courseMenuVisible}
+                onDismiss={() => setCourseMenuVisible(false)}
+                anchor={
+                  <Button
+                    mode="outlined"
+                    onPress={() => setCourseMenuVisible(true)}
+                    style={styles.input}
+                    contentStyle={styles.dropdownButton}
+                    icon="chevron-down"
+                  >
+                    {formData.courseId && courses?.courses?.find((c: any) => c.id === formData.courseId)
+                      ? courses.courses.find((c: any) => c.id === formData.courseId).title
+                      : 'Sélectionner un cours'}
+                  </Button>
+                }
+              >
+                {courses?.courses?.map((course: any) => (
+                  <Menu.Item
+                    key={course.id}
+                    onPress={() => {
+                      setFormData({ ...formData, courseId: course.id });
+                      setCourseMenuVisible(false);
+                    }}
+                    title={course.title}
+                    leadingIcon={formData.courseId === course.id ? 'check' : undefined}
+                  />
+                ))}
+              </Menu>
 
               <TextInput
                 label="Durée (minutes)"
@@ -209,6 +250,18 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
                         {test._count?.questions || 0} questions
                       </Chip>
                     </View>
+                    <Button
+                      mode="outlined"
+                      icon="format-list-checks"
+                      onPress={() => navigation.navigate('AdminQuestions', { 
+                        testId: test.id, 
+                        testTitle: test.title 
+                      })}
+                      style={styles.questionsButton}
+                      compact
+                    >
+                      Gérer les questions
+                    </Button>
                   </View>
                   <View style={styles.testActions}>
                     <IconButton
@@ -272,6 +325,9 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: 12,
   },
+  dropdownButton: {
+    justifyContent: 'flex-start',
+  },
   formActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -307,6 +363,9 @@ const styles = StyleSheet.create({
   },
   chip: {
     marginLeft: 4,
+  },
+  questionsButton: {
+    marginTop: 12,
   },
   testActions: {
     flexDirection: 'row',

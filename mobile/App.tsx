@@ -18,6 +18,7 @@ import { TestScreen } from './src/screens/TestScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
 import { AdminDashboardScreen } from './src/screens/AdminDashboardScreen';
 import { AdminTestsScreen } from './src/screens/AdminTestsScreen';
+import { AdminQuestionsScreen } from './src/screens/AdminQuestionsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -81,6 +82,23 @@ function CoursesStack() {
   );
 }
 
+function TestsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="TestsList"
+        component={AdminTestsScreen}
+        options={{ title: 'Gestion des Tests' }}
+      />
+      <Stack.Screen
+        name="AdminQuestions"
+        component={AdminQuestionsScreen}
+        options={{ title: 'Questions' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function AdminTabs() {
   const { theme } = useTheme();
 
@@ -118,8 +136,8 @@ function AdminTabs() {
       />
       <Tab.Screen
         name="TestsAdminTab"
-        component={AdminTestsScreen}
-        options={{ title: 'Tests' }}
+        component={TestsStack}
+        options={{ title: 'Tests', headerShown: false }}
       />
       <Tab.Screen
         name="ProfileTab"
