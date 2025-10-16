@@ -53,6 +53,9 @@ const customLightColors = {
   surfaceDisabled: 'rgba(14, 20, 34, 0.12)',
   onSurfaceDisabled: 'rgba(14, 20, 34, 0.38)',
   backdrop: 'rgba(13, 31, 71, 0.35)',
+  // Couleurs de succès
+  successContainer: '#C8E6C9',
+  onSuccessContainer: '#1B5E20',
   // Couleurs custom pour header/tab bars
   headerBackground: '#396a98',
   onHeaderBackground: '#FFFFFF',
@@ -111,6 +114,9 @@ const customDarkColors = {
   surfaceDisabled: 'rgba(229, 236, 248, 0.12)',
   onSurfaceDisabled: 'rgba(229, 236, 248, 0.38)',
   backdrop: 'rgba(4, 10, 24, 0.5)',
+  // Couleurs de succès
+  successContainer: '#2E7D32',
+  onSuccessContainer: '#C8E6C9',
   // Couleurs custom pour header/tab bars
   headerBackground: '#04294c',
   onHeaderBackground: '#FFFFFF',

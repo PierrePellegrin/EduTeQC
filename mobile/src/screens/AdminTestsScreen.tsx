@@ -73,6 +73,17 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     },
   });
 
+  const togglePublishMutation = useMutation({
+    mutationFn: ({ id, isPublished }: { id: string; isPublished: boolean }) => 
+      adminApi.updateTest(id, { isPublished }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminTests'] });
+    },
+    onError: (error: any) => {
+      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la publication');
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       title: '',
@@ -118,6 +129,23 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
       [
         { text: 'Annuler', style: 'cancel' },
         { text: 'Supprimer', style: 'destructive', onPress: () => deleteMutation.mutate(id) },
+      ]
+    );
+  };
+
+  const handleTogglePublish = (id: string, currentStatus: boolean, title: string) => {
+    const newStatus = !currentStatus;
+    const action = newStatus ? 'publier' : 'dépublier';
+    
+    Alert.alert(
+      'Confirmer',
+      `Voulez-vous ${action} le test "${title}" ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { 
+          text: newStatus ? 'Publier' : 'Dépublier', 
+          onPress: () => togglePublishMutation.mutate({ id, isPublished: newStatus })
+        },
       ]
     );
   };
@@ -250,7 +278,22 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
               <Card.Content>
                 <View style={styles.testHeader}>
                   <View style={styles.testInfo}>
-                    <Text variant="titleLarge">{test.title}</Text>
+                    <View style={styles.titleRow}>
+                      <Text variant="titleLarge" style={styles.testTitleText}>{test.title}</Text>
+                      <Chip 
+                        icon={test.isPublished ? 'check-circle' : 'clock-outline'}
+                        style={[
+                          styles.statusChip,
+                          { backgroundColor: test.isPublished ? theme.colors.successContainer : theme.colors.surfaceVariant }
+                        ]}
+                        textStyle={{ 
+                          color: test.isPublished ? theme.colors.onSuccessContainer : theme.colors.onSurfaceVariant 
+                        }}
+                        compact
+                      >
+                        {test.isPublished ? 'Publié' : 'Brouillon'}
+                      </Chip>
+                    </View>
                     <Text variant="bodyMedium" style={styles.testMeta}>
                       Durée: {test.duration} min • Score min: {test.passingScore}%
                     </Text>
@@ -262,18 +305,29 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
                         {test._count?.questions || 0} questions
                       </Chip>
                     </View>
-                    <Button
-                      mode="outlined"
-                      icon="format-list-checks"
-                      onPress={() => navigation.navigate('AdminQuestions', { 
-                        testId: test.id, 
-                        testTitle: test.title 
-                      })}
-                      style={styles.questionsButton}
-                      compact
-                    >
-                      Gérer les questions
-                    </Button>
+                    <View style={styles.buttonRow}>
+                      <Button
+                        mode="outlined"
+                        icon="format-list-checks"
+                        onPress={() => navigation.navigate('AdminQuestions', { 
+                          testId: test.id, 
+                          testTitle: test.title 
+                        })}
+                        style={styles.questionsButton}
+                        compact
+                      >
+                        Questions
+                      </Button>
+                      <Button
+                        mode={test.isPublished ? 'outlined' : 'contained'}
+                        icon={test.isPublished ? 'eye-off' : 'eye'}
+                        onPress={() => handleTogglePublish(test.id, test.isPublished, test.title)}
+                        style={styles.publishButton}
+                        compact
+                      >
+                        {test.isPublished ? 'Dépublier' : 'Publier'}
+                      </Button>
+                    </View>
                   </View>
                   <View style={styles.testActions}>
                     <IconButton
@@ -370,6 +424,18 @@ const styles = StyleSheet.create({
   testInfo: {
     flex: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  testTitleText: {
+    flex: 1,
+  },
+  statusChip: {
+    alignSelf: 'flex-start',
+  },
   testMeta: {
     marginTop: 4,
     opacity: 0.7,
@@ -383,8 +449,16 @@ const styles = StyleSheet.create({
   chip: {
     marginLeft: 4,
   },
-  questionsButton: {
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 8,
     marginTop: 12,
+  },
+  questionsButton: {
+    flex: 1,
+  },
+  publishButton: {
+    flex: 1,
   },
   testActions: {
     flexDirection: 'row',

@@ -70,6 +70,18 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     },
   });
 
+  const togglePublishMutation = useMutation({
+    mutationFn: ({ id, isPublished }: { id: string; isPublished: boolean }) => 
+      adminApi.updateCourse(id, { isPublished }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminCourses'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+    onError: (error: any) => {
+      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la publication');
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       title: '',
@@ -120,6 +132,23 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
       [
         { text: 'Annuler', style: 'cancel' },
         { text: 'Supprimer', style: 'destructive', onPress: () => deleteMutation.mutate(id) },
+      ]
+    );
+  };
+
+  const handleTogglePublish = (id: string, currentStatus: boolean, title: string) => {
+    const newStatus = !currentStatus;
+    const action = newStatus ? 'publier' : 'dépublier';
+    
+    Alert.alert(
+      'Confirmer',
+      `Voulez-vous ${action} le cours "${title}" ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { 
+          text: newStatus ? 'Publier' : 'Dépublier', 
+          onPress: () => togglePublishMutation.mutate({ id, isPublished: newStatus })
+        },
       ]
     );
   };
@@ -232,9 +261,24 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
               <Card.Content>
                 <View style={styles.courseHeader}>
                   <View style={styles.courseInfo}>
-                    <Text variant="titleLarge" style={{ color: theme.colors.onCardBackground }}>
-                      {course.title}
-                    </Text>
+                    <View style={styles.titleRow}>
+                      <Text variant="titleLarge" style={[styles.courseTitleText, { color: theme.colors.onCardBackground }]}>
+                        {course.title}
+                      </Text>
+                      <Chip 
+                        icon={course.isPublished ? 'check-circle' : 'clock-outline'}
+                        style={[
+                          styles.statusChip,
+                          { backgroundColor: course.isPublished ? theme.colors.successContainer : theme.colors.surfaceVariant }
+                        ]}
+                        textStyle={{ 
+                          color: course.isPublished ? theme.colors.onSuccessContainer : theme.colors.onSurfaceVariant 
+                        }}
+                        compact
+                      >
+                        {course.isPublished ? 'Publié' : 'Brouillon'}
+                      </Chip>
+                    </View>
                     <Text variant="bodyMedium" style={[styles.courseMeta, { color: theme.colors.onCardBackground }]}>
                       {course.description}
                     </Text>
@@ -248,6 +292,15 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
                         </Chip>
                       )}
                     </View>
+                    <Button
+                      mode={course.isPublished ? 'outlined' : 'contained'}
+                      icon={course.isPublished ? 'eye-off' : 'eye'}
+                      onPress={() => handleTogglePublish(course.id, course.isPublished, course.title)}
+                      style={styles.publishButton}
+                      compact
+                    >
+                      {course.isPublished ? 'Dépublier' : 'Publier'}
+                    </Button>
                   </View>
                   <View style={styles.courseActions}>
                     <IconButton
@@ -337,6 +390,18 @@ const styles = StyleSheet.create({
   courseInfo: {
     flex: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  courseTitleText: {
+    flex: 1,
+  },
+  statusChip: {
+    alignSelf: 'flex-start',
+  },
   courseMeta: {
     marginTop: 4,
     opacity: 0.7,
@@ -349,6 +414,9 @@ const styles = StyleSheet.create({
   },
   chip: {
     marginLeft: 4,
+  },
+  publishButton: {
+    marginTop: 12,
   },
   courseActions: {
     flexDirection: 'row',

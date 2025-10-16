@@ -49,13 +49,19 @@ function ClientTabs() {
           backgroundColor: theme.colors.headerBackground,
           borderTopColor: theme.colors.outlineVariant,
         },
-        headerShown: false,
+        headerStyle: {
+          backgroundColor: theme.colors.headerBackground,
+        },
+        headerTintColor: theme.colors.onHeaderBackground,
+        headerTitleStyle: {
+          color: theme.colors.onHeaderBackground,
+        },
       })}
     >
       <Tab.Screen
         name="CoursesTab"
         component={CoursesStack}
-        options={{ title: 'Cours' }}
+        options={{ title: 'Cours', headerShown: false }}
       />
       <Tab.Screen
         name="ProfileTab"
