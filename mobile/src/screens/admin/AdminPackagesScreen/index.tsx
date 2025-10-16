@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
-import { Card, Text, Button, TextInput, FAB, IconButton, Chip, Searchbar, Checkbox } from 'react-native-paper';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Text, Searchbar, FAB } from 'react-native-paper';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { PackageForm, PackagesList, EmptyState } from './components';
 import { styles } from './styles';
 
 // Type
@@ -17,7 +17,6 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPackage, setEditingPackage] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const { theme } = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -109,6 +108,12 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     }
   };
 
+  const handleCancelForm = () => {
+    setShowCreateForm(false);
+    setEditingPackage(null);
+    resetForm();
+  };
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -141,165 +146,30 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         {showCreateForm && (
-          <Card style={[styles.formCard, { backgroundColor: theme.colors.cardBackground }]}>
-            <Card.Content>
-              <Text variant="titleLarge" style={styles.formTitle}>
-                {editingPackage ? 'Modifier le package' : 'Créer un nouveau package'}
-              </Text>
-
-              <TextInput
-                label="Nom du package *"
-                value={formData.name}
-                onChangeText={(text) => setFormData({ ...formData, name: text })}
-                mode="outlined"
-                style={styles.input}
-              />
-
-              <TextInput
-                label="Description *"
-                value={formData.description}
-                onChangeText={(text) => setFormData({ ...formData, description: text })}
-                mode="outlined"
-                multiline
-                numberOfLines={3}
-                style={styles.input}
-              />
-
-              <TextInput
-                label="Prix (€) *"
-                value={formData.price}
-                onChangeText={(text) => setFormData({ ...formData, price: text })}
-                mode="outlined"
-                keyboardType="decimal-pad"
-                style={styles.input}
-              />
-
-              <TextInput
-                label="URL de l'image (optionnel)"
-                value={formData.imageUrl}
-                onChangeText={(text) => setFormData({ ...formData, imageUrl: text })}
-                mode="outlined"
-                placeholder="https://..."
-                style={styles.input}
-              />
-
-              <Text variant="titleMedium" style={styles.sectionTitle}>
-                Cours inclus *
-              </Text>
-
-              {uniqueCourses.map((course: any) => (
-                <Checkbox.Item
-                  key={course.id}
-                  label={course.title}
-                  status={selectedCourses.includes(course.id) ? 'checked' : 'unchecked'}
-                  onPress={() => toggleCourse(course.id)}
-                  style={styles.checkbox}
-                />
-              ))}
-
-              <View style={styles.formActions}>
-                <Button
-                  mode="outlined"
-                  onPress={() => {
-                    setShowCreateForm(false);
-                    setEditingPackage(null);
-                    resetForm();
-                  }}
-                  style={styles.actionButton}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handleSubmit}
-                  loading={createMutation.isPending || updateMutation.isPending}
-                  style={styles.actionButton}
-                >
-                  {editingPackage ? 'Mettre à jour' : 'Créer'}
-                </Button>
-              </View>
-            </Card.Content>
-          </Card>
+          <PackageForm
+            formData={formData}
+            selectedCourses={selectedCourses}
+            availableCourses={uniqueCourses}
+            isEditing={!!editingPackage}
+            isLoading={createMutation.isPending || updateMutation.isPending}
+            onFormChange={setFormData}
+            onToggleCourse={toggleCourse}
+            onSubmit={handleSubmit}
+            onCancel={handleCancelForm}
+          />
         )}
 
-        <View style={styles.packagesList}>
-          {filteredPackages.map((pkg: any) => (
-            <Card key={pkg.id} style={[styles.packageCard, { backgroundColor: theme.colors.cardBackground }]}>
-              <Card.Content>
-                <View style={styles.packageHeader}>
-                  <View style={styles.packageInfo}>
-                    <View style={styles.titleRow}>
-                      <Text variant="titleLarge" style={[styles.packageTitleText, { color: theme.colors.onCardBackground }]}>
-                        {pkg.name}
-                      </Text>
-                    </View>
-                    <Text variant="bodyMedium" style={[styles.packageMeta, { color: theme.colors.onCardBackground }]}>
-                      {pkg.description}
-                    </Text>
-                    <View style={styles.chipContainer}>
-                      <Chip icon="currency-eur" compact style={styles.chip}>
-                        {pkg.price.toFixed(2)} €
-                      </Chip>
-                      <Chip icon="book-multiple" compact style={styles.chip}>
-                        {pkg.courses?.length || 0} cours
-                      </Chip>
-                      {pkg._count?.userPackages > 0 && (
-                        <Chip icon="account-group" compact style={styles.chip}>
-                          {pkg._count.userPackages} client{pkg._count.userPackages > 1 ? 's' : ''}
-                        </Chip>
-                      )}
-                    </View>
-                    {pkg.courses && pkg.courses.length > 0 && (
-                      <>
-                        <Text variant="labelMedium" style={styles.coursesLabel}>
-                          Cours inclus :
-                        </Text>
-                        {pkg.courses.map((c: any) => (
-                          <Text key={c.id} variant="bodySmall" style={[styles.courseItem, { color: theme.colors.onCardBackground }]}>
-                            • {c.course.title}
-                          </Text>
-                        ))}
-                      </>
-                    )}
-                    <Button
-                      mode={pkg.isActive ? 'outlined' : 'contained'}
-                      icon={pkg.isActive ? 'cancel' : 'check'}
-                      onPress={() => handleToggleActive(pkg.id, pkg.isActive, pkg.name)}
-                      style={styles.activeButton}
-                      compact
-                    >
-                      {pkg.isActive ? 'Désactiver' : 'Activer'}
-                    </Button>
-                  </View>
-                  <View style={styles.packageActions}>
-                    <IconButton
-                      icon="pencil"
-                      mode="contained-tonal"
-                      onPress={() => handleEdit(pkg)}
-                    />
-                    <IconButton
-                      icon="delete"
-                      mode="contained-tonal"
-                      iconColor={theme.colors.logoutColor}
-                      onPress={() => handleDelete(pkg.id, pkg.name)}
-                    />
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
-          ))}
-        </View>
+        {filteredPackages.length > 0 && (
+          <PackagesList
+            packages={filteredPackages}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onToggleActive={handleToggleActive}
+          />
+        )}
 
         {!filteredPackages.length && !showCreateForm && (
-          <Card style={[styles.emptyCard, { backgroundColor: theme.colors.cardBackground }]}>
-            <Card.Content>
-              <Text variant="bodyLarge" style={styles.emptyText}>
-                {searchQuery 
-                  ? 'Aucun package trouvé pour cette recherche.'
-                  : 'Aucun package créé. Cliquez sur le bouton + pour commencer.'}
-              </Text>
-            </Card.Content>
-          </Card>
+          <EmptyState hasSearchQuery={!!searchQuery} />
         )}
       </ScrollView>
 
