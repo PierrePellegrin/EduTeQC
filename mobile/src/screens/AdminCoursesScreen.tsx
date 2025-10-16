@@ -265,18 +265,15 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
                       <Text variant="titleLarge" style={[styles.courseTitleText, { color: theme.colors.onCardBackground }]}>
                         {course.title}
                       </Text>
-                      <Chip 
-                        icon={course.isPublished ? 'check-circle' : 'clock-outline'}
-                        style={[
-                          styles.statusChip,
-                          { backgroundColor: course.isPublished ? theme.colors.successContainer : theme.colors.surfaceVariant }
-                        ]}
-                        textStyle={{ 
-                          color: course.isPublished ? theme.colors.onSuccessContainer : theme.colors.onSurfaceVariant 
-                        }}
-                        compact
-                      >
-                        {course.isPublished ? 'Publié' : 'Brouillon'}
+                      <Chip icon={course.isPublished ? 'check-circle' : 'clock-outline'}
+                      style={[
+                        styles.statusChip,
+                        { backgroundColor: course.isPublished ? theme.colors.successContainer : theme.colors.surfaceVariant }
+                      ]}
+                      textStyle={{
+                        color: course.isPublished ? theme.colors.onSuccessContainer : theme.colors.onSurfaceVariant
+                      }}
+                      compact children={undefined}>
                       </Chip>
                     </View>
                     <Text variant="bodyMedium" style={[styles.courseMeta, { color: theme.colors.onCardBackground }]}>
