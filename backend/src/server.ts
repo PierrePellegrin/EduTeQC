@@ -18,10 +18,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
+import packageRoutes from './routes/package.routes';
+
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/packages', packageRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

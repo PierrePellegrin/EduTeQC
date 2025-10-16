@@ -99,6 +99,17 @@ export const testsApi = {
 
 // Admin API
 export const adminApi = {
+  // Client Packages
+  getUserPackages: async () => {
+    const response = await api.get('/packages/mine');
+    // Always return an array, even if undefined or missing
+    return Array.isArray(response.data.userPackages) ? response.data.userPackages : [];
+  },
+
+  buyPackage: async (packageId: string) => {
+    const response = await api.post(`/packages/buy`, { packageId });
+    return response.data;
+  },
   // Courses
   getAllCourses: async () => {
     const response = await api.get('/admin/courses');

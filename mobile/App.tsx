@@ -68,6 +68,11 @@ function ClientTabs() {
         options={{ title: 'Cours', headerShown: false }}
       />
       <Tab.Screen
+        name="PackagesTab"
+        component={require('./src/screens/PackagesListScreen').PackagesListScreen}
+        options={{ title: 'Packages' }}
+      />
+      <Tab.Screen
         name="ProfileTab"
         component={ProfileScreen}
         options={{ title: 'Profil' }}
