@@ -5,11 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { PaperProvider } from 'react-native-paper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-// @ts-ignore
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-// Fix missing type declaration for vector icons
-declare module 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StatusBar } from 'expo-status-bar';
 
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
@@ -53,7 +49,7 @@ function ClientTabs() {
                 } else if (route.name === 'ProfileTab') {
                   iconName = focused ? 'account' : 'account-outline';
                 }
-                return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+                return <Icon name={iconName as any} size={size} color={color} />;
               },
               tabBarActiveTintColor: theme.colors.onHeaderBackground,
               tabBarInactiveTintColor: theme.colors.tabBarInactiveTint,
@@ -208,7 +204,7 @@ function AdminTabs() {
             iconName = focused ? 'account' : 'account-outline';
           }
 
-          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+          return <Icon name={iconName as any} size={size} color={color} />;
         },
         tabBarActiveTintColor: theme.colors.onHeaderBackground,
         tabBarInactiveTintColor: theme.colors.tabBarInactiveTint,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image } from 'react-native';
 import { Card, Text, TextInput, Button, Menu, Icon } from 'react-native-paper';
-import Slider from '@react-native-community/slider';
+import { Slider } from '@rneui/themed';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { styles } from '../styles';
 
@@ -97,7 +97,7 @@ export const TestForm: React.FC<TestFormProps> = ({
             Durée: {formData.duration || 0} minutes
           </Text>
           <Slider
-            style={{ width: '100%', height: 40 }}
+            style={{ width: '100%' }}
             minimumValue={0}
             maximumValue={60}
             step={1}
@@ -106,6 +106,8 @@ export const TestForm: React.FC<TestFormProps> = ({
             minimumTrackTintColor={theme.colors.primary}
             maximumTrackTintColor={theme.colors.surfaceVariant}
             thumbTintColor={theme.colors.primary}
+            thumbStyle={{ height: 20, width: 20 }}
+            trackStyle={{ height: 4 }}
           />
         </View>
 
@@ -114,7 +116,7 @@ export const TestForm: React.FC<TestFormProps> = ({
             Score minimum: {formData.passingScore || 0}%
           </Text>
           <Slider
-            style={{ width: '100%', height: 40 }}
+            style={{ width: '100%' }}
             minimumValue={0}
             maximumValue={100}
             step={5}
@@ -123,6 +125,8 @@ export const TestForm: React.FC<TestFormProps> = ({
             minimumTrackTintColor={theme.colors.primary}
             maximumTrackTintColor={theme.colors.surfaceVariant}
             thumbTintColor={theme.colors.primary}
+            thumbStyle={{ height: 20, width: 20 }}
+            trackStyle={{ height: 4 }}
           />
         </View>
 
