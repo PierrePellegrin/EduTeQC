@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { Text, Button, Card, Chip, Divider, List } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { coursesApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
+import { styles } from './courseDetailScreen.styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -70,7 +71,7 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
               Tests disponibles
             </Text>
 
-            {course.tests.map((test) => (
+            {course.tests.map((test: any) => (
               <Card
                 key={test.id}
                 style={[styles.testCard, { backgroundColor: theme.colors.cardBackground }]}
@@ -100,66 +101,3 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  cover: {
-    height: 250,
-  },
-  content: {
-    padding: 16,
-  },
-  chip: {
-    alignSelf: 'flex-start',
-    marginBottom: 12,
-  },
-  title: {
-    marginBottom: 12,
-    fontWeight: '600',
-  },
-  description: {
-    marginBottom: 16,
-    opacity: 0.8,
-  },
-  divider: {
-    marginVertical: 24,
-  },
-  sectionTitle: {
-    marginBottom: 16,
-    fontWeight: '600',
-  },
-  contentCard: {
-    marginBottom: 16,
-    elevation: 1,
-  },
-  testCard: {
-    marginBottom: 12,
-    elevation: 2,
-  },
-  testHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  testTitle: {
-    flex: 1,
-    marginRight: 8,
-    fontWeight: '500',
-  },
-  testDescription: {
-    opacity: 0.7,
-    marginBottom: 12,
-  },
-  testFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

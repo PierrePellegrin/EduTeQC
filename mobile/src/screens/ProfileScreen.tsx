@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { Text, List, IconButton, Divider } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { styles } from './profileScreen.styles';
 
 export const ProfileScreen = () => {
   const { user, logout, isAdminMode, toggleAdminMode } = useAuth();
@@ -128,31 +129,3 @@ export const ProfileScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  name: {
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  email: {
-    opacity: 0.7,
-    marginBottom: 12,
-  },
-  badge: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 16,
-    color: 'white',
-    overflow: 'hidden',
-  },
-  logoutText: {
-    // Color will be set dynamically from theme
-  },
-});

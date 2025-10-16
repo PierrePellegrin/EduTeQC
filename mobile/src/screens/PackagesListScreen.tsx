@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, Alert } from 'react-native';
 import { Card, Text, Button, IconButton, Chip } from 'react-native-paper';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../services/api';
 import { useTheme } from '../contexts/ThemeContext';
+import { styles } from './packagesListScreen.styles';
+import { usePackageMutations } from './packagesListScreen.consts';
 
 export const PackagesListScreen = () => {
   const queryClient = useQueryClient();
@@ -22,16 +24,7 @@ export const PackagesListScreen = () => {
   });
 
   // Achat package
-  const buyMutation = useMutation({
-    mutationFn: adminApi.buyPackage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userPackages'] });
-      Alert.alert('Succès', 'Package acheté avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de l\'achat');
-    },
-  });
+  const { buyMutation } = usePackageMutations(queryClient);
 
   if (isLoading) {
     return <Text>Chargement...</Text>;
@@ -78,40 +71,3 @@ export const PackagesListScreen = () => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  sectionTitle: {
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  packageCard: {
-    marginBottom: 12,
-  },
-  packageTitle: {
-    marginBottom: 4,
-  },
-  packageDesc: {
-    marginBottom: 8,
-    opacity: 0.8,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 8,
-  },
-  chip: {
-    marginLeft: 4,
-  },
-  buyButton: {
-    marginTop: 8,
-  },
-  emptyText: {
-    textAlign: 'center',
-    opacity: 0.6,
-    marginBottom: 16,
-  },
-});

@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { Card, Text, Chip, FAB, Searchbar } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { coursesApi } from '../services/api';
 import { Course } from '../types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../contexts/ThemeContext';
+import { styles } from './coursesListScreen.styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -95,44 +96,3 @@ export const CoursesListScreen = ({ navigation }: Props) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  searchbar: {
-    margin: 16,
-    elevation: 2,
-  },
-  list: {
-    padding: 16,
-    paddingTop: 0,
-  },
-  card: {
-    marginBottom: 16,
-    elevation: 2,
-  },
-  cover: {
-    height: 180,
-  },
-  cardContent: {
-    paddingTop: 16,
-  },
-  chip: {
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-  },
-  title: {
-    marginBottom: 8,
-    fontWeight: '600',
-  },
-  description: {
-    opacity: 0.7,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-});
