@@ -162,6 +162,28 @@ export const adminApi = {
     const response = await api.get('/admin/stats');
     return response.data;
   },
+
+  // Packages
+  getAllPackages: async () => {
+    const response = await api.get('/admin/packages');
+    return response.data;
+  },
+
+  createPackage: async (data: any) => {
+    const response = await api.post('/admin/packages', data);
+    return response.data;
+  },
+
+  updatePackage: async (id: string, data: any) => {
+    const response = await api.put(`/admin/packages/${id}`, data);
+    return response.data;
+  },
+
+  deletePackage: async (id: string) => {
+    const response = await api.delete(`/admin/packages/${id}`);
+    return response.data;
+  },
 };
 
 export default api;
+

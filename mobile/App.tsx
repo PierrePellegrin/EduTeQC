@@ -21,6 +21,7 @@ import { AdminDashboardScreen } from './src/screens/AdminDashboardScreen';
 import { AdminCoursesScreen } from './src/screens/AdminCoursesScreen';
 import { AdminTestsScreen } from './src/screens/AdminTestsScreen';
 import { AdminQuestionsScreen } from './src/screens/AdminQuestionsScreen';
+import { AdminPackagesScreen } from './src/screens/AdminPackagesScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -174,6 +175,8 @@ function AdminTabs() {
             iconName = focused ? 'book-open' : 'book-open-outline';
           } else if (route.name === 'TestsAdminTab') {
             iconName = focused ? 'file-document' : 'file-document-outline';
+          } else if (route.name === 'PackagesTab') {
+            iconName = focused ? 'package-variant' : 'package-variant-closed';
           } else if (route.name === 'ProfileTab') {
             iconName = focused ? 'account' : 'account-outline';
           }
@@ -210,6 +213,11 @@ function AdminTabs() {
         name="TestsAdminTab"
         component={TestsStack}
         options={{ title: 'Tests', headerShown: false }}
+      />
+      <Tab.Screen
+        name="PackagesTab"
+        component={AdminPackagesScreen}
+        options={{ title: 'Packages' }}
       />
       <Tab.Screen
         name="ProfileTab"
