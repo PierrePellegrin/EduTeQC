@@ -5,7 +5,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { PaperProvider } from 'react-native-paper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+// @ts-ignore
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+// Fix missing type declaration for vector icons
+declare module 'react-native-vector-icons/MaterialCommunityIcons';
 import { StatusBar } from 'expo-status-bar';
 
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
@@ -98,17 +102,17 @@ function CoursesStack() {
     >
       <Stack.Screen
         name="CoursesList"
-        component={CoursesListScreen}
+        component={CoursesListScreen as React.ComponentType<any>}
         options={{ title: 'Mes Cours' }}
       />
       <Stack.Screen
         name="CourseDetail"
-        component={CourseDetailScreen}
+        component={CourseDetailScreen as React.ComponentType<any>}
         options={{ title: 'Détails du cours' }}
       />
       <Stack.Screen
         name="TestDetail"
-        component={TestScreen}
+        component={TestScreen as React.ComponentType<any>}
         options={{ title: 'Test' }}
       />
     </Stack.Navigator>
@@ -156,12 +160,12 @@ function TestsStack() {
     >
       <Stack.Screen
         name="TestsList"
-        component={AdminTestsScreen}
+        component={AdminTestsScreen as React.ComponentType<any>}
         options={{ title: 'Gestion des Tests' }}
       />
       <Stack.Screen
         name="AdminQuestions"
-        component={AdminQuestionsScreen}
+        component={AdminQuestionsScreen as React.ComponentType<any>}
         options={{ title: 'Questions' }}
       />
     </Stack.Navigator>
