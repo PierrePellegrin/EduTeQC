@@ -158,7 +158,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
           />
         )}
 
-        {filteredPackages.length > 0 && (
+        {!showCreateForm && filteredPackages.length > 0 && (
           <PackagesList
             packages={filteredPackages}
             onEdit={handleEdit}

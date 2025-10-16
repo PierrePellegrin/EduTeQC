@@ -147,7 +147,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
           />
         )}
 
-        {filteredCourses.length > 0 && (
+        {!showCreateForm && filteredCourses.length > 0 && (
           <CoursesList
             courses={filteredCourses}
             onEdit={handleEdit}

@@ -203,7 +203,7 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
           />
         )}
 
-        {test?.questions && test.questions.length > 0 && (
+        {!showCreateForm && test?.questions && test.questions.length > 0 && (
           <QuestionsList
             questions={test.questions}
             onEdit={handleEdit}
