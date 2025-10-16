@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
-import { Card, Text, Button, TextInput, FAB, IconButton, Chip, Searchbar } from 'react-native-paper';
+import { Text, Searchbar, FAB } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { CourseForm, CoursesList, EmptyState } from './components';
 import { styles } from './styles';
 
 type Props = {
@@ -16,7 +16,6 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const { theme } = useTheme();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -122,6 +121,12 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     course.category?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
+  const handleCancelForm = () => {
+    setShowCreateForm(false);
+    setEditingCourse(null);
+    resetForm();
+  };
+
   return (
     <View style={styles.container}>
       <Searchbar
@@ -133,146 +138,27 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         {showCreateForm && (
-          <Card style={[styles.formCard, { backgroundColor: theme.colors.cardBackground }]}>
-            <Card.Content>
-              <Text variant="titleLarge" style={styles.formTitle}>
-                {editingCourse ? 'Modifier le cours' : 'Créer un nouveau cours'}
-              </Text>
-
-              <TextInput
-                label="Titre du cours *"
-                value={formData.title}
-                onChangeText={(text) => setFormData({ ...formData, title: text })}
-                mode="outlined"
-                style={styles.input}
-              />
-
-              <TextInput
-                label="Description *"
-                value={formData.description}
-                onChangeText={(text) => setFormData({ ...formData, description: text })}
-                mode="outlined"
-                multiline
-                numberOfLines={3}
-                style={styles.input}
-              />
-
-              <TextInput
-                label="Catégorie *"
-                value={formData.category}
-                onChangeText={(text) => setFormData({ ...formData, category: text })}
-                mode="outlined"
-                placeholder="Ex: Programmation, Mathématiques, Sciences..."
-                style={styles.input}
-              />
-
-              <TextInput
-                label="Contenu du cours *"
-                value={formData.content}
-                onChangeText={(text) => setFormData({ ...formData, content: text })}
-                mode="outlined"
-                multiline
-                numberOfLines={6}
-                style={styles.input}
-              />
-
-              <TextInput
-                label="URL de l'image (optionnel)"
-                value={formData.imageUrl}
-                onChangeText={(text) => setFormData({ ...formData, imageUrl: text })}
-                mode="outlined"
-                placeholder="https://..."
-                style={styles.input}
-              />
-
-              <View style={styles.formActions}>
-                <Button
-                  mode="outlined"
-                  onPress={() => {
-                    setShowCreateForm(false);
-                    setEditingCourse(null);
-                    resetForm();
-                  }}
-                  style={styles.actionButton}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handleSubmit}
-                  loading={createMutation.isPending || updateMutation.isPending}
-                  style={styles.actionButton}
-                >
-                  {editingCourse ? 'Mettre à jour' : 'Créer'}
-                </Button>
-              </View>
-            </Card.Content>
-          </Card>
+          <CourseForm
+            formData={formData}
+            isEditing={!!editingCourse}
+            isLoading={createMutation.isPending || updateMutation.isPending}
+            onFormChange={setFormData}
+            onSubmit={handleSubmit}
+            onCancel={handleCancelForm}
+          />
         )}
 
-        <View style={styles.coursesList}>
-          {filteredCourses.map((course: any) => (
-            <Card key={course.id} style={[styles.courseCard, { backgroundColor: theme.colors.cardBackground }]}>
-              <Card.Content>
-                <View style={styles.courseHeader}>
-                  <View style={styles.courseInfo}>
-                    <View style={styles.titleRow}>
-                      <Text variant="titleLarge" style={[styles.courseTitleText, { color: theme.colors.onCardBackground }]}>
-                        {course.title}
-                      </Text>
-                    </View>
-                    <Text variant="bodyMedium" style={[styles.courseMeta, { color: theme.colors.onCardBackground }]}>
-                      {course.description}
-                    </Text>
-                    <View style={styles.chipContainer}>
-                      <Chip icon="tag" compact style={styles.chip}>
-                        {course.category}
-                      </Chip>
-                      {course._count?.tests > 0 && (
-                        <Chip icon="file-document" compact style={styles.chip}>
-                          {course._count.tests} test{course._count.tests > 1 ? 's' : ''}
-                        </Chip>
-                      )}
-                    </View>
-                    <Button
-                      mode={course.isPublished ? 'outlined' : 'contained'}
-                      icon={course.isPublished ? 'eye-off' : 'eye'}
-                      onPress={() => handleTogglePublish(course.id, course.isPublished, course.title)}
-                      style={styles.publishButton}
-                      compact
-                    >
-                      {course.isPublished ? 'Dépublier' : 'Publier'}
-                    </Button>
-                  </View>
-                  <View style={styles.courseActions}>
-                    <IconButton
-                      icon="pencil"
-                      mode="contained-tonal"
-                      onPress={() => handleEdit(course)}
-                    />
-                    <IconButton
-                      icon="delete"
-                      mode="contained-tonal"
-                      iconColor={theme.colors.logoutColor}
-                      onPress={() => handleDelete(course.id, course.title)}
-                    />
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
-          ))}
-        </View>
+        {filteredCourses.length > 0 && (
+          <CoursesList
+            courses={filteredCourses}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onTogglePublish={handleTogglePublish}
+          />
+        )}
 
         {!filteredCourses.length && !showCreateForm && (
-          <Card style={[styles.emptyCard, { backgroundColor: theme.colors.cardBackground }]}>
-            <Card.Content>
-              <Text variant="bodyLarge" style={styles.emptyText}>
-                {searchQuery 
-                  ? 'Aucun cours trouvé pour cette recherche.'
-                  : 'Aucun cours créé. Cliquez sur le bouton + pour commencer.'}
-              </Text>
-            </Card.Content>
-          </Card>
+          <EmptyState hasSearchQuery={!!searchQuery} />
         )}
       </ScrollView>
 
