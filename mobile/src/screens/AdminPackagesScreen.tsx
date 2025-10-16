@@ -186,6 +186,14 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     pkg.description?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
+  // Éliminer les doublons de cours par ID
+  const uniqueCourses = courses?.courses?.reduce((acc: any[], course: any) => {
+    if (!acc.find(c => c.id === course.id)) {
+      acc.push(course);
+    }
+    return acc;
+  }, []) || [];
+
   return (
     <View style={styles.container}>
       <Searchbar
@@ -243,7 +251,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
                 Cours inclus *
               </Text>
 
-              {courses?.courses?.map((course: any) => (
+              {uniqueCourses.map((course: any) => (
                 <Checkbox.Item
                   key={course.id}
                   label={course.title}
