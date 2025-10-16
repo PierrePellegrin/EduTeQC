@@ -18,6 +18,7 @@ import { CourseDetailScreen } from './src/screens/CourseDetailScreen';
 import { TestScreen } from './src/screens/TestScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
 import { AdminDashboardScreen } from './src/screens/AdminDashboardScreen';
+import { AdminCoursesScreen } from './src/screens/AdminCoursesScreen';
 import { AdminTestsScreen } from './src/screens/AdminTestsScreen';
 import { AdminQuestionsScreen } from './src/screens/AdminQuestionsScreen';
 
@@ -99,6 +100,30 @@ function CoursesStack() {
   );
 }
 
+function AdminCoursesStack() {
+  const { theme } = useTheme();
+  
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.headerBackground,
+        },
+        headerTintColor: theme.colors.onHeaderBackground,
+        headerTitleStyle: {
+          color: theme.colors.onHeaderBackground,
+        },
+      }}
+    >
+      <Stack.Screen
+        name="CoursesList"
+        component={AdminCoursesScreen}
+        options={{ title: 'Gestion des Cours' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function TestsStack() {
   const { theme } = useTheme();
   
@@ -172,7 +197,7 @@ function AdminTabs() {
       />
       <Tab.Screen
         name="CoursesAdminTab"
-        component={CoursesStack}
+        component={AdminCoursesStack}
         options={{ title: 'Cours', headerShown: false }}
       />
       <Tab.Screen
@@ -190,7 +215,7 @@ function AdminTabs() {
 }
 
 function AppNavigator() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdminMode } = useAuth();
 
   if (loading) {
     return null; // Or a loading screen
@@ -204,8 +229,9 @@ function AppNavigator() {
     );
   }
 
+  // Si l'utilisateur est admin, afficher la vue selon isAdminMode
   if (user.role === 'ADMIN') {
-    return <AdminTabs />;
+    return isAdminMode ? <AdminTabs /> : <ClientTabs />;
   }
 
   return <ClientTabs />;

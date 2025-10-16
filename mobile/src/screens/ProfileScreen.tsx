@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 export const ProfileScreen = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdminMode, toggleAdminMode } = useAuth();
   const { isDark, toggleTheme, theme } = useTheme();
 
   return (
@@ -27,6 +27,24 @@ export const ProfileScreen = () => {
       <Divider />
 
       <List.Section>
+        {user?.role === 'ADMIN' && (
+          <>
+            <List.Item
+              title="Mode administrateur"
+              description={isAdminMode ? "Vue administration" : "Vue utilisateur"}
+              left={(props) => <List.Icon {...props} icon="shield-account" />}
+              right={() => (
+                <IconButton
+                  icon={isAdminMode ? 'toggle-switch' : 'toggle-switch-off-outline'}
+                  onPress={toggleAdminMode}
+                />
+              )}
+            />
+
+            <Divider />
+          </>
+        )}
+
         <List.Item
           title="Thème sombre"
           left={(props) => <List.Icon {...props} icon="theme-light-dark" />}

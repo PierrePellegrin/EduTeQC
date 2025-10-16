@@ -1,0 +1,369 @@
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { Card, Text, Button, TextInput, FAB, IconButton, Chip, Searchbar } from 'react-native-paper';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { adminApi } from '../services/api';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTheme } from '../contexts/ThemeContext';
+
+type Props = {
+  navigation: NativeStackNavigationProp<any>;
+};
+
+export const AdminCoursesScreen = ({ navigation }: Props) => {
+  const queryClient = useQueryClient();
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { theme } = useTheme();
+  
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category: '',
+    content: '',
+    imageUrl: '',
+  });
+
+  const { data: courses, isLoading } = useQuery({
+    queryKey: ['adminCourses'],
+    queryFn: adminApi.getAllCourses,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: adminApi.createCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminCourses'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      setShowCreateForm(false);
+      resetForm();
+      Alert.alert('Succès', 'Cours créé avec succès');
+    },
+    onError: (error: any) => {
+      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la création');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: any) => adminApi.updateCourse(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminCourses'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      setEditingCourse(null);
+      resetForm();
+      Alert.alert('Succès', 'Cours mis à jour avec succès');
+    },
+    onError: (error: any) => {
+      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la mise à jour');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: adminApi.deleteCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminCourses'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      Alert.alert('Succès', 'Cours supprimé avec succès');
+    },
+    onError: (error: any) => {
+      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la suppression');
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      category: '',
+      content: '',
+      imageUrl: '',
+    });
+  };
+
+  const handleSubmit = () => {
+    if (!formData.title || !formData.description || !formData.category || !formData.content) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    const data = {
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      content: formData.content,
+      imageUrl: formData.imageUrl || undefined,
+    };
+
+    if (editingCourse) {
+      updateMutation.mutate({ id: editingCourse.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
+  const handleEdit = (course: any) => {
+    setEditingCourse(course);
+    setFormData({
+      title: course.title,
+      description: course.description || '',
+      category: course.category,
+      content: course.content || '',
+      imageUrl: course.imageUrl || '',
+    });
+    setShowCreateForm(true);
+  };
+
+  const handleDelete = (id: string, title: string) => {
+    Alert.alert(
+      'Confirmer la suppression',
+      `Voulez-vous vraiment supprimer le cours "${title}" ?\nCela supprimera également tous les tests associés.`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Supprimer', style: 'destructive', onPress: () => deleteMutation.mutate(id) },
+      ]
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text>Chargement...</Text>
+      </View>
+    );
+  }
+
+  const filteredCourses = courses?.courses?.filter((course: any) =>
+    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.category?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  return (
+    <View style={styles.container}>
+      <Searchbar
+        placeholder="Rechercher un cours..."
+        onChangeText={setSearchQuery}
+        value={searchQuery}
+        style={styles.searchbar}
+      />
+
+      <ScrollView contentContainerStyle={styles.content}>
+        {showCreateForm && (
+          <Card style={[styles.formCard, { backgroundColor: theme.colors.cardBackground }]}>
+            <Card.Content>
+              <Text variant="titleLarge" style={styles.formTitle}>
+                {editingCourse ? 'Modifier le cours' : 'Créer un nouveau cours'}
+              </Text>
+
+              <TextInput
+                label="Titre du cours *"
+                value={formData.title}
+                onChangeText={(text) => setFormData({ ...formData, title: text })}
+                mode="outlined"
+                style={styles.input}
+              />
+
+              <TextInput
+                label="Description *"
+                value={formData.description}
+                onChangeText={(text) => setFormData({ ...formData, description: text })}
+                mode="outlined"
+                multiline
+                numberOfLines={3}
+                style={styles.input}
+              />
+
+              <TextInput
+                label="Catégorie *"
+                value={formData.category}
+                onChangeText={(text) => setFormData({ ...formData, category: text })}
+                mode="outlined"
+                placeholder="Ex: Programmation, Mathématiques, Sciences..."
+                style={styles.input}
+              />
+
+              <TextInput
+                label="Contenu du cours *"
+                value={formData.content}
+                onChangeText={(text) => setFormData({ ...formData, content: text })}
+                mode="outlined"
+                multiline
+                numberOfLines={6}
+                style={styles.input}
+              />
+
+              <TextInput
+                label="URL de l'image (optionnel)"
+                value={formData.imageUrl}
+                onChangeText={(text) => setFormData({ ...formData, imageUrl: text })}
+                mode="outlined"
+                placeholder="https://..."
+                style={styles.input}
+              />
+
+              <View style={styles.formActions}>
+                <Button
+                  mode="outlined"
+                  onPress={() => {
+                    setShowCreateForm(false);
+                    setEditingCourse(null);
+                    resetForm();
+                  }}
+                  style={styles.actionButton}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handleSubmit}
+                  loading={createMutation.isPending || updateMutation.isPending}
+                  style={styles.actionButton}
+                >
+                  {editingCourse ? 'Mettre à jour' : 'Créer'}
+                </Button>
+              </View>
+            </Card.Content>
+          </Card>
+        )}
+
+        <View style={styles.coursesList}>
+          {filteredCourses.map((course: any) => (
+            <Card key={course.id} style={[styles.courseCard, { backgroundColor: theme.colors.cardBackground }]}>
+              <Card.Content>
+                <View style={styles.courseHeader}>
+                  <View style={styles.courseInfo}>
+                    <Text variant="titleLarge" style={{ color: theme.colors.onCardBackground }}>
+                      {course.title}
+                    </Text>
+                    <Text variant="bodyMedium" style={[styles.courseMeta, { color: theme.colors.onCardBackground }]}>
+                      {course.description}
+                    </Text>
+                    <View style={styles.chipContainer}>
+                      <Chip icon="tag" compact style={styles.chip}>
+                        {course.category}
+                      </Chip>
+                      {course._count?.tests > 0 && (
+                        <Chip icon="file-document" compact style={styles.chip}>
+                          {course._count.tests} test{course._count.tests > 1 ? 's' : ''}
+                        </Chip>
+                      )}
+                    </View>
+                  </View>
+                  <View style={styles.courseActions}>
+                    <IconButton
+                      icon="pencil"
+                      mode="contained-tonal"
+                      onPress={() => handleEdit(course)}
+                    />
+                    <IconButton
+                      icon="delete"
+                      mode="contained-tonal"
+                      iconColor={theme.colors.logoutColor}
+                      onPress={() => handleDelete(course.id, course.title)}
+                    />
+                  </View>
+                </View>
+              </Card.Content>
+            </Card>
+          ))}
+        </View>
+
+        {!filteredCourses.length && !showCreateForm && (
+          <Card style={[styles.emptyCard, { backgroundColor: theme.colors.cardBackground }]}>
+            <Card.Content>
+              <Text variant="bodyLarge" style={styles.emptyText}>
+                {searchQuery 
+                  ? 'Aucun cours trouvé pour cette recherche.'
+                  : 'Aucun cours créé. Cliquez sur le bouton + pour commencer.'}
+              </Text>
+            </Card.Content>
+          </Card>
+        )}
+      </ScrollView>
+
+      {!showCreateForm && (
+        <FAB
+          icon="plus"
+          style={styles.fab}
+          onPress={() => setShowCreateForm(true)}
+        />
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  searchbar: {
+    margin: 16,
+    elevation: 2,
+  },
+  content: {
+    padding: 16,
+    paddingTop: 0,
+    paddingBottom: 80,
+  },
+  formCard: {
+    marginBottom: 16,
+  },
+  formTitle: {
+    marginBottom: 16,
+  },
+  input: {
+    marginBottom: 12,
+  },
+  formActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginTop: 8,
+  },
+  actionButton: {
+    flex: 1,
+  },
+  coursesList: {
+    gap: 12,
+  },
+  courseCard: {
+    marginBottom: 12,
+  },
+  courseHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  courseInfo: {
+    flex: 1,
+  },
+  courseMeta: {
+    marginTop: 4,
+    opacity: 0.7,
+  },
+  chipContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+    flexWrap: 'wrap',
+  },
+  chip: {
+    marginLeft: 4,
+  },
+  courseActions: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  emptyCard: {
+    marginTop: 32,
+  },
+  emptyText: {
+    textAlign: 'center',
+    opacity: 0.6,
+  },
+  fab: {
+    position: 'absolute',
+    right: 16,
+    bottom: 16,
+  },
+});

@@ -6,6 +6,8 @@ import { User } from '../types';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAdminMode: boolean;
+  toggleAdminMode: () => void;
   login: (email: string, password: string) => Promise<void>;
   register: (data: {
     email: string;
@@ -21,6 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdminMode, setIsAdminMode] = useState(true); // Par défaut en mode admin pour les administrateurs
 
   useEffect(() => {
     checkAuth();
@@ -58,10 +61,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     await authApi.logout();
     setUser(null);
+    setIsAdminMode(true); // Réinitialiser au mode admin par défaut
+  };
+
+  const toggleAdminMode = () => {
+    setIsAdminMode(!isAdminMode);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, isAdminMode, toggleAdminMode, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
