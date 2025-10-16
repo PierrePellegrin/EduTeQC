@@ -70,19 +70,24 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 8,
     flexWrap: 'wrap',
+    marginHorizontal: -4,
   },
   chip: {
-    marginLeft: 4,
+    marginHorizontal: 4,
+    marginVertical: 4,
   },
   buttonRow: {
     flexDirection: 'row',
     marginTop: 12,
+    marginHorizontal: -4,
   },
   questionsButton: {
     flex: 1,
+    marginHorizontal: 4,
   },
   publishButton: {
     flex: 1,
+    marginHorizontal: 4,
   },
   testActions: {
     flexDirection: 'column',

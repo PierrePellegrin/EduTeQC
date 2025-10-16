@@ -244,7 +244,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
                       Durée: {test.duration} min • Score min: {test.passingScore}%
                     </Text>
                     <View style={styles.chipContainer}>
-                      <Chip icon="book" compact>
+                      <Chip icon="book" compact style={styles.chip}>
                         {test.course?.title || 'Cours non trouvé'}
                       </Chip>
                       <Chip icon="help-circle" compact style={styles.chip}>
