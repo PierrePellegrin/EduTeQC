@@ -6,36 +6,11 @@ export class TestController {
   // Get test by ID with questions (authenticated)
   static async getById(req: Request, res: Response, next: NextFunction) {
     try {
-      const test = await prisma.test.findUnique({
-        where: { id: req.params.id },
-        include: {
-          questions: {
-            orderBy: { order: 'asc' },
-            include: {
-              options: {
-                orderBy: { order: 'asc' },
-                select: {
-                  id: true,
-                  text: true,
-                  order: true,
-                  // Ne pas renvoyer isCorrect au client
-                },
-              },
-            },
-          },
-          course: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
-        },
-      });
-
+      const { TestService } = require('../services/test.service');
+      const test = await TestService.getTestWithQuestions(req.params.id);
       if (!test || !test.isPublished) {
         throw new AppError(404, 'Test not found');
       }
-
       res.json({ test });
     } catch (error) {
       next(error);
@@ -45,62 +20,16 @@ export class TestController {
   // Submit test answers (authenticated)
   static async submit(req: Request, res: Response, next: NextFunction) {
     try {
+      const { TestService } = require('../services/test.service');
       const { answers } = req.body;
       const testId = req.params.id;
       const userId = (req as any).user.id;
-
-      // Get test with correct answers
-      const test = await prisma.test.findUnique({
-        where: { id: testId },
-        include: {
-          questions: {
-            include: {
-              options: true,
-            },
-          },
-        },
-      });
-
+      const test = await TestService.getTestWithQuestions(testId);
       if (!test) {
         throw new AppError(404, 'Test not found');
       }
-
-      // Calculate score
-      let totalPoints = 0;
-      let earnedPoints = 0;
-
-      for (const question of test.questions) {
-        totalPoints += question.points;
-
-        const userAnswers = answers[question.id] || [];
-        const correctOptions = question.options
-          .filter((opt) => opt.isCorrect)
-          .map((opt) => opt.id);
-
-        // Check if answer is correct
-        const isCorrect =
-          userAnswers.length === correctOptions.length &&
-          userAnswers.every((ans: string) => correctOptions.includes(ans));
-
-        if (isCorrect) {
-          earnedPoints += question.points;
-        }
-      }
-
-      const score = (earnedPoints / totalPoints) * 100;
-      const passed = score >= test.passingScore;
-
-      // Save result
-      const result = await prisma.testResult.create({
-        data: {
-          userId,
-          testId,
-          score,
-          passed,
-          answers,
-        },
-      });
-
+      const { score, passed, totalPoints, earnedPoints } = await TestService.calculateScore(test, answers);
+      const result = await TestService.saveResult({ userId, testId, score, passed, answers });
       res.json({
         result: {
           id: result.id,
@@ -118,27 +47,10 @@ export class TestController {
   // Get test results (authenticated)
   static async getResults(req: Request, res: Response, next: NextFunction) {
     try {
+      const { TestService } = require('../services/test.service');
       const userId = (req as any).user.id;
       const testId = req.params.id;
-
-      const results = await prisma.testResult.findMany({
-        where: {
-          userId,
-          testId,
-        },
-        orderBy: {
-          id: 'desc',
-        },
-        include: {
-          test: {
-            select: {
-              title: true,
-              passingScore: true,
-            },
-          },
-        },
-      });
-
+      const results = await TestService.getUserResults(userId, testId);
       res.json({ results });
     } catch (error) {
       next(error);

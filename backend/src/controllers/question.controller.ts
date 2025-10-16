@@ -1,28 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../lib/prisma';
+import { QuestionService } from '../services/question.service';
 
 export class QuestionController {
   // Create question with options (admin)
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const { testId, question, type, points, order, options } = req.body;
-
-      const newQuestion = await prisma.question.create({
-        data: {
-          testId,
-          question,
-          type,
-          points,
-          order: order || 0,
-          options: {
-            create: options,
-          },
-        },
-        include: {
-          options: true,
-        },
-      });
-
+      const newQuestion = await QuestionService.create(req.body);
       res.status(201).json({ question: newQuestion });
     } catch (error) {
       next(error);
@@ -32,16 +15,7 @@ export class QuestionController {
   // Update question (admin)
   static async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const { options, ...questionData } = req.body;
-
-      const question = await prisma.question.update({
-        where: { id: req.params.id },
-        data: questionData,
-        include: {
-          options: true,
-        },
-      });
-
+      const question = await QuestionService.update(req.params.id, req.body);
       res.json({ question });
     } catch (error) {
       next(error);
@@ -51,10 +25,7 @@ export class QuestionController {
   // Delete question (admin)
   static async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      await prisma.question.delete({
-        where: { id: req.params.id },
-      });
-
+      await QuestionService.delete(req.params.id);
       res.json({ message: 'Question deleted successfully' });
     } catch (error) {
       next(error);
