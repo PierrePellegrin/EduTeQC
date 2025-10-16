@@ -132,15 +132,12 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
   const handleEdit = (question: any) => {
     setEditingQuestion(question);
     setFormData({
-      text: question.text ?? question.question,
-      type:
-        question.type === 'SINGLE' || question.type === 'SINGLE_CHOICE'
-          ? 'SINGLE'
-          : 'MULTIPLE',
+      text: question.question,
+      type: question.type === 'SINGLE_CHOICE' ? 'SINGLE' : 'MULTIPLE',
       points: question.points.toString(),
       order: question.order.toString(),
     });
-    setOptions(question.options.length > 0 ? question.options : [
+    setOptions(question.options?.length > 0 ? question.options : [
       { text: '', isCorrect: false },
       { text: '', isCorrect: false },
     ]);
@@ -354,14 +351,14 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
                       Question {index + 1}
                     </Text>
                     <Text variant="bodyLarge" style={styles.questionText}>
-                      {question.text ?? question.question}
+                      {question.question}
                     </Text>
                     <View style={styles.chipContainer}>
                       <Chip icon="format-list-bulleted" compact>
-                        {question.type === 'SINGLE' ? 'Choix unique' : 'Choix multiple'}
+                        {question.type === 'SINGLE_CHOICE' ? 'Choix unique' : 'Choix multiple'}
                       </Chip>
                       <Chip icon="star" compact style={styles.chip}>
-                        {question.points} pts
+                        {question.points} pt{question.points > 1 ? 's' : ''}
                       </Chip>
                       <Chip icon="sort-numeric-ascending" compact style={styles.chip}>
                         Ordre: {question.order}
@@ -390,7 +387,7 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
                       icon="delete"
                       mode="contained-tonal"
                       iconColor={theme.colors.logoutColor}
-                      onPress={() => handleDelete(question.id, question.text)}
+                      onPress={() => handleDelete(question.id, question.question)}
                     />
                   </View>
                 </View>

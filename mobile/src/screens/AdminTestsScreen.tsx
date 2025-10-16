@@ -302,7 +302,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
                         {test.course?.title || 'Cours non trouvé'}
                       </Chip>
                       <Chip icon="help-circle" compact style={styles.chip}>
-                        {test._count?.questions || 0} questions
+                        {test.questions?.length || 0} questions
                       </Chip>
                     </View>
                     <View style={styles.buttonRow}>

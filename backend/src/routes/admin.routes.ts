@@ -111,9 +111,12 @@ router.get('/tests', async (req, res, next) => {
           },
         },
         questions: {
-          select: {
-            id: true,
+          include: {
+            options: {
+              orderBy: { order: 'asc' },
+            },
           },
+          orderBy: { order: 'asc' },
         },
       },
     });
