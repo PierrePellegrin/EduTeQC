@@ -95,6 +95,11 @@ export const testsApi = {
     const response = await api.get(`/tests/${id}/results`);
     return response.data;
   },
+
+  getAllResultsForUser: async () => {
+    const response = await api.get('/tests/results');
+    return response.data;
+  },
 };
 
 // Admin API

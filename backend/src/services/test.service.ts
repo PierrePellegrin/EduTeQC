@@ -1,6 +1,20 @@
 import { prisma } from '../lib/prisma';
 
 export class TestService {
+  static async getAllUserResults(userId: string) {
+    return prisma.testResult.findMany({
+      where: { userId },
+      orderBy: { completedAt: 'desc' },
+      include: {
+        test: {
+          select: {
+            title: true,
+            passingScore: true,
+          },
+        },
+      },
+    });
+  }
   static async getTestWithQuestions(testId: string) {
     return prisma.test.findUnique({
       where: { id: testId },

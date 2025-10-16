@@ -16,7 +16,8 @@ export { CourseDetailScreen } from './courses/CourseDetailScreen';
 export { PackagesListScreen } from './packages';
 
 // Profile screens
-export { ProfileScreen } from './profile/ProfileScreen';
+export { default as ProfileScreen } from './profile/ProfileScreen';
+export { ResultsScreen } from './profile/ResultsScreen';
 
 // Test screens
 export { TestScreen } from './tests/TestScreen';

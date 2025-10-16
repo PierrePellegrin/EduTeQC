@@ -3,6 +3,17 @@ import { prisma } from '../lib/prisma';
 import { AppError } from '../middleware/error.middleware';
 
 export class TestController {
+  // Get all test results for the authenticated user
+  static async getAllResults(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { TestService } = require('../services/test.service');
+      const userId = (req as any).user.id;
+      const results = await TestService.getAllUserResults(userId);
+      res.json({ results });
+    } catch (error) {
+      next(error);
+    }
+  }
   // Get test by ID with questions (authenticated)
   static async getById(req: Request, res: Response, next: NextFunction) {
     try {

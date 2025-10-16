@@ -28,6 +28,7 @@ import {
   AdminQuestionsScreen,
   AdminPackagesScreen,
   PackagesListScreen,
+  ResultsScreen,
 } from './src/screens';
 
 const Stack = createNativeStackNavigator();
@@ -38,53 +39,58 @@ function ClientTabs() {
   const { theme } = useTheme();
 
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: string = 'home';
-
-          if (route.name === 'CoursesTab') {
-            iconName = focused ? 'book-open' : 'book-open-outline';
-          } else if (route.name === 'ProfileTab') {
-            iconName = focused ? 'account' : 'account-outline';
-          }
-
-          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: theme.colors.onHeaderBackground,
-        tabBarInactiveTintColor: theme.colors.tabBarInactiveTint,
-        tabBarStyle: {
-          backgroundColor: theme.colors.headerBackground,
-          borderTopColor: theme.colors.outlineVariant,
-        },
-        tabBarLabelStyle: {
-          marginBottom: 4,
-        },
-        headerStyle: {
-          backgroundColor: theme.colors.headerBackground,
-        },
-        headerTintColor: theme.colors.onHeaderBackground,
-        headerTitleStyle: {
-          color: theme.colors.onHeaderBackground,
-        },
-      })}
-    >
-      <Tab.Screen
-        name="CoursesTab"
-        component={CoursesStack}
-        options={{ title: 'Cours', headerShown: false }}
-      />
-      <Tab.Screen
-        name="PackagesTab"
-        component={PackagesListScreen}
-        options={{ title: 'Packages' }}
-      />
-      <Tab.Screen
-        name="ProfileTab"
-        component={ProfileScreen}
-        options={{ title: 'Profil' }}
-      />
-    </Tab.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Tabs" options={{ headerShown: false }}>
+        {() => (
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              tabBarIcon: ({ focused, color, size }) => {
+                let iconName: string = 'home';
+                if (route.name === 'CoursesTab') {
+                  iconName = focused ? 'book-open' : 'book-open-outline';
+                } else if (route.name === 'ProfileTab') {
+                  iconName = focused ? 'account' : 'account-outline';
+                }
+                return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+              },
+              tabBarActiveTintColor: theme.colors.onHeaderBackground,
+              tabBarInactiveTintColor: theme.colors.tabBarInactiveTint,
+              tabBarStyle: {
+                backgroundColor: theme.colors.headerBackground,
+                borderTopColor: theme.colors.outlineVariant,
+              },
+              tabBarLabelStyle: {
+                marginBottom: 4,
+              },
+              headerStyle: {
+                backgroundColor: theme.colors.headerBackground,
+              },
+              headerTintColor: theme.colors.onHeaderBackground,
+              headerTitleStyle: {
+                color: theme.colors.onHeaderBackground,
+              },
+            })}
+          >
+            <Tab.Screen
+              name="CoursesTab"
+              component={CoursesStack}
+              options={{ title: 'Cours', headerShown: false }}
+            />
+            <Tab.Screen
+              name="PackagesTab"
+              component={PackagesListScreen}
+              options={{ title: 'Packages' }}
+            />
+            <Tab.Screen
+              name="ProfileTab"
+              component={ProfileScreen}
+              options={{ title: 'Profil' }}
+            />
+          </Tab.Navigator>
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="ResultsScreen" component={ResultsScreen} options={{ title: 'Mes résultats', headerShown: true }} />
+    </Stack.Navigator>
   );
 }
 

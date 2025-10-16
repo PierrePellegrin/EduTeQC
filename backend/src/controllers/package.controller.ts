@@ -47,7 +47,7 @@ export class PackageController {
     try {
       const userId = (req as any).user.id;
       const userPackages = await PackageService.getUserPackages(userId);
-      res.json(userPackages);
+      res.json({ userPackages });
     } catch (error) {
       next(error);
     }
