@@ -1,8 +1,14 @@
 import { Alert } from 'react-native';
 import { adminApi } from '../services/api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, QueryClient } from '@tanstack/react-query';
 
-export function useQuestionMutations(queryClient, testId, resetForm, setShowCreateForm, setEditingQuestion) {
+export function useQuestionMutations(
+  queryClient: QueryClient,
+  testId: string,
+  resetForm: () => void,
+  setShowCreateForm: (show: boolean) => void,
+  setEditingQuestion: (question: any) => void
+) {
   const createMutation = useMutation({
     mutationFn: adminApi.createQuestion,
     onSuccess: () => {
@@ -11,20 +17,20 @@ export function useQuestionMutations(queryClient, testId, resetForm, setShowCrea
       resetForm();
       Alert.alert('Succès', 'Question créée avec succès');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la création');
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => adminApi.updateQuestion(id, data),
+    mutationFn: ({ id, data }: { id: string; data: any }) => adminApi.updateQuestion(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminTest', testId] });
       setEditingQuestion(null);
       resetForm();
       Alert.alert('Succès', 'Question mise à jour avec succès');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la mise à jour');
     },
   });
@@ -35,7 +41,7 @@ export function useQuestionMutations(queryClient, testId, resetForm, setShowCrea
       queryClient.invalidateQueries({ queryKey: ['adminTest', testId] });
       Alert.alert('Succès', 'Question supprimée avec succès');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la suppression');
     },
   });
