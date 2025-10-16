@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text, Surface, SegmentedButtons } from 'react-native-paper';
-import { useAuth } from '../contexts/AuthContext';
-import { styles } from './loginScreen.styles';
+import { useAuth } from '../../../contexts/AuthContext';
+import { styles } from './styles';
 
 export const LoginScreen = () => {
   const [mode, setMode] = useState<'login' | 'register'>('login');

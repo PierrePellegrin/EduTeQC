@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { adminApi } from '../services/api';
+import { adminApi } from '../../../services/api';
 import { useMutation, QueryClient } from '@tanstack/react-query';
 
 export function useTestMutations(

@@ -10,12 +10,12 @@ import {
   ProgressBar,
 } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
-import { testsApi } from '../services/api';
+import { testsApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './testScreen.styles';
-import { useTestMutations } from './testScreen.consts';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { styles } from './styles';
+import { useTestMutations } from './consts';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;

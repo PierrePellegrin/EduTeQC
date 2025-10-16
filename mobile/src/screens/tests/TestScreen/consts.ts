@@ -1,5 +1,5 @@
 import { QueryClient, useMutation } from '@tanstack/react-query';
-import { testsApi } from '../services/api';
+import { testsApi } from '../../../services/api';
 
 export const useTestMutations = (
   testId: string,

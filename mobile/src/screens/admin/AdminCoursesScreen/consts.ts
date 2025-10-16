@@ -1,6 +1,6 @@
 // Constantes et handlers extraits de AdminCoursesScreen
 import { Alert } from 'react-native';
-import { adminApi } from '../services/api';
+import { adminApi } from '../../../services/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export function useCourseMutations(queryClient: any, resetForm: () => void, setShowCreateForm: (v: boolean) => void, setEditingCourse: (v: any) => void) {

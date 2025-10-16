@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { Card, Text, Button, TextInput, FAB, List, IconButton, Chip, Menu, Searchbar } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApi, coursesApi } from '../services/api';
+import { adminApi, coursesApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './adminTestsScreen.styles';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { styles } from './styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -50,7 +50,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
 
   // Import mutations from extracted hook
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { useTestMutations } = require('./adminTestsScreen.consts');
+  const { useTestMutations } = require('./consts');
   const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useTestMutations(queryClient, resetForm, setShowCreateForm, setEditingTest);
 
   const handleSubmit = () => {

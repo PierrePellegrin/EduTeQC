@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { Card, Text, Button, TextInput, FAB, IconButton, Chip, RadioButton, Checkbox, Divider } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from '../services/api';
+import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './adminQuestionsScreen.styles';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { styles } from './styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -54,7 +54,7 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
 
   // Import mutations from extracted hook
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { useQuestionMutations } = require('./adminQuestionsScreen.consts');
+  const { useQuestionMutations } = require('./consts');
   const { createMutation, updateMutation, deleteMutation } = useQuestionMutations(queryClient, testId, resetForm, setShowCreateForm, setEditingQuestion);
 
   const handleSubmit = () => {

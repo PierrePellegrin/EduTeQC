@@ -1,9 +1,11 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Text, List, IconButton, Divider } from 'react-native-paper';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './profileScreen.styles';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { adminApi } from '../../../services/api';
+import { styles } from './styles';
 
 export const ProfileScreen = () => {
   const { user, logout, isAdminMode, toggleAdminMode } = useAuth();
@@ -11,10 +13,10 @@ export const ProfileScreen = () => {
 
   const [showResults, setShowResults] = React.useState(false);
   const { data: results, isLoading: loadingResults } = useAuth().user?.role === 'CLIENT'
-    ? require('@tanstack/react-query').useQuery({
+    ? useQuery({
         queryKey: ['myResults'],
         queryFn: async () => {
-          const res = await require('../services/api').adminApi.getUserResults();
+          const res = await adminApi.getUserResults();
           return res;
         },
       })

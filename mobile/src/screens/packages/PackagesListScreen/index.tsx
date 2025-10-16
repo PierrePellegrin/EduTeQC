@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { Card, Text, Button, IconButton, Chip } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from '../services/api';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './packagesListScreen.styles';
-import { usePackageMutations } from './packagesListScreen.consts';
+import { adminApi } from '../../../services/api';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { styles } from './styles';
+import { usePackageMutations } from './consts';
 
 export const PackagesListScreen = () => {
   const queryClient = useQueryClient();

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { Card, Text, Button, TextInput, FAB, IconButton, Chip, Searchbar, Checkbox } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from '../services/api';
+import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './adminPackagesScreen.styles';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { styles } from './styles';
 
 // Type
 type Props = {
@@ -47,7 +47,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
 
   // Import mutations from extracted hook
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { usePackageMutations } = require('./adminPackagesScreen.consts');
+  const { usePackageMutations } = require('./consts');
   const { createMutation, updateMutation, deleteMutation, toggleActiveMutation } = usePackageMutations(queryClient, resetForm, setShowCreateForm, setEditingPackage);
 
   const handleToggleActive = (id: string, isActive: boolean, name: string) => {

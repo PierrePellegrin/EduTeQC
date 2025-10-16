@@ -2,11 +2,11 @@ import React from 'react';
 import { View, FlatList } from 'react-native';
 import { Card, Text, Chip, FAB, Searchbar } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
-import { coursesApi } from '../services/api';
-import { Course } from '../types';
+import { coursesApi, adminApi } from '../../../services/api';
+import { Course } from '../../../types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './coursesListScreen.styles';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { styles } from './styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -19,13 +19,13 @@ export const CoursesListScreen = ({ navigation }: Props) => {
   // Récupère les packages achetés
   const { data: userPackages, isLoading: loadingPackages } = useQuery({
     queryKey: ['userPackages'],
-    queryFn: require('../services/api').adminApi.getUserPackages,
+    queryFn: adminApi.getUserPackages,
   });
 
   // Récupère tous les cours
   const { data, isLoading, error } = useQuery<{ courses?: Course[] }>({
     queryKey: ['courses'],
-    queryFn: require('../services/api').coursesApi.getAll,
+    queryFn: coursesApi.getAll,
   });
 
   // Filtre les cours selon les packages achetés

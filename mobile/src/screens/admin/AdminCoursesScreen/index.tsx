@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { Card, Text, Button, TextInput, FAB, IconButton, Chip, Searchbar } from 'react-native-paper';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from '../services/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './adminCoursesScreen.styles';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { styles } from './styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -44,7 +44,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
 
   // Import mutations from extracted hook
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { useCourseMutations } = require('./adminCoursesScreen.consts');
+  const { useCourseMutations } = require('./consts');
   const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useCourseMutations(queryClient, resetForm, setShowCreateForm, setEditingCourse);
 
   const handleSubmit = () => {

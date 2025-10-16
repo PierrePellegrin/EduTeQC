@@ -2,10 +2,10 @@ import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { Card, Text, Button, FAB } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
-import { adminApi } from '../services/api';
+import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './adminDashboardScreen.styles';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { styles } from './styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;

@@ -2,11 +2,11 @@ import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { Text, Button, Card, Chip, Divider, List } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
-import { coursesApi } from '../services/api';
+import { coursesApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { useTheme } from '../contexts/ThemeContext';
-import { styles } from './courseDetailScreen.styles';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { styles } from './styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;

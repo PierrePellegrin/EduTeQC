@@ -16,16 +16,19 @@ import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 
 // Screens
-import { LoginScreen } from './src/screens/LoginScreen';
-import { CoursesListScreen } from './src/screens/CoursesListScreen';
-import { CourseDetailScreen } from './src/screens/CourseDetailScreen';
-import { TestScreen } from './src/screens/TestScreen';
-import { ProfileScreen } from './src/screens/ProfileScreen';
-import { AdminDashboardScreen } from './src/screens/AdminDashboardScreen';
-import { AdminCoursesScreen } from './src/screens/AdminCoursesScreen';
-import { AdminTestsScreen } from './src/screens/AdminTestsScreen';
-import { AdminQuestionsScreen } from './src/screens/AdminQuestionsScreen';
-import { AdminPackagesScreen } from './src/screens/AdminPackagesScreen';
+import {
+  LoginScreen,
+  CoursesListScreen,
+  CourseDetailScreen,
+  TestScreen,
+  ProfileScreen,
+  AdminDashboardScreen,
+  AdminCoursesScreen,
+  AdminTestsScreen,
+  AdminQuestionsScreen,
+  AdminPackagesScreen,
+  PackagesListScreen,
+} from './src/screens';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
