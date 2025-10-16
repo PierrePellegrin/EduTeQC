@@ -260,6 +260,32 @@ Exemple: Le chat dort.
   console.log('\n📧 Comptes créés:');
   console.log('   Admin: admin@eduteqc.com / admin123');
   console.log('   Client: client@eduteqc.com / client123');
+
+  // Créer un package qui contient les 2 cours
+  const starterPackage = await prisma.package.create({
+    data: {
+      name: 'Pack Découverte',
+      description: 'Accédez aux cours de Mathématiques et de Français pour débuter votre apprentissage. Idéal pour les débutants qui souhaitent acquérir les bases essentielles.',
+      price: 29.99,
+      imageUrl: 'https://images.unsplash.com/photo-1513258496099-48168024aec0?w=800',
+      isActive: true,
+      courses: {
+        create: [
+          { courseId: mathCourse.id },
+          { courseId: frenchCourse.id },
+        ],
+      },
+    },
+    include: {
+      courses: {
+        include: {
+          course: true,
+        },
+      },
+    },
+  });
+  console.log('✅ Package créé:', starterPackage.name);
+  console.log('   Cours inclus:', starterPackage.courses.map(c => c.course.title).join(', '));
 }
 
 main()
@@ -270,3 +296,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

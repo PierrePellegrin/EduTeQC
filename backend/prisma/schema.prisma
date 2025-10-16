@@ -27,9 +27,54 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  testResults TestResult[]
+  testResults      TestResult[]
+  purchasedPackages UserPackage[]
 
   @@map("users")
+}
+
+model Package {
+  id          String   @id @default(uuid())
+  name        String
+  description String   @db.Text
+  price       Float
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  courses      PackageCourse[]
+  userPackages UserPackage[]
+
+  @@map("packages")
+}
+
+model PackageCourse {
+  id        String   @id @default(uuid())
+  packageId String
+  courseId  String
+  addedAt   DateTime @default(now())
+
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([packageId, courseId])
+  @@map("package_courses")
+}
+
+model UserPackage {
+  id           String   @id @default(uuid())
+  userId       String
+  packageId    String
+  purchasedAt  DateTime @default(now())
+  expiresAt    DateTime?
+  isActive     Boolean  @default(true)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, packageId])
+  @@map("user_packages")
 }
 
 model Course {
@@ -44,7 +89,8 @@ model Course {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tests Test[]
+  tests           Test[]
+  packageCourses  PackageCourse[]
 
   @@map("courses")
 }

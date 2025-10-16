@@ -271,4 +271,150 @@ router.get('/stats', async (req, res, next) => {
   }
 });
 
+// ========== PACKAGES ==========
+
+const packageSchema = z.object({
+  name: z.string().min(3),
+  description: z.string(),
+  price: z.number().min(0),
+  imageUrl: z.string().optional(),
+  isActive: z.boolean().optional(),
+  courseIds: z.array(z.string()).optional(),
+});
+
+// Get all packages
+router.get('/packages', async (req, res, next) => {
+  try {
+    const packages = await prisma.package.findMany({
+      include: {
+        courses: {
+          include: {
+            course: {
+              select: {
+                id: true,
+                title: true,
+                category: true,
+                imageUrl: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            userPackages: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json({ packages });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Create package
+router.post('/packages', async (req, res, next) => {
+  try {
+    const { courseIds, ...data } = packageSchema.parse(req.body);
+
+    const packageData: any = {
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      imageUrl: data.imageUrl,
+      isActive: data.isActive ?? true,
+    };
+
+    if (courseIds && courseIds.length > 0) {
+      packageData.courses = {
+        create: courseIds.map((courseId) => ({ courseId })),
+      };
+    }
+
+    const pkg = await prisma.package.create({
+      data: packageData,
+      include: {
+        courses: {
+          include: {
+            course: true,
+          },
+        },
+      },
+    });
+
+    res.status(201).json({ package: pkg });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update package
+router.put('/packages/:id', async (req, res, next) => {
+  try {
+    const { courseIds, ...data } = packageSchema.partial().parse(req.body);
+
+    // Update package basic info
+    const pkg = await prisma.package.update({
+      where: { id: req.params.id },
+      data: {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        imageUrl: data.imageUrl,
+        isActive: data.isActive,
+      },
+    });
+
+    // Update courses if provided
+    if (courseIds !== undefined) {
+      // Remove all existing courses
+      await prisma.packageCourse.deleteMany({
+        where: { packageId: req.params.id },
+      });
+
+      // Add new courses
+      if (courseIds.length > 0) {
+        await prisma.packageCourse.createMany({
+          data: courseIds.map((courseId) => ({
+            packageId: req.params.id,
+            courseId,
+          })),
+        });
+      }
+    }
+
+    // Fetch updated package with courses
+    const updatedPkg = await prisma.package.findUnique({
+      where: { id: req.params.id },
+      include: {
+        courses: {
+          include: {
+            course: true,
+          },
+        },
+      },
+    });
+
+    res.json({ package: updatedPkg });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete package
+router.delete('/packages/:id', async (req, res, next) => {
+  try {
+    await prisma.package.delete({
+      where: { id: req.params.id },
+    });
+
+    res.json({ message: 'Package deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
+
