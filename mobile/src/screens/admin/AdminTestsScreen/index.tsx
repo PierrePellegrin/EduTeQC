@@ -159,7 +159,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
           />
         )}
 
-        {filteredTests.length > 0 && (
+        {!showCreateForm && filteredTests.length > 0 && (
           <TestsList
             tests={filteredTests}
             onEdit={handleEdit}
