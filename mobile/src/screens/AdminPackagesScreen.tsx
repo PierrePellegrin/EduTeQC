@@ -122,13 +122,18 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
 
   const handleEdit = (pkg: any) => {
     setEditingPackage(pkg);
+    
+    // Extraire les IDs de cours du package
+    const courseIds = pkg.courses?.map((pc: any) => pc.course?.id || pc.courseId) || [];
+    
+    // Mettre à jour tous les états
     setFormData({
       name: pkg.name,
       description: pkg.description || '',
       price: pkg.price.toString(),
       imageUrl: pkg.imageUrl || '',
     });
-    setSelectedCourses(pkg.courses?.map((c: any) => c.courseId) || []);
+    setSelectedCourses(courseIds);
     setShowCreateForm(true);
   };
 
