@@ -12,6 +12,10 @@ export const ProfileScreen = () => {
   const { isDark, toggleTheme, theme } = useTheme();
 
   const [showResults, setShowResults] = React.useState(false);
+  // TODO: Implement getUserResults API endpoint
+  const results: any[] | null = null;
+  const loadingResults = false;
+  /*
   const { data: results, isLoading: loadingResults } = useAuth().user?.role === 'CLIENT'
     ? useQuery({
         queryKey: ['myResults'],
@@ -21,6 +25,7 @@ export const ProfileScreen = () => {
         },
       })
     : { data: null, isLoading: false };
+  */
 
   return (
     <View style={styles.container}>
@@ -116,8 +121,8 @@ export const ProfileScreen = () => {
           <Text variant="titleLarge" style={{ marginBottom: 12 }}>Mes résultats</Text>
           {loadingResults ? (
             <Text>Chargement...</Text>
-          ) : results && results.length > 0 ? (
-            results.map((r: any) => (
+          ) : ((results as unknown) as any[])?.length > 0 ? (
+            ((results as unknown) as any[]).map((r: any) => (
               <View key={r.id} style={{ marginBottom: 8 }}>
                 <Text>{r.test?.title || 'Test'} : {r.score} % {r.passed ? '✅' : '❌'}</Text>
               </View>
