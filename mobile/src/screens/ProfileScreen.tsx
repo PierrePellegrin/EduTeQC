@@ -6,7 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 export const ProfileScreen = () => {
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, theme } = useTheme();
 
   return (
     <View style={styles.container}>
@@ -18,7 +18,7 @@ export const ProfileScreen = () => {
           {user?.email}
         </Text>
         {user?.role === 'ADMIN' && (
-          <Text variant="labelLarge" style={styles.badge}>
+          <Text variant="labelLarge" style={[styles.badge, { backgroundColor: theme.colors.badgeBackground }]}>
             Administrateur
           </Text>
         )}
@@ -69,8 +69,8 @@ export const ProfileScreen = () => {
 
         <List.Item
           title="Déconnexion"
-          titleStyle={styles.logoutText}
-          left={(props) => <List.Icon {...props} icon="logout" color="#D32F2F" />}
+          titleStyle={[styles.logoutText, { color: theme.colors.logoutColor }]}
+          left={(props) => <List.Icon {...props} icon="logout" color={theme.colors.logoutColor} />}
           onPress={logout}
         />
       </List.Section>
@@ -98,11 +98,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: '#6200EE',
     color: 'white',
     overflow: 'hidden',
   },
   logoutText: {
-    color: '#D32F2F',
+    // Color will be set dynamically from theme
   },
 });

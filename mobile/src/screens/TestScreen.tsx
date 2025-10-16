@@ -13,6 +13,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { testsApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -22,6 +23,7 @@ type Props = {
 export const TestScreen = ({ navigation, route }: Props) => {
   const { testId } = route.params;
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
+  const { theme } = useTheme();
 
   const { data, isLoading } = useQuery({
     queryKey: ['test', testId],
@@ -99,7 +101,7 @@ export const TestScreen = ({ navigation, route }: Props) => {
 
   return (
     <View style={styles.container}>
-      <Surface style={styles.header} elevation={2}>
+      <Surface style={[styles.header, { backgroundColor: theme.colors.transparent }]} elevation={2}>
         <Text variant="titleLarge">{test.title}</Text>
         <Text variant="bodyMedium" style={styles.headerInfo}>
           {test.questions.length} questions • {test.duration} minutes
@@ -109,12 +111,12 @@ export const TestScreen = ({ navigation, route }: Props) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         {test.questions.map((question, index) => (
-          <Card key={question.id} style={styles.questionCard}>
+          <Card key={question.id} style={[styles.questionCard, { backgroundColor: theme.colors.cardBackground }]}>
             <Card.Content>
-              <Text variant="titleMedium" style={styles.questionNumber}>
+              <Text variant="titleMedium" style={[styles.questionNumber, { color: theme.colors.onCardBackground }]}>
                 Question {index + 1}
               </Text>
-              <Text variant="bodyLarge" style={styles.questionText}>
+              <Text variant="bodyLarge" style={[styles.questionText, { color: theme.colors.onCardBackground }]}>
                 {question.question}
               </Text>
 
@@ -130,7 +132,7 @@ export const TestScreen = ({ navigation, route }: Props) => {
                       <RadioButton value={option.id} />
                       <Text
                         variant="bodyMedium"
-                        style={styles.optionText}
+                        style={[styles.optionText, { color: theme.colors.onCardBackground }]}
                         onPress={() =>
                           handleOptionSelect(question.id, option.id, false)
                         }
@@ -156,7 +158,7 @@ export const TestScreen = ({ navigation, route }: Props) => {
                       />
                       <Text
                         variant="bodyMedium"
-                        style={styles.optionText}
+                        style={[styles.optionText, { color: theme.colors.onCardBackground }]}
                         onPress={() =>
                           handleOptionSelect(question.id, option.id, true)
                         }

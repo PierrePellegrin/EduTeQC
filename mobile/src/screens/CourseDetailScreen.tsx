@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { coursesApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -13,6 +14,7 @@ type Props = {
 
 export const CourseDetailScreen = ({ navigation, route }: Props) => {
   const { courseId } = route.params;
+  const { theme } = useTheme();
 
   const { data, isLoading } = useQuery({
     queryKey: ['course', courseId],
@@ -52,9 +54,11 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
           Contenu du cours
         </Text>
 
-        <Card style={styles.contentCard}>
+        <Card style={[styles.contentCard, { backgroundColor: theme.colors.cardBackground }]}>
           <Card.Content>
-            <Text variant="bodyMedium">{course.content}</Text>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onCardBackground }}>
+              {course.content}
+            </Text>
           </Card.Content>
         </Card>
 
@@ -69,21 +73,21 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
             {course.tests.map((test) => (
               <Card
                 key={test.id}
-                style={styles.testCard}
+                style={[styles.testCard, { backgroundColor: theme.colors.cardBackground }]}
                 onPress={() => navigation.navigate('TestDetail', { testId: test.id })}
               >
                 <Card.Content>
                   <View style={styles.testHeader}>
-                    <Text variant="titleMedium" style={styles.testTitle}>
+                    <Text variant="titleMedium" style={[styles.testTitle, { color: theme.colors.onCardBackground }]}>
                       {test.title}
                     </Text>
                     <Chip compact>{test.duration} min</Chip>
                   </View>
-                  <Text variant="bodyMedium" style={styles.testDescription}>
+                  <Text variant="bodyMedium" style={[styles.testDescription, { color: theme.colors.onCardBackground }]}>
                     {test.description}
                   </Text>
                   <View style={styles.testFooter}>
-                    <Text variant="bodySmall">
+                    <Text variant="bodySmall" style={{ color: theme.colors.onCardBackground }}>
                       Score minimum: {test.passingScore}%
                     </Text>
                   </View>

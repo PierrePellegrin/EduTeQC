@@ -4,6 +4,7 @@ import { Card, Text, Button, FAB } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -14,50 +15,59 @@ export const AdminDashboardScreen = ({ navigation }: Props) => {
     queryKey: ['adminStats'],
     queryFn: adminApi.getStats,
   });
+  const { theme } = useTheme();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="headlineMedium" style={styles.title}>
+        <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
           Tableau de bord
         </Text>
 
         <View style={styles.statsGrid}>
-          <Card style={styles.statCard}>
-            <Card.Content>
-              <Text variant="headlineLarge" style={styles.statNumber}>
-                {stats?.stats.courses || 0}
-              </Text>
-              <Text variant="bodyLarge">Cours</Text>
-            </Card.Content>
-          </Card>
+          <View style={styles.statCell}>
+            <Card mode="contained" style={[styles.statCard, { backgroundColor: theme.colors.cardBackground }]}>
+              <Card.Content>
+                <Text variant="headlineLarge" style={[styles.statNumber, { color: theme.colors.onCardBackground }]}>
+                  {stats?.stats.courses || 0}
+                </Text>
+                <Text variant="bodyLarge" style={{ color: theme.colors.onCardBackground }}>Cours</Text>
+              </Card.Content>
+            </Card>
+          </View>
 
-          <Card style={styles.statCard}>
-            <Card.Content>
-              <Text variant="headlineLarge" style={styles.statNumber}>
-                {stats?.stats.tests || 0}
-              </Text>
-              <Text variant="bodyLarge">Tests</Text>
-            </Card.Content>
-          </Card>
+          <View style={styles.statCell}>
+            <Card mode="contained" style={[styles.statCard, { backgroundColor: theme.colors.cardBackground }]}>
+              <Card.Content>
+                <Text variant="headlineLarge" style={[styles.statNumber, { color: theme.colors.onCardBackground }]}>
+                  {stats?.stats.tests || 0}
+                </Text>
+                <Text variant="bodyLarge" style={{ color: theme.colors.onCardBackground }}>Tests</Text>
+              </Card.Content>
+            </Card>
+          </View>
 
-          <Card style={styles.statCard}>
-            <Card.Content>
-              <Text variant="headlineLarge" style={styles.statNumber}>
-                {stats?.stats.users || 0}
-              </Text>
-              <Text variant="bodyLarge">Utilisateurs</Text>
-            </Card.Content>
-          </Card>
+          <View style={styles.statCell}>
+            <Card mode="contained" style={[styles.statCard, { backgroundColor: theme.colors.cardBackground }]}>
+              <Card.Content>
+                <Text variant="headlineLarge" style={[styles.statNumber, { color: theme.colors.onCardBackground }]}>
+                  {stats?.stats.users || 0}
+                </Text>
+                <Text variant="bodyLarge" style={{ color: theme.colors.onCardBackground }}>Utilisateurs</Text>
+              </Card.Content>
+            </Card>
+          </View>
 
-          <Card style={styles.statCard}>
-            <Card.Content>
-              <Text variant="headlineLarge" style={styles.statNumber}>
-                {stats?.stats.results || 0}
-              </Text>
-              <Text variant="bodyLarge">Résultats</Text>
-            </Card.Content>
-          </Card>
+          <View style={styles.statCell}>
+            <Card mode="contained" style={[styles.statCard, { backgroundColor: theme.colors.cardBackground }]}>
+              <Card.Content>
+                <Text variant="headlineLarge" style={[styles.statNumber, { color: theme.colors.onCardBackground }]}>
+                  {stats?.stats.results || 0}
+                </Text>
+                <Text variant="bodyLarge" style={{ color: theme.colors.onCardBackground }}>Résultats</Text>
+              </Card.Content>
+            </Card>
+          </View>
         </View>
 
         <View style={styles.actions}>
@@ -100,10 +110,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginHorizontal: -8,
   },
-  statCard: {
+  statCell: {
     width: '50%',
-    padding: 8,
+    paddingHorizontal: 8,
     marginBottom: 16,
+  },
+  statCard: {
+    width: '100%',
   },
   statNumber: {
     fontWeight: 'bold',

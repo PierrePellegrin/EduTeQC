@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -16,6 +17,7 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
   const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
+  const { theme } = useTheme();
   
   const [formData, setFormData] = useState({
     text: '',
@@ -213,7 +215,7 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
         </View>
 
         {showCreateForm && (
-          <Card style={styles.formCard}>
+         <Card style={[styles.formCard, { backgroundColor: theme.colors.cardBackground }]}>
             <Card.Content>
               <Text variant="titleLarge" style={styles.formTitle}>
                 {editingQuestion ? 'Modifier la question' : 'Créer une nouvelle question'}
@@ -344,7 +346,7 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
 
         <View style={styles.questionsList}>
           {test?.questions?.map((question: any, index: number) => (
-            <Card key={question.id} style={styles.questionCard}>
+              <Card key={question.id} style={[styles.questionCard, { backgroundColor: theme.colors.cardBackground }]}>
               <Card.Content>
                 <View style={styles.questionHeader}>
                   <View style={styles.questionInfo}>
@@ -387,7 +389,7 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
                     <IconButton
                       icon="delete"
                       mode="contained-tonal"
-                      iconColor="#D32F2F"
+                      iconColor={theme.colors.logoutColor}
                       onPress={() => handleDelete(question.id, question.text)}
                     />
                   </View>
@@ -398,7 +400,7 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
         </View>
 
         {!test?.questions?.length && !showCreateForm && (
-          <Card style={styles.emptyCard}>
+         <Card style={[styles.emptyCard, { backgroundColor: theme.colors.cardBackground }]}>
             <Card.Content>
               <Text variant="bodyLarge" style={styles.emptyText}>
                 Aucune question créée. Cliquez sur le bouton + pour commencer.

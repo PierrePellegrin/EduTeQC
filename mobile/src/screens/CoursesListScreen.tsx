@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { coursesApi } from '../services/api';
 import { Course } from '../types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -12,6 +13,7 @@ type Props = {
 
 export const CoursesListScreen = ({ navigation }: Props) => {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const { theme } = useTheme();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['courses'],
@@ -27,7 +29,7 @@ export const CoursesListScreen = ({ navigation }: Props) => {
 
   const renderCourse = ({ item }: { item: Course }) => (
     <Card
-      style={styles.card}
+      style={[styles.card, { backgroundColor: theme.colors.cardBackground }]}
       onPress={() => navigation.navigate('CourseDetail', { courseId: item.id })}
     >
       {item.imageUrl && (
@@ -37,10 +39,10 @@ export const CoursesListScreen = ({ navigation }: Props) => {
         <Chip style={styles.chip} compact>
           {item.category}
         </Chip>
-        <Text variant="titleLarge" style={styles.title}>
+        <Text variant="titleLarge" style={[styles.title, { color: theme.colors.onCardBackground }]}>
           {item.title}
         </Text>
-        <Text variant="bodyMedium" numberOfLines={2} style={styles.description}>
+        <Text variant="bodyMedium" numberOfLines={2} style={[styles.description, { color: theme.colors.onCardBackground }]}>
           {item.description}
         </Text>
       </Card.Content>

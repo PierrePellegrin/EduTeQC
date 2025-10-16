@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Card, Text, Button, TextInput, FAB, List, IconButton, Chip, Menu } from 'react-native-paper';
+import { Card, Text, Button, TextInput, FAB, List, IconButton, Chip, Menu, Searchbar } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi, coursesApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -14,6 +15,8 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTest, setEditingTest] = useState<any>(null);
   const [courseMenuVisible, setCourseMenuVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { theme } = useTheme();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -127,15 +130,24 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     );
   }
 
+  const filteredTests = tests?.tests?.filter((test: any) =>
+    test.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    test.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    test.course?.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="headlineMedium" style={styles.title}>
-          Gestion des Tests
-        </Text>
+      <Searchbar
+        placeholder="Rechercher un test..."
+        onChangeText={setSearchQuery}
+        value={searchQuery}
+        style={styles.searchbar}
+      />
 
+      <ScrollView contentContainerStyle={styles.content}>
         {showCreateForm && (
-          <Card style={styles.formCard}>
+          <Card style={[styles.formCard, { backgroundColor: theme.colors.cardBackground }]}>
             <Card.Content>
               <Text variant="titleLarge" style={styles.formTitle}>
                 {editingTest ? 'Modifier le test' : 'Créer un nouveau test'}
@@ -233,8 +245,8 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
         )}
 
         <View style={styles.testsList}>
-          {tests?.tests?.map((test: any) => (
-            <Card key={test.id} style={styles.testCard}>
+          {filteredTests.map((test: any) => (
+            <Card key={test.id} style={[styles.testCard, { backgroundColor: theme.colors.cardBackground }]}>
               <Card.Content>
                 <View style={styles.testHeader}>
                   <View style={styles.testInfo}>
@@ -272,7 +284,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
                     <IconButton
                       icon="delete"
                       mode="contained-tonal"
-                      iconColor="#D32F2F"
+                      iconColor={theme.colors.logoutColor}
                       onPress={() => handleDelete(test.id, test.title)}
                     />
                   </View>
@@ -282,11 +294,13 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
           ))}
         </View>
 
-        {!tests?.tests?.length && !showCreateForm && (
-          <Card style={styles.emptyCard}>
+        {!filteredTests.length && !showCreateForm && (
+          <Card style={[styles.emptyCard, { backgroundColor: theme.colors.cardBackground }]}>
             <Card.Content>
               <Text variant="bodyLarge" style={styles.emptyText}>
-                Aucun test créé. Cliquez sur le bouton + pour commencer.
+                {searchQuery 
+                  ? 'Aucun test trouvé pour cette recherche.'
+                  : 'Aucun test créé. Cliquez sur le bouton + pour commencer.'}
               </Text>
             </Card.Content>
           </Card>
@@ -308,8 +322,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  searchbar: {
+    margin: 16,
+    elevation: 2,
+  },
   content: {
     padding: 16,
+    paddingTop: 0,
     paddingBottom: 80,
   },
   title: {

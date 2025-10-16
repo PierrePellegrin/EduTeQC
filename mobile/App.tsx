@@ -6,6 +6,7 @@ import { PaperProvider } from 'react-native-paper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { StatusBar } from 'expo-status-bar';
 
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
@@ -41,8 +42,12 @@ function ClientTabs() {
 
           return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        tabBarActiveTintColor: theme.colors.onHeaderBackground,
+        tabBarInactiveTintColor: theme.colors.tabBarInactiveTint,
+        tabBarStyle: {
+          backgroundColor: theme.colors.headerBackground,
+          borderTopColor: theme.colors.outlineVariant,
+        },
         headerShown: false,
       })}
     >
@@ -61,8 +66,20 @@ function ClientTabs() {
 }
 
 function CoursesStack() {
+  const { theme } = useTheme();
+  
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.headerBackground,
+        },
+        headerTintColor: theme.colors.onHeaderBackground,
+        headerTitleStyle: {
+          color: theme.colors.onHeaderBackground,
+        },
+      }}
+    >
       <Stack.Screen
         name="CoursesList"
         component={CoursesListScreen}
@@ -83,8 +100,20 @@ function CoursesStack() {
 }
 
 function TestsStack() {
+  const { theme } = useTheme();
+  
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.headerBackground,
+        },
+        headerTintColor: theme.colors.onHeaderBackground,
+        headerTitleStyle: {
+          color: theme.colors.onHeaderBackground,
+        },
+      }}
+    >
       <Stack.Screen
         name="TestsList"
         component={AdminTestsScreen}
@@ -120,8 +149,20 @@ function AdminTabs() {
 
           return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        tabBarActiveTintColor: theme.colors.onHeaderBackground,
+        tabBarInactiveTintColor: theme.colors.tabBarInactiveTint,
+        tabBarStyle: {
+          backgroundColor: theme.colors.headerBackground,
+          borderTopColor: theme.colors.outlineVariant,
+        },
+        headerStyle: {
+          backgroundColor: theme.colors.headerBackground,
+        },
+        headerTintColor: theme.colors.onHeaderBackground,
+        headerTitleStyle: {
+          color: theme.colors.onHeaderBackground,
+        },
+        headerShadowVisible: true,
       })}
     >
       <Tab.Screen
@@ -183,10 +224,14 @@ export default function App() {
 }
 
 function AppContent() {
-  const { theme, navTheme } = useTheme();
+  const { theme, navTheme, isDark } = useTheme();
 
   return (
     <PaperProvider theme={theme}>
+      <StatusBar 
+        style="light" 
+        backgroundColor={theme.colors.statusBarBackground}
+      />
       <AuthProvider>
         <NavigationContainer theme={navTheme}>
           <AppNavigator />
