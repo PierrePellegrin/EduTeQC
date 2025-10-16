@@ -97,9 +97,11 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 12,
     flexWrap: 'wrap',
+    marginHorizontal: -4,
   },
   chip: {
-    marginLeft: 4,
+    marginHorizontal: 4,
+    marginVertical: 4,
   },
   optionsLabel: {
     marginTop: 8,

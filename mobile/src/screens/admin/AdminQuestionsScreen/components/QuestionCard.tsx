@@ -38,7 +38,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               {question.question}
             </Text>
             <View style={styles.chipContainer}>
-              <Chip icon="format-list-bulleted" compact>
+              <Chip icon="format-list-bulleted" compact style={styles.chip}>
                 {question.type === 'SINGLE_CHOICE' ? 'Choix unique' : 'Choix multiple'}
               </Chip>
               <Chip icon="star" compact style={styles.chip}>
