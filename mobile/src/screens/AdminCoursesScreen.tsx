@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, Alert } from 'react-native';
 import { Card, Text, Button, TextInput, FAB, IconButton, Chip, Searchbar } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../contexts/ThemeContext';
+import { styles } from './adminCoursesScreen.styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -286,93 +287,3 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  searchbar: {
-    margin: 16,
-    elevation: 2,
-  },
-  content: {
-    padding: 16,
-    paddingTop: 0,
-    paddingBottom: 80,
-  },
-  formCard: {
-    marginBottom: 16,
-  },
-  formTitle: {
-    marginBottom: 16,
-  },
-  input: {
-    marginBottom: 12,
-  },
-  formActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-    marginTop: 8,
-  },
-  actionButton: {
-    flex: 1,
-  },
-  coursesList: {
-    gap: 12,
-  },
-  courseCard: {
-    marginBottom: 12,
-  },
-  courseHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  courseInfo: {
-    flex: 1,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  courseTitleText: {
-    flex: 1,
-  },
-  statusChip: {
-    alignSelf: 'flex-start',
-  },
-  courseMeta: {
-    marginTop: 4,
-    opacity: 0.7,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 8,
-    flexWrap: 'wrap',
-  },
-  chip: {
-    marginLeft: 4,
-  },
-  publishButton: {
-    marginTop: 12,
-  },
-  courseActions: {
-    flexDirection: 'column',
-    gap: 4,
-  },
-  emptyCard: {
-    marginTop: 32,
-  },
-  emptyText: {
-    textAlign: 'center',
-    opacity: 0.6,
-  },
-  fab: {
-    position: 'absolute',
-    right: 16,
-    bottom: 16,
-  },
-});

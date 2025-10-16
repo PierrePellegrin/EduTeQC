@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, Alert } from 'react-native';
 import { Card, Text, Button, TextInput, FAB, List, IconButton, Chip, Menu, Searchbar } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi, coursesApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../contexts/ThemeContext';
+import { styles } from './adminTestsScreen.styles';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -317,108 +318,3 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  searchbar: {
-    margin: 16,
-    elevation: 2,
-  },
-  content: {
-    padding: 16,
-    paddingTop: 0,
-    paddingBottom: 80,
-  },
-  title: {
-    marginBottom: 16,
-    fontWeight: 'bold',
-  },
-  formCard: {
-    marginBottom: 16,
-  },
-  formTitle: {
-    marginBottom: 16,
-  },
-  input: {
-    marginBottom: 12,
-  },
-  dropdownButton: {
-    justifyContent: 'flex-start',
-  },
-  formActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-    marginTop: 8,
-  },
-  actionButton: {
-    flex: 1,
-  },
-  testsList: {
-    gap: 12,
-  },
-  testCard: {
-    marginBottom: 12,
-  },
-  testHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  testInfo: {
-    flex: 1,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  testTitleText: {
-    flex: 1,
-  },
-  statusChip: {
-    alignSelf: 'flex-start',
-  },
-  testMeta: {
-    marginTop: 4,
-    opacity: 0.7,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 8,
-    flexWrap: 'wrap',
-  },
-  chip: {
-    marginLeft: 4,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
-  },
-  questionsButton: {
-    flex: 1,
-  },
-  publishButton: {
-    flex: 1,
-  },
-  testActions: {
-    flexDirection: 'column',
-    gap: 0,
-  },
-  emptyCard: {
-    marginTop: 32,
-  },
-  emptyText: {
-    textAlign: 'center',
-    opacity: 0.6,
-  },
-  fab: {
-    position: 'absolute',
-    right: 16,
-    bottom: 16,
-  },
-});
