@@ -102,6 +102,7 @@ model Test {
   courseId    String
   duration    Int      // durée en minutes
   passingScore Int     @default(70) // score minimum pour réussir (en %)
+  imageUrl    String?
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -12,6 +12,7 @@ type TestCardProps = {
     duration: number;
     passingScore: number;
     isPublished: boolean;
+    imageUrl?: string;
     course?: {
       title: string;
     };
@@ -33,7 +34,8 @@ export const TestCard: React.FC<TestCardProps> = ({
   const { theme } = useTheme();
 
   return (
-    <Card style={[styles.testCard, { backgroundColor: theme.colors.cardBackground }]}>
+    <Card style={[styles.testCard, { backgroundColor: theme.colors.cardBackground }]}> 
+      <Card.Cover source={{ uri: test.imageUrl || 'https://via.placeholder.com/800x400?text=Test' }} />
       <Card.Content>
         <View style={styles.testHeader}>
           <View style={styles.testInfo}>

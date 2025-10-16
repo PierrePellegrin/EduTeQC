@@ -28,6 +28,7 @@ export const PackageCard: React.FC<PackageCardProps> = ({
   onToggleActive,
 }) => {
   const { theme } = useTheme();
+  const userPackagesCount = pkg?._count?.userPackages ?? 0;
 
   return (
     <Card style={[styles.packageCard, { backgroundColor: theme.colors.cardBackground }]}>
@@ -36,22 +37,24 @@ export const PackageCard: React.FC<PackageCardProps> = ({
           <View style={styles.packageInfo}>
             <View style={styles.titleRow}>
               <Text variant="titleLarge" style={[styles.packageTitleText, { color: theme.colors.onCardBackground }]}>
-                {pkg.name}
+                {typeof pkg.name === 'string' && pkg.name.trim() !== '' ? pkg.name : 'N/A'}
               </Text>
             </View>
             <Text variant="bodyMedium" style={[styles.packageMeta, { color: theme.colors.onCardBackground }]}>
-              {pkg.description}
+              {typeof pkg.description === 'string' && pkg.description.trim() !== '' ? pkg.description : 'N/A'}
             </Text>
             <View style={styles.chipContainer}>
               <Chip icon="currency-eur" compact style={styles.chip}>
-                {pkg.price.toFixed(2)} €
+                <Text>{typeof pkg.price === 'number' && !isNaN(pkg.price) ? `${pkg.price.toFixed(2)} €` : 'N/A'}</Text>
               </Chip>
               <Chip icon="book-multiple" compact style={styles.chip}>
-                {pkg.courses?.length || 0} cours
+                <Text>{Array.isArray(pkg.courses) ? `${pkg.courses.length} cours` : '0 cours'}</Text>
               </Chip>
-              {pkg._count?.userPackages && pkg._count.userPackages > 0 && (
+              {userPackagesCount > 0 && (
                 <Chip icon="account-group" compact style={styles.chip}>
-                  {pkg._count.userPackages} client{pkg._count.userPackages > 1 ? 's' : ''}
+                  <Text>
+                    {`${userPackagesCount} client${userPackagesCount > 1 ? 's' : ''}`}
+                  </Text>
                 </Chip>
               )}
             </View>
@@ -62,7 +65,7 @@ export const PackageCard: React.FC<PackageCardProps> = ({
                 </Text>
                 {pkg.courses.map((c: any) => (
                   <Text key={c.id} variant="bodySmall" style={[styles.courseItem, { color: theme.colors.onCardBackground }]}>
-                    • {c.course.title}
+                    {`• ${typeof c?.course?.title === 'string' ? c.course.title : 'Sans titre'}`}
                   </Text>
                 ))}
               </>

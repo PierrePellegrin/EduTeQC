@@ -143,6 +143,7 @@ Exemple: Le chat dort.
       courseId: mathCourse.id,
       duration: 15,
       passingScore: 70,
+      imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800',
       isPublished: true,
     },
   });
@@ -213,6 +214,7 @@ Exemple: Le chat dort.
       courseId: frenchCourse.id,
       duration: 10,
       passingScore: 60,
+      imageUrl: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800',
       isPublished: true,
     },
   });

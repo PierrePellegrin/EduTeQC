@@ -23,7 +23,7 @@ const ProfileScreen = () => {
         isDark={isDark}
         onToggleAdminMode={toggleAdminMode}
         onToggleTheme={toggleTheme}
-  onShowResults={() => navigation.navigate('ResultsScreen')}
+  onShowResults={() => navigation.navigate('ResultsTab' as never)}
         onLogout={logout}
       />
     </View>

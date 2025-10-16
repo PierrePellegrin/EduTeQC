@@ -26,6 +26,9 @@ export const styles = StyleSheet.create({
   input: {
     marginBottom: 12,
   },
+  previewCard: {
+    marginBottom: 12,
+  },
   dropdownButton: {
     justifyContent: 'flex-start',
   },

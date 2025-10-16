@@ -29,15 +29,17 @@ export const PackageCard: React.FC<PackageCardProps> = ({
     <Card style={[styles.packageCard, { backgroundColor: theme.colors.cardBackground }]}>
       <Card.Content>
         <Text variant="titleMedium" style={styles.packageTitle}>
-          {pkg.name}
+          {typeof pkg.name === 'string' && pkg.name.trim() !== '' ? pkg.name : 'N/A'}
         </Text>
-        <Text style={styles.packageDesc}>{pkg.description}</Text>
+        <Text style={styles.packageDesc}>
+          {typeof pkg.description === 'string' && pkg.description.trim() !== '' ? pkg.description : 'N/A'}
+        </Text>
         <View style={styles.chipContainer}>
           <Chip icon="currency-eur" compact style={styles.chip}>
-            {pkg.price.toFixed(2)} €
+            <Text>{typeof pkg.price === 'number' && !isNaN(pkg.price) ? `${pkg.price.toFixed(2)} €` : 'N/A'}</Text>
           </Chip>
           <Chip icon="book-multiple" compact style={styles.chip}>
-            {pkg.courses?.length || 0} cours
+            <Text>{Array.isArray(pkg.courses) ? `${pkg.courses.length} cours` : '0 cours'}</Text>
           </Chip>
         </View>
         {showBuyButton && (

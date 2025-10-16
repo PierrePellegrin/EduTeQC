@@ -16,6 +16,7 @@ export const testSchema = z.object({
   courseId: z.string().uuid('ID de cours invalide'),
   duration: z.number().int().min(1, 'La durée doit être d\'au moins 1 minute'),
   passingScore: z.number().min(0).max(100, 'Le score doit être entre 0 et 100'),
+  imageUrl: z.string().url('URL invalide').optional(),
   isPublished: z.boolean().optional(),
 });
 

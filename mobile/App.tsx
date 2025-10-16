@@ -48,6 +48,8 @@ function ClientTabs() {
                 let iconName: string = 'home';
                 if (route.name === 'CoursesTab') {
                   iconName = focused ? 'book-open' : 'book-open-outline';
+                } else if (route.name === 'ResultsTab') {
+                  iconName = focused ? 'chart-line' : 'chart-line';
                 } else if (route.name === 'ProfileTab') {
                   iconName = focused ? 'account' : 'account-outline';
                 }
@@ -82,6 +84,11 @@ function ClientTabs() {
               options={{ title: 'Packages' }}
             />
             <Tab.Screen
+              name="ResultsTab"
+              component={ResultsScreen}
+              options={{ title: 'Résultats' }}
+            />
+            <Tab.Screen
               name="ProfileTab"
               component={ProfileScreen}
               options={{ title: 'Profil' }}
@@ -89,7 +96,6 @@ function ClientTabs() {
           </Tab.Navigator>
         )}
       </Stack.Screen>
-      <Stack.Screen name="ResultsScreen" component={ResultsScreen} options={{ title: 'Mes résultats', headerShown: true }} />
     </Stack.Navigator>
   );
 }

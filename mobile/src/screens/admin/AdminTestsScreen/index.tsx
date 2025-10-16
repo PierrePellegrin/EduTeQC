@@ -24,6 +24,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     courseId: '',
     duration: '',
     passingScore: '',
+    imageUrl: '',
   });
 
   const { data: tests, isLoading } = useQuery({
@@ -44,6 +45,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
       courseId: '',
       duration: '',
       passingScore: '',
+	  imageUrl: '',
     });
   };
 
@@ -58,6 +60,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
       courseId: formData.courseId,
       duration: parseInt(formData.duration),
       passingScore: parseInt(formData.passingScore),
+      imageUrl: formData.imageUrl || undefined,
     };
 
     if (editingTest) {
@@ -75,6 +78,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
       courseId: test.courseId,
       duration: test.duration.toString(),
       passingScore: test.passingScore.toString(),
+      imageUrl: test.imageUrl || '',
     });
     setShowCreateForm(true);
   };

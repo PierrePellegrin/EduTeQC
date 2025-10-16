@@ -6,12 +6,7 @@ export class TestService {
       where: { userId },
       orderBy: { completedAt: 'desc' },
       include: {
-        test: {
-          select: {
-            title: true,
-            passingScore: true,
-          },
-        },
+        test: true,
       },
     });
   }
@@ -81,12 +76,7 @@ export class TestService {
       where: { userId, testId },
       orderBy: { id: 'desc' },
       include: {
-        test: {
-          select: {
-            title: true,
-            passingScore: true,
-          },
-        },
+        test: true,
       },
     });
   }

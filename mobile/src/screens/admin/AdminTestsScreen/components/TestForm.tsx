@@ -11,6 +11,7 @@ type TestFormProps = {
     courseId: string;
     duration: string;
     passingScore: string;
+    imageUrl: string;
   };
   courses: any[];
   courseMenuVisible: boolean;
@@ -107,6 +108,28 @@ export const TestForm: React.FC<TestFormProps> = ({
           keyboardType="numeric"
           style={styles.input}
         />
+
+        <TextInput
+          label="Image (URL)"
+          value={formData.imageUrl}
+          onChangeText={(text) => onFormChange({ ...formData, imageUrl: text })}
+          mode="outlined"
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+          style={styles.input}
+        />
+
+        {formData.imageUrl ? (
+          <Card style={[styles.previewCard, { backgroundColor: theme.colors.cardBackground }]}>
+            <Card.Cover source={{ uri: formData.imageUrl }} />
+            <Card.Content>
+              <Text variant="bodySmall" style={{ opacity: 0.7, marginTop: 8 }}>
+                Aperçu de l'image
+              </Text>
+            </Card.Content>
+          </Card>
+        ) : null}
 
         <View style={styles.formActions}>
           <Button
