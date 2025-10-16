@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Image } from 'react-native';
 import { Card, Text, TextInput, Button, Menu, Icon } from 'react-native-paper';
+import Slider from '@react-native-community/slider';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { styles } from '../styles';
 
@@ -91,23 +92,39 @@ export const TestForm: React.FC<TestFormProps> = ({
           ))}
         </Menu>
 
-        <TextInput
-          label="Durée (minutes)"
-          value={formData.duration}
-          onChangeText={(text) => onFormChange({ ...formData, duration: text })}
-          mode="outlined"
-          keyboardType="numeric"
-          style={styles.input}
-        />
+        <View style={styles.input}>
+          <Text variant="labelLarge" style={{ marginBottom: 8 }}>
+            Durée: {formData.duration || 0} minutes
+          </Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={0}
+            maximumValue={60}
+            step={1}
+            value={parseInt(formData.duration) || 0}
+            onValueChange={(value) => onFormChange({ ...formData, duration: Math.round(value).toString() })}
+            minimumTrackTintColor={theme.colors.primary}
+            maximumTrackTintColor={theme.colors.surfaceVariant}
+            thumbTintColor={theme.colors.primary}
+          />
+        </View>
 
-        <TextInput
-          label="Score minimum (%)"
-          value={formData.passingScore}
-          onChangeText={(text) => onFormChange({ ...formData, passingScore: text })}
-          mode="outlined"
-          keyboardType="numeric"
-          style={styles.input}
-        />
+        <View style={styles.input}>
+          <Text variant="labelLarge" style={{ marginBottom: 8 }}>
+            Score minimum: {formData.passingScore || 0}%
+          </Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={0}
+            maximumValue={100}
+            step={5}
+            value={parseInt(formData.passingScore) || 0}
+            onValueChange={(value) => onFormChange({ ...formData, passingScore: Math.round(value).toString() })}
+            minimumTrackTintColor={theme.colors.primary}
+            maximumTrackTintColor={theme.colors.surfaceVariant}
+            thumbTintColor={theme.colors.primary}
+          />
+        </View>
 
         <TextInput
           label="Image (URL)"
