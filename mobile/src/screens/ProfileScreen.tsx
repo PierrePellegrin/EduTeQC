@@ -8,6 +8,17 @@ export const ProfileScreen = () => {
   const { user, logout, isAdminMode, toggleAdminMode } = useAuth();
   const { isDark, toggleTheme, theme } = useTheme();
 
+  const [showResults, setShowResults] = React.useState(false);
+  const { data: results, isLoading: loadingResults } = useAuth().user?.role === 'CLIENT'
+    ? require('@tanstack/react-query').useQuery({
+        queryKey: ['myResults'],
+        queryFn: async () => {
+          const res = await require('../services/api').adminApi.getUserResults();
+          return res;
+        },
+      })
+    : { data: null, isLoading: false };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -18,7 +29,7 @@ export const ProfileScreen = () => {
           {user?.email}
         </Text>
         {user?.role === 'ADMIN' && (
-          <Text variant="labelLarge" style={[styles.badge, { backgroundColor: theme.colors.badgeBackground }]}>
+          <Text variant="labelLarge" style={[styles.badge, { backgroundColor: theme.colors.badgeBackground }]}> 
             Administrateur
           </Text>
         )}
@@ -58,14 +69,17 @@ export const ProfileScreen = () => {
 
         <Divider />
 
-        <List.Item
-          title="Mes résultats"
-          left={(props) => <List.Icon {...props} icon="chart-line" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
-          onPress={() => {}}
-        />
-
-        <Divider />
+        {(user?.role === 'CLIENT' || (user?.role === 'ADMIN' && !isAdminMode)) && (
+          <>
+            <List.Item
+              title="Mes résultats"
+              left={(props) => <List.Icon {...props} icon="chart-line" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => setShowResults(true)}
+            />
+            <Divider />
+          </>
+        )}
 
         <List.Item
           title="Paramètres"
@@ -92,6 +106,25 @@ export const ProfileScreen = () => {
           onPress={logout}
         />
       </List.Section>
+
+      {/* Modal d'affichage des résultats */}
+      {showResults && (
+        <View style={{ position: 'absolute', top: 80, left: 0, right: 0, backgroundColor: theme.colors.cardBackground, padding: 16, borderRadius: 12, elevation: 4 }}>
+          <Text variant="titleLarge" style={{ marginBottom: 12 }}>Mes résultats</Text>
+          {loadingResults ? (
+            <Text>Chargement...</Text>
+          ) : results && results.length > 0 ? (
+            results.map((r: any) => (
+              <View key={r.id} style={{ marginBottom: 8 }}>
+                <Text>{r.test?.title || 'Test'} : {r.score} % {r.passed ? '✅' : '❌'}</Text>
+              </View>
+            ))
+          ) : (
+            <Text>Aucun résultat disponible.</Text>
+          )}
+          <IconButton icon="close" onPress={() => setShowResults(false)} style={{ alignSelf: 'flex-end' }} />
+        </View>
+      )}
     </View>
   );
 };
