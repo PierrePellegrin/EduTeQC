@@ -15,12 +15,26 @@ export const CoursesListScreen = ({ navigation }: Props) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { theme } = useTheme();
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['courses'],
-    queryFn: coursesApi.getAll,
+  // Récupère les packages achetés
+  const { data: userPackages, isLoading: loadingPackages } = useQuery({
+    queryKey: ['userPackages'],
+    queryFn: require('../services/api').adminApi.getUserPackages,
   });
 
-  const courses: Course[] = data?.courses || [];
+  // Récupère tous les cours
+  const { data, isLoading, error } = useQuery<{ courses?: Course[] }>({
+    queryKey: ['courses'],
+    queryFn: require('../services/api').coursesApi.getAll,
+  });
+
+  // Filtre les cours selon les packages achetés
+  let courses: Course[] = Array.isArray(data?.courses) ? data.courses! : [];
+  if (userPackages && Array.isArray(userPackages) && userPackages.length > 0) {
+    const allowedCourseIds = userPackages.flatMap((up: any) => up.package.courses.map((c: any) => c.course.id));
+    courses = courses.filter((course) => allowedCourseIds.includes(course.id));
+  } else {
+    courses = [];
+  }
 
   const filteredCourses = courses.filter((course) =>
     course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
