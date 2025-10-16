@@ -33,9 +33,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: 16,
+    marginHorizontal: -4,
   },
   actionButton: {
     flex: 1,
+    marginHorizontal: 4,
   },
   packagesList: {
     // marginBottom: 12, // handled by packageCard

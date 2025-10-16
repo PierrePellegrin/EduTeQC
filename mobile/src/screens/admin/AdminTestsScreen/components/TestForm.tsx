@@ -100,7 +100,7 @@ export const TestForm: React.FC<TestFormProps> = ({
             style={{ width: '100%' }}
             minimumValue={0}
             maximumValue={60}
-            step={1}
+            step={5}
             value={parseInt(formData.duration) || 0}
             onValueChange={(value) => onFormChange({ ...formData, duration: Math.round(value).toString() })}
             minimumTrackTintColor={theme.colors.primary}

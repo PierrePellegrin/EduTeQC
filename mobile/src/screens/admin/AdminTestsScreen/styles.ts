@@ -36,9 +36,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: 8,
+    marginHorizontal: -4,
   },
   actionButton: {
     flex: 1,
+    marginHorizontal: 4,
   },
   testsList: {
     // gap not supported in RN StyleSheet
