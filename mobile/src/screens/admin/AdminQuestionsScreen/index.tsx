@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
-import { Card, Text, Button, TextInput, FAB, IconButton, Chip, RadioButton, Checkbox, Divider } from 'react-native-paper';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Text, FAB } from 'react-native-paper';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { QuestionForm, QuestionsList, EmptyState, Header } from './components';
 import { styles } from './styles';
 
 type Props = {
@@ -18,7 +18,6 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
   const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
-  const { theme } = useTheme();
   
   const [formData, setFormData] = useState({
     text: '',
@@ -157,6 +156,25 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
     setOptions(newOptions);
   };
 
+  const handleTypeChange = (newType: 'SINGLE' | 'MULTIPLE') => {
+    setFormData({ ...formData, type: newType });
+    if (newType === 'SINGLE') {
+      setOptions((prev) => {
+        const firstCorrectIdx = prev.findIndex((o) => o.isCorrect);
+        return prev.map((o, idx) => ({
+          ...o,
+          isCorrect: firstCorrectIdx !== -1 ? idx === firstCorrectIdx : o.isCorrect,
+        }));
+      });
+    }
+  };
+
+  const handleCancelForm = () => {
+    setShowCreateForm(false);
+    setEditingQuestion(null);
+    resetForm();
+  };
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -168,212 +186,33 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <IconButton icon="arrow-left" onPress={() => navigation.goBack()} />
-          <View style={styles.headerText}>
-            <Text variant="headlineMedium" style={styles.title}>
-              Questions du test
-            </Text>
-            <Text variant="bodyMedium" style={styles.subtitle}>
-              {testTitle}
-            </Text>
-          </View>
-        </View>
+        <Header testTitle={testTitle} onBack={() => navigation.goBack()} />
 
         {showCreateForm && (
-         <Card style={[styles.formCard, { backgroundColor: theme.colors.cardBackground }]}>
-            <Card.Content>
-              <Text variant="titleLarge" style={styles.formTitle}>
-                {editingQuestion ? 'Modifier la question' : 'Créer une nouvelle question'}
-              </Text>
-
-              <TextInput
-                label="Question"
-                value={formData.text}
-                onChangeText={(text) => setFormData({ ...formData, text })}
-                mode="outlined"
-                multiline
-                numberOfLines={3}
-                style={styles.input}
-              />
-
-              <Text variant="labelLarge" style={styles.label}>Type de question</Text>
-              <RadioButton.Group
-                onValueChange={(value) => {
-                  // Normalize when switching to SINGLE: keep only the first correct option
-                  const newType = value as 'SINGLE' | 'MULTIPLE';
-                  setFormData({ ...formData, type: newType });
-                  if (newType === 'SINGLE') {
-                    setOptions((prev) => {
-                      const firstCorrectIdx = prev.findIndex((o) => o.isCorrect);
-                      return prev.map((o, idx) => ({
-                        ...o,
-                        isCorrect: firstCorrectIdx !== -1 ? idx === firstCorrectIdx : o.isCorrect,
-                      }));
-                    });
-                  }
-                }}
-                value={formData.type}
-              >
-                <View style={styles.radioRow}>
-                  <RadioButton.Item label="Choix unique" value="SINGLE" />
-                  <RadioButton.Item label="Choix multiple" value="MULTIPLE" />
-                </View>
-              </RadioButton.Group>
-
-              <View style={styles.row}>
-                <TextInput
-                  label="Points"
-                  value={formData.points}
-                  onChangeText={(text) => setFormData({ ...formData, points: text })}
-                  mode="outlined"
-                  keyboardType="numeric"
-                  style={styles.halfInput}
-                />
-                <TextInput
-                  label="Ordre"
-                  value={formData.order}
-                  onChangeText={(text) => setFormData({ ...formData, order: text })}
-                  mode="outlined"
-                  keyboardType="numeric"
-                  style={styles.halfInput}
-                />
-              </View>
-
-              <Divider style={styles.divider} />
-
-              <View style={styles.optionsHeader}>
-                <Text variant="titleMedium">Options de réponse</Text>
-                <Button icon="plus" mode="outlined" onPress={addOption} compact>
-                  Ajouter
-                </Button>
-              </View>
-
-              {options.map((option, index) => (
-                <View key={index} style={styles.optionRow}>
-                  <View style={styles.optionInput}>
-                    <TextInput
-                      label={`Option ${index + 1}`}
-                      value={option.text}
-                      onChangeText={(text) => updateOption(index, 'text', text)}
-                      mode="outlined"
-                      style={styles.input}
-                    />
-                    <View style={styles.optionControls}>
-                      {formData.type === 'SINGLE' ? (
-                        <RadioButton
-                          value={index.toString()}
-                          status={option.isCorrect ? 'checked' : 'unchecked'}
-                          onPress={() => updateOption(index, 'isCorrect', true)}
-                        />
-                      ) : (
-                        <Checkbox
-                          status={option.isCorrect ? 'checked' : 'unchecked'}
-                          onPress={() => updateOption(index, 'isCorrect', !option.isCorrect)}
-                        />
-                      )}
-                      <Text variant="bodySmall">Correcte</Text>
-                      {options.length > 2 && (
-                        <IconButton
-                          icon="delete"
-                          size={20}
-                          onPress={() => removeOption(index)}
-                        />
-                      )}
-                    </View>
-                  </View>
-                </View>
-              ))}
-
-              <View style={styles.formActions}>
-                <Button
-                  mode="outlined"
-                  onPress={() => {
-                    setShowCreateForm(false);
-                    setEditingQuestion(null);
-                    resetForm();
-                  }}
-                  style={styles.actionButton}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handleSubmit}
-                  loading={createMutation.isPending || updateMutation.isPending}
-                  style={styles.actionButton}
-                >
-                  {editingQuestion ? 'Mettre à jour' : 'Créer'}
-                </Button>
-              </View>
-            </Card.Content>
-          </Card>
+          <QuestionForm
+            formData={formData}
+            options={options}
+            isEditing={!!editingQuestion}
+            isLoading={createMutation.isPending || updateMutation.isPending}
+            onFormChange={setFormData}
+            onTypeChange={handleTypeChange}
+            onAddOption={addOption}
+            onRemoveOption={removeOption}
+            onUpdateOption={updateOption}
+            onSubmit={handleSubmit}
+            onCancel={handleCancelForm}
+          />
         )}
 
-        <View style={styles.questionsList}>
-          {test?.questions?.map((question: any, index: number) => (
-              <Card key={question.id} style={[styles.questionCard, { backgroundColor: theme.colors.cardBackground }]}>
-              <Card.Content>
-                <View style={styles.questionHeader}>
-                  <View style={styles.questionInfo}>
-                    <Text variant="titleMedium">
-                      Question {index + 1}
-                    </Text>
-                    <Text variant="bodyLarge" style={styles.questionText}>
-                      {question.question}
-                    </Text>
-                    <View style={styles.chipContainer}>
-                      <Chip icon="format-list-bulleted" compact>
-                        {question.type === 'SINGLE_CHOICE' ? 'Choix unique' : 'Choix multiple'}
-                      </Chip>
-                      <Chip icon="star" compact style={styles.chip}>
-                        {question.points} pt{question.points > 1 ? 's' : ''}
-                      </Chip>
-                      <Chip icon="sort-numeric-ascending" compact style={styles.chip}>
-                        Ordre: {question.order}
-                      </Chip>
-                    </View>
-                    
-                    <Text variant="labelMedium" style={styles.optionsLabel}>
-                      Options ({question.options?.length || 0}):
-                    </Text>
-                    {question.options?.map((opt: any, optIndex: number) => (
-                      <View key={opt.id} style={styles.optionItem}>
-                        <Text variant="bodyMedium">
-                          {optIndex + 1}. {opt.text}
-                          {opt.isCorrect && ' ✓'}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                  <View style={styles.questionActions}>
-                    <IconButton
-                      icon="pencil"
-                      mode="contained-tonal"
-                      onPress={() => handleEdit(question)}
-                    />
-                    <IconButton
-                      icon="delete"
-                      mode="contained-tonal"
-                      iconColor={theme.colors.logoutColor}
-                      onPress={() => handleDelete(question.id, question.question)}
-                    />
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
-          ))}
-        </View>
-
-        {!test?.questions?.length && !showCreateForm && (
-         <Card style={[styles.emptyCard, { backgroundColor: theme.colors.cardBackground }]}>
-            <Card.Content>
-              <Text variant="bodyLarge" style={styles.emptyText}>
-                Aucune question créée. Cliquez sur le bouton + pour commencer.
-              </Text>
-            </Card.Content>
-          </Card>
+        {test?.questions && test.questions.length > 0 && (
+          <QuestionsList
+            questions={test.questions}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         )}
+
+        {!test?.questions?.length && !showCreateForm && <EmptyState />}
       </ScrollView>
 
       {!showCreateForm && (
