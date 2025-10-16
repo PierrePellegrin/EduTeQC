@@ -38,43 +38,6 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
     ),
   });
 
-  const createMutation = useMutation({
-    mutationFn: adminApi.createQuestion,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminTest', testId] });
-      setShowCreateForm(false);
-      resetForm();
-      Alert.alert('Succès', 'Question créée avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la création');
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: any) => adminApi.updateQuestion(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminTest', testId] });
-      setEditingQuestion(null);
-      resetForm();
-      Alert.alert('Succès', 'Question mise à jour avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la mise à jour');
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: adminApi.deleteQuestion,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminTest', testId] });
-      Alert.alert('Succès', 'Question supprimée avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la suppression');
-    },
-  });
-
   const resetForm = () => {
     setFormData({
       text: '',
@@ -87,6 +50,11 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
       { text: '', isCorrect: false },
     ]);
   };
+
+  // Import mutations from extracted hook
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { useQuestionMutations } = require('./adminQuestionsScreen.consts');
+  const { createMutation, updateMutation, deleteMutation } = useQuestionMutations(queryClient, testId, resetForm, setShowCreateForm, setEditingQuestion);
 
   const handleSubmit = () => {
     const validOptions = options.filter(opt => opt.text.trim() !== '');

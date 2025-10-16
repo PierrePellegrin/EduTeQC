@@ -36,54 +36,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     queryFn: adminApi.getAllCourses,
   });
 
-  const createMutation = useMutation({
-    mutationFn: adminApi.createTest,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminTests'] });
-      setShowCreateForm(false);
-      resetForm();
-      Alert.alert('Succès', 'Test créé avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la création');
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: any) => adminApi.updateTest(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminTests'] });
-      setEditingTest(null);
-      resetForm();
-      Alert.alert('Succès', 'Test mis à jour avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la mise à jour');
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: adminApi.deleteTest,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminTests'] });
-      Alert.alert('Succès', 'Test supprimé avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la suppression');
-    },
-  });
-
-  const togglePublishMutation = useMutation({
-    mutationFn: ({ id, isPublished }: { id: string; isPublished: boolean }) => 
-      adminApi.updateTest(id, { isPublished }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminTests'] });
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la publication');
-    },
-  });
-
+  // ...existing code...
   const resetForm = () => {
     setFormData({
       title: '',
@@ -93,6 +46,11 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
       passingScore: '',
     });
   };
+
+  // Import mutations from extracted hook
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { useTestMutations } = require('./adminTestsScreen.consts');
+  const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useTestMutations(queryClient, resetForm, setShowCreateForm, setEditingTest);
 
   const handleSubmit = () => {
     const data = {

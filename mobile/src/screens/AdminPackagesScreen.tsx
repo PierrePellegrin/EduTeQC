@@ -6,6 +6,7 @@ import { adminApi } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../contexts/ThemeContext';
 
+// Type
 type Props = {
   navigation: NativeStackNavigationProp<any>;
 };
@@ -16,73 +17,21 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
   const [editingPackage, setEditingPackage] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { theme } = useTheme();
-  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     imageUrl: '',
   });
-
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
 
   const { data: packages, isLoading } = useQuery({
     queryKey: ['adminPackages'],
     queryFn: adminApi.getAllPackages,
   });
-
   const { data: courses } = useQuery({
     queryKey: ['adminCourses'],
     queryFn: adminApi.getAllCourses,
-  });
-
-  const createMutation = useMutation({
-    mutationFn: adminApi.createPackage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminPackages'] });
-      setShowCreateForm(false);
-      resetForm();
-      Alert.alert('Succès', 'Package créé avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la création');
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: any) => adminApi.updatePackage(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminPackages'] });
-      setEditingPackage(null);
-      setShowCreateForm(false);
-      resetForm();
-      Alert.alert('Succès', 'Package mis à jour avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la mise à jour');
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: adminApi.deletePackage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminPackages'] });
-      Alert.alert('Succès', 'Package supprimé avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la suppression');
-    },
-  });
-
-  const toggleActiveMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => 
-      adminApi.updatePackage(id, { isActive }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminPackages'] });
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la modification');
-    },
   });
 
   const resetForm = () => {
@@ -95,53 +44,32 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     setSelectedCourses([]);
   };
 
-  const handleSubmit = () => {
-    if (!formData.name || !formData.description || !formData.price) {
-      Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
-      return;
-    }
+  // Import mutations from extracted hook
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { usePackageMutations } = require('./adminPackagesScreen.consts');
+  const { createMutation, updateMutation, deleteMutation, toggleActiveMutation } = usePackageMutations(queryClient, resetForm, setShowCreateForm, setEditingPackage);
 
-    if (selectedCourses.length === 0) {
-      Alert.alert('Erreur', 'Veuillez sélectionner au moins un cours');
-      return;
-    }
-
-    const data = {
-      name: formData.name,
-      description: formData.description,
-      price: parseFloat(formData.price),
-      imageUrl: formData.imageUrl || undefined,
-      courseIds: selectedCourses,
-    };
-
-    if (editingPackage) {
-      updateMutation.mutate({ id: editingPackage.id, data });
-    } else {
-      createMutation.mutate(data);
-    }
+  const handleToggleActive = (id: string, isActive: boolean, name: string) => {
+    toggleActiveMutation.mutate({ id, isActive: !isActive });
+    Alert.alert('Succès', `Le package "${name}" a été ${isActive ? 'désactivé' : 'activé'}.`);
   };
 
   const handleEdit = (pkg: any) => {
     setEditingPackage(pkg);
-    
-    // Extraire les IDs de cours du package
-    const courseIds = pkg.courses?.map((pc: any) => pc.course?.id || pc.courseId) || [];
-    
-    // Mettre à jour tous les états
+    setShowCreateForm(true);
     setFormData({
       name: pkg.name,
-      description: pkg.description || '',
+      description: pkg.description,
       price: pkg.price.toString(),
       imageUrl: pkg.imageUrl || '',
     });
-    setSelectedCourses(courseIds);
-    setShowCreateForm(true);
+    setSelectedCourses(pkg.courses?.map((c: any) => c.course.id) || []);
   };
 
   const handleDelete = (id: string, name: string) => {
     Alert.alert(
-      'Confirmer la suppression',
-      `Voulez-vous vraiment supprimer le package "${name}" ?`,
+      'Confirmation',
+      `Supprimer le package "${name}" ?`,
       [
         { text: 'Annuler', style: 'cancel' },
         { text: 'Supprimer', style: 'destructive', onPress: () => deleteMutation.mutate(id) },
@@ -149,21 +77,27 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     );
   };
 
-  const handleToggleActive = (id: string, currentStatus: boolean, name: string) => {
-    const newStatus = !currentStatus;
-    const action = newStatus ? 'activer' : 'désactiver';
-    
-    Alert.alert(
-      'Confirmer',
-      `Voulez-vous ${action} le package "${name}" ?`,
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: newStatus ? 'Activer' : 'Désactiver', 
-          onPress: () => toggleActiveMutation.mutate({ id, isActive: newStatus })
-        },
-      ]
-    );
+  const handleSubmit = () => {
+    if (!formData.name || !formData.description || !formData.price) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+    if (selectedCourses.length === 0) {
+      Alert.alert('Erreur', 'Veuillez sélectionner au moins un cours');
+      return;
+    }
+    const data = {
+      name: formData.name,
+      description: formData.description,
+      price: parseFloat(formData.price),
+      imageUrl: formData.imageUrl || undefined,
+      courseIds: selectedCourses,
+    };
+    if (editingPackage) {
+      updateMutation.mutate({ id: editingPackage.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
   };
 
   const toggleCourse = (courseId: string) => {
@@ -314,7 +248,6 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
                         </Chip>
                       )}
                     </View>
-                    
                     {pkg.courses && pkg.courses.length > 0 && (
                       <>
                         <Text variant="labelMedium" style={styles.coursesLabel}>
@@ -327,7 +260,6 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
                         ))}
                       </>
                     )}
-
                     <Button
                       mode={pkg.isActive ? 'outlined' : 'contained'}
                       icon={pkg.isActive ? 'cancel' : 'check'}
@@ -413,14 +345,13 @@ const styles = StyleSheet.create({
   formActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 8,
     marginTop: 16,
   },
   actionButton: {
     flex: 1,
   },
   packagesList: {
-    gap: 12,
+    // marginBottom: 12, // handled by packageCard
   },
   packageCard: {
     marginBottom: 12,
@@ -436,7 +367,6 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
     marginBottom: 4,
   },
   packageTitleText: {
@@ -451,7 +381,6 @@ const styles = StyleSheet.create({
   },
   chipContainer: {
     flexDirection: 'row',
-    gap: 8,
     marginTop: 8,
     flexWrap: 'wrap',
   },
@@ -472,7 +401,6 @@ const styles = StyleSheet.create({
   },
   packageActions: {
     flexDirection: 'column',
-    gap: 4,
   },
   emptyCard: {
     marginTop: 32,
