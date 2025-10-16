@@ -35,7 +35,7 @@ export class TestController {
       const { answers } = req.body;
       const testId = req.params.id;
       const userId = (req as any).user.id;
-      const test = await TestService.getTestWithQuestions(testId);
+      const test = await TestService.getTestWithQuestions(testId, true);
       if (!test) {
         throw new AppError(404, 'Test not found');
       }

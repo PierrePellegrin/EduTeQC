@@ -12,6 +12,9 @@ export const styles = StyleSheet.create({
   packageCard: {
     marginBottom: 12,
   },
+  cover: {
+    height: 180,
+  },
   packageTitle: {
     marginBottom: 4,
   },

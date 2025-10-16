@@ -10,6 +10,7 @@ type PackageCardProps = {
     name: string;
     description: string;
     price: number;
+    imageUrl?: string;
     courses?: any[];
   };
   isPurchased?: boolean;
@@ -27,6 +28,9 @@ export const PackageCard: React.FC<PackageCardProps> = ({
 
   return (
     <Card style={[styles.packageCard, { backgroundColor: theme.colors.cardBackground }]}>
+      {pkg.imageUrl && (
+        <Card.Cover source={{ uri: pkg.imageUrl }} style={styles.cover} />
+      )}
       <Card.Content>
         <Text variant="titleMedium" style={styles.packageTitle}>
           {typeof pkg.name === 'string' && pkg.name.trim() !== '' ? pkg.name : 'N/A'}

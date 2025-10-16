@@ -10,7 +10,7 @@ export class TestService {
       },
     });
   }
-  static async getTestWithQuestions(testId: string) {
+  static async getTestWithQuestions(testId: string, includeCorrect: boolean = false) {
     return prisma.test.findUnique({
       where: { id: testId },
       include: {
@@ -23,6 +23,7 @@ export class TestService {
                 id: true,
                 text: true,
                 order: true,
+                ...(includeCorrect ? { isCorrect: true } : {}),
               },
             },
           },
