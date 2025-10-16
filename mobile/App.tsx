@@ -76,7 +76,7 @@ function ClientTabs() {
       />
       <Tab.Screen
         name="PackagesTab"
-        component={require('./src/screens/PackagesListScreen').PackagesListScreen}
+        component={PackagesListScreen}
         options={{ title: 'Packages' }}
       />
       <Tab.Screen

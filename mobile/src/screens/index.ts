@@ -13,7 +13,7 @@ export { CoursesListScreen } from './courses/CoursesListScreen';
 export { CourseDetailScreen } from './courses/CourseDetailScreen';
 
 // Package screens
-export { PackagesListScreen } from './packages/PackagesListScreen';
+export { PackagesListScreen } from './packages';
 
 // Profile screens
 export { ProfileScreen } from './profile/ProfileScreen';
