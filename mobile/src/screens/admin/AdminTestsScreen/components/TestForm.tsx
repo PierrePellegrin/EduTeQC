@@ -120,16 +120,6 @@ export const TestForm: React.FC<TestFormProps> = ({
           style={styles.input}
         />
 
-        {formData.imageUrl ? (
-          <Card style={[styles.previewCard, { backgroundColor: theme.colors.cardBackground }]}>
-            <Card.Cover source={{ uri: formData.imageUrl }} />
-            <Card.Content>
-              <Text variant="bodySmall" style={{ opacity: 0.7, marginTop: 8 }}>
-                Aperçu de l'image
-              </Text>
-            </Card.Content>
-          </Card>
-        ) : null}
 
         <View style={styles.formActions}>
           <Button
