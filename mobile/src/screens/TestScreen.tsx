@@ -110,8 +110,8 @@ export const TestScreen = ({ navigation, route }: Props) => {
       </Surface>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {test.questions.map((question, index) => (
-          <Card key={question.id} style={[styles.questionCard, { backgroundColor: theme.colors.cardBackground }]}>
+        {test.questions.map((question: { id: React.Key | null | undefined; question: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; type: string; options: any[]; }, index: number) => (
+          <Card key={String(question.id)} style={[styles.questionCard, { backgroundColor: theme.colors.cardBackground }]}>
             <Card.Content>
               <Text variant="titleMedium" style={[styles.questionNumber, { color: theme.colors.onCardBackground }]}>
                 Question {index + 1}
@@ -123,18 +123,18 @@ export const TestScreen = ({ navigation, route }: Props) => {
               {question.type === 'SINGLE_CHOICE' ? (
                 <RadioButton.Group
                   onValueChange={(value) =>
-                    handleOptionSelect(question.id, value, false)
+                    handleOptionSelect(String(question.id), value, false)
                   }
-                  value={answers[question.id]?.[0] || ''}
+                  value={answers[String(question.id)]?.[0] || ''}
                 >
-                  {question.options.map((option) => (
-                    <View key={option.id} style={styles.optionRow}>
-                      <RadioButton value={option.id} />
+                  {question.options.map((option: { id: React.Key | null | undefined; text: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }) => (
+                    <View key={String(option.id)} style={styles.optionRow}>
+                      <RadioButton value={String(option.id)} />
                       <Text
                         variant="bodyMedium"
                         style={[styles.optionText, { color: theme.colors.onCardBackground }]}
                         onPress={() =>
-                          handleOptionSelect(question.id, option.id, false)
+                          handleOptionSelect(String(question.id), String(option.id), false)
                         }
                       >
                         {option.text}
@@ -144,23 +144,23 @@ export const TestScreen = ({ navigation, route }: Props) => {
                 </RadioButton.Group>
               ) : (
                 <View>
-                  {question.options.map((option) => (
-                    <View key={option.id} style={styles.optionRow}>
+                  {question.options.map((option: { id: any; text: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }) => (
+                    <View key={String(option.id)} style={styles.optionRow}>
                       <Checkbox
                         status={
-                          answers[question.id]?.includes(option.id)
+                          answers[String(question.id)]?.includes(String(option.id))
                             ? 'checked'
                             : 'unchecked'
                         }
                         onPress={() =>
-                          handleOptionSelect(question.id, option.id, true)
+                          handleOptionSelect(String(question.id), String(option.id), true)
                         }
                       />
                       <Text
                         variant="bodyMedium"
                         style={[styles.optionText, { color: theme.colors.onCardBackground }]}
                         onPress={() =>
-                          handleOptionSelect(question.id, option.id, true)
+                          handleOptionSelect(String(question.id), String(option.id), true)
                         }
                       >
                         {option.text}

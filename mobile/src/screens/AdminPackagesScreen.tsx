@@ -297,19 +297,6 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
                       <Text variant="titleLarge" style={[styles.packageTitleText, { color: theme.colors.onCardBackground }]}>
                         {pkg.name}
                       </Text>
-                      <Chip 
-                        icon={pkg.isActive ? 'check-circle' : 'cancel'}
-                        style={[
-                          styles.statusChip,
-                          { backgroundColor: pkg.isActive ? theme.colors.successContainer : theme.colors.errorContainer }
-                        ]}
-                        textStyle={{ 
-                          color: pkg.isActive ? theme.colors.onSuccessContainer : theme.colors.onErrorContainer 
-                        }}
-                        compact
-                      >
-                        {pkg.isActive ? 'Actif' : 'Inactif'}
-                      </Chip>
                     </View>
                     <Text variant="bodyMedium" style={[styles.packageMeta, { color: theme.colors.onCardBackground }]}>
                       {pkg.description}
@@ -484,7 +471,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   packageActions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 4,
   },
   emptyCard: {

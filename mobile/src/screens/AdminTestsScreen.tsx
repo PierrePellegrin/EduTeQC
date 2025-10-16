@@ -280,19 +280,6 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
                   <View style={styles.testInfo}>
                     <View style={styles.titleRow}>
                       <Text variant="titleLarge" style={styles.testTitleText}>{test.title}</Text>
-                      <Chip 
-                        icon={test.isPublished ? 'check-circle' : 'clock-outline'}
-                        style={[
-                          styles.statusChip,
-                          { backgroundColor: test.isPublished ? theme.colors.successContainer : theme.colors.surfaceVariant }
-                        ]}
-                        textStyle={{ 
-                          color: test.isPublished ? theme.colors.onSuccessContainer : theme.colors.onSurfaceVariant 
-                        }}
-                        compact
-                      >
-                        {test.isPublished ? 'Publié' : 'Brouillon'}
-                      </Chip>
                     </View>
                     <Text variant="bodyMedium" style={styles.testMeta}>
                       Durée: {test.duration} min • Score min: {test.passingScore}%
@@ -461,8 +448,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   testActions: {
-    flexDirection: 'row',
-    gap: 4,
+    flexDirection: 'column',
+    gap: 0,
   },
   emptyCard: {
     marginTop: 32,
