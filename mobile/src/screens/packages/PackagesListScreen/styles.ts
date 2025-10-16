@@ -23,9 +23,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 8,
     marginHorizontal: -4,
+    flexWrap: 'wrap',
   },
   chip: {
     marginHorizontal: 4,
+    marginVertical: 4,
   },
   buyButton: {
     marginTop: 8,

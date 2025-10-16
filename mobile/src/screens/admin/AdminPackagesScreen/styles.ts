@@ -70,9 +70,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 8,
     flexWrap: 'wrap',
+    marginHorizontal: -4,
   },
   chip: {
-    marginLeft: 4,
+    marginHorizontal: 4,
+    marginVertical: 4,
   },
   coursesLabel: {
     marginTop: 12,
