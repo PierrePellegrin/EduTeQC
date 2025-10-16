@@ -1,6 +1,6 @@
 import React from 'react';
-import { View } from 'react-native';
-import { Card, Text, TextInput, Button, Menu } from 'react-native-paper';
+import { View, Image } from 'react-native';
+import { Card, Text, TextInput, Button, Menu, Icon } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { styles } from '../styles';
 
@@ -120,6 +120,25 @@ export const TestForm: React.FC<TestFormProps> = ({
           style={styles.input}
         />
 
+        {formData.imageUrl && formData.imageUrl.trim() !== '' ? (
+          <View style={{ marginBottom: 12, alignItems: 'center' }}>
+            <Image
+              source={{ uri: formData.imageUrl }}
+              style={{ width: 120, height: 120, borderRadius: 8 }}
+              resizeMode="cover"
+            />
+            <Text variant="bodySmall" style={{ marginTop: 4, opacity: 0.7 }}>
+              Aperçu de l'image
+            </Text>
+          </View>
+        ) : (
+          <View style={{ marginBottom: 12, alignItems: 'center', padding: 16 }}>
+            <Icon source="image-off-outline" size={48} color={theme.colors.outline} />
+            <Text variant="bodySmall" style={{ marginTop: 8, opacity: 0.6 }}>
+              Aucune image
+            </Text>
+          </View>
+        )}
 
         <View style={styles.formActions}>
           <Button
