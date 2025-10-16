@@ -50,6 +50,9 @@ function ClientTabs() {
           backgroundColor: theme.colors.headerBackground,
           borderTopColor: theme.colors.outlineVariant,
         },
+        tabBarLabelStyle: {
+          marginBottom: 4,
+        },
         headerStyle: {
           backgroundColor: theme.colors.headerBackground,
         },
@@ -188,6 +191,9 @@ function AdminTabs() {
         tabBarStyle: {
           backgroundColor: theme.colors.headerBackground,
           borderTopColor: theme.colors.outlineVariant,
+        },
+        tabBarLabelStyle: {
+          marginBottom: 4,
         },
         headerStyle: {
           backgroundColor: theme.colors.headerBackground,
