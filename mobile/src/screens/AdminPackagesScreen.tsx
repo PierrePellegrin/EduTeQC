@@ -54,6 +54,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminPackages'] });
       setEditingPackage(null);
+      setShowCreateForm(false);
       resetForm();
       Alert.alert('Succès', 'Package mis à jour avec succès');
     },
