@@ -1,61 +1,41 @@
-import { Alert } from 'react-native';
 import { adminApi } from '../../../services/api';
-import { useMutation, QueryClient } from '@tanstack/react-query';
+import { useCrudMutations } from '../../../hooks/useCrudMutations';
 
 export function usePackageMutations(
-  queryClient: QueryClient,
   resetForm: () => void,
   setShowCreateForm: (show: boolean) => void,
   setEditingPackage: (pkg: any) => void
 ) {
-  const createMutation = useMutation({
-    mutationFn: adminApi.createPackage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminPackages'] });
-      setShowCreateForm(false);
-      resetForm();
-      Alert.alert('Succès', 'Package créé avec succès');
+  const { createMutation, updateMutation, deleteMutation, toggleMutation } = useCrudMutations({
+    queryKeys: ['adminPackages'],
+    api: {
+      create: adminApi.createPackage,
+      update: adminApi.updatePackage,
+      delete: adminApi.deletePackage,
+      toggle: adminApi.updatePackage,
     },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la création');
+    messages: {
+      createSuccess: 'Package créé avec succès',
+      updateSuccess: 'Package mis à jour avec succès',
+      deleteSuccess: 'Package supprimé avec succès',
     },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => adminApi.updatePackage(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminPackages'] });
-      setEditingPackage(null);
-      setShowCreateForm(false);
-      resetForm();
-      Alert.alert('Succès', 'Package mis à jour avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la mise à jour');
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: adminApi.deletePackage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminPackages'] });
-      Alert.alert('Succès', 'Package supprimé avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la suppression');
+    callbacks: {
+      onCreateSuccess: () => {
+        setShowCreateForm(false);
+        resetForm();
+      },
+      onUpdateSuccess: () => {
+        setEditingPackage(null);
+        setShowCreateForm(false);
+        resetForm();
+      },
     },
   });
 
-  const toggleActiveMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => 
-      adminApi.updatePackage(id, { isActive }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminPackages'] });
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors du changement d\'état');
-    },
-  });
-
-  return { createMutation, updateMutation, deleteMutation, toggleActiveMutation };
+  return { 
+    createMutation, 
+    updateMutation, 
+    deleteMutation, 
+    toggleActiveMutation: toggleMutation 
+  };
 }

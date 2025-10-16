@@ -1,60 +1,41 @@
 // Constantes et handlers extraits de AdminCoursesScreen
-import { Alert } from 'react-native';
 import { adminApi } from '../../../services/api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCrudMutations } from '../../../hooks/useCrudMutations';
 
-export function useCourseMutations(queryClient: any, resetForm: () => void, setShowCreateForm: (v: boolean) => void, setEditingCourse: (v: any) => void) {
-  const createMutation = useMutation({
-    mutationFn: adminApi.createCourse,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminCourses'] });
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-      setShowCreateForm(false);
-      resetForm();
-      Alert.alert('Succès', 'Cours créé avec succès');
+export function useCourseMutations(
+  resetForm: () => void,
+  setShowCreateForm: (v: boolean) => void,
+  setEditingCourse: (v: any) => void
+) {
+  const { createMutation, updateMutation, deleteMutation, toggleMutation } = useCrudMutations({
+    queryKeys: ['adminCourses', 'courses'],
+    api: {
+      create: adminApi.createCourse,
+      update: adminApi.updateCourse,
+      delete: adminApi.deleteCourse,
+      toggle: adminApi.updateCourse,
     },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la création');
+    messages: {
+      createSuccess: 'Cours créé avec succès',
+      updateSuccess: 'Cours mis à jour avec succès',
+      deleteSuccess: 'Cours supprimé avec succès',
+    },
+    callbacks: {
+      onCreateSuccess: () => {
+        setShowCreateForm(false);
+        resetForm();
+      },
+      onUpdateSuccess: () => {
+        setEditingCourse(null);
+        resetForm();
+      },
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: any) => adminApi.updateCourse(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminCourses'] });
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-      setEditingCourse(null);
-      resetForm();
-      Alert.alert('Succès', 'Cours mis à jour avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la mise à jour');
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: adminApi.deleteCourse,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminCourses'] });
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-      Alert.alert('Succès', 'Cours supprimé avec succès');
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la suppression');
-    },
-  });
-
-  const togglePublishMutation = useMutation({
-    mutationFn: ({ id, isPublished }: { id: string; isPublished: boolean }) => 
-      adminApi.updateCourse(id, { isPublished }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminCourses'] });
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-    },
-    onError: (error: any) => {
-      Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de la publication');
-    },
-  });
-
-  return { createMutation, updateMutation, deleteMutation, togglePublishMutation };
+  return { 
+    createMutation, 
+    updateMutation, 
+    deleteMutation, 
+    togglePublishMutation: toggleMutation 
+  };
 }

@@ -47,10 +47,9 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     });
   };
 
-  // Import mutations from extracted hook
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // Use refactored CRUD mutations hook
   const { useTestMutations } = require('./consts');
-  const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useTestMutations(queryClient, resetForm, setShowCreateForm, setEditingTest);
+  const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useTestMutations(resetForm, setShowCreateForm, setEditingTest);
 
   const handleSubmit = () => {
     const data = {

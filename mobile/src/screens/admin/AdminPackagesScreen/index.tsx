@@ -44,10 +44,9 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     setSelectedCourses([]);
   };
 
-  // Import mutations from extracted hook
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // Use refactored CRUD mutations hook
   const { usePackageMutations } = require('./consts');
-  const { createMutation, updateMutation, deleteMutation, toggleActiveMutation } = usePackageMutations(queryClient, resetForm, setShowCreateForm, setEditingPackage);
+  const { createMutation, updateMutation, deleteMutation, toggleActiveMutation } = usePackageMutations(resetForm, setShowCreateForm, setEditingPackage);
 
   const handleToggleActive = (id: string, isActive: boolean, name: string) => {
     toggleActiveMutation.mutate({ id, isActive: !isActive });

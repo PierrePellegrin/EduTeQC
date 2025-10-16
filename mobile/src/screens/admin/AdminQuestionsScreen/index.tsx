@@ -51,10 +51,9 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
     ]);
   };
 
-  // Import mutations from extracted hook
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // Use refactored CRUD mutations hook
   const { useQuestionMutations } = require('./consts');
-  const { createMutation, updateMutation, deleteMutation } = useQuestionMutations(queryClient, testId, resetForm, setShowCreateForm, setEditingQuestion);
+  const { createMutation, updateMutation, deleteMutation } = useQuestionMutations(testId, resetForm, setShowCreateForm, setEditingQuestion);
 
   const handleSubmit = () => {
     const validOptions = options.filter(opt => opt.text.trim() !== '');

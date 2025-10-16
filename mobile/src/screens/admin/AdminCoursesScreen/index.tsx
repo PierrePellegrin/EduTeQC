@@ -41,10 +41,9 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     });
   };
 
-  // Import mutations from extracted hook
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // Use refactored CRUD mutations hook
   const { useCourseMutations } = require('./consts');
-  const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useCourseMutations(queryClient, resetForm, setShowCreateForm, setEditingCourse);
+  const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useCourseMutations(resetForm, setShowCreateForm, setEditingCourse);
 
   const handleSubmit = () => {
     if (!formData.title || !formData.description || !formData.category || !formData.content) {
