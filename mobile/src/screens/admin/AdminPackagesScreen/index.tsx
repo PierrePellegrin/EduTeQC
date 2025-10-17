@@ -32,6 +32,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
   const [searchQuery, setSearchQuery] = useState('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
+  // Initialize all groups as CLOSED for performance
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [formData, setFormData] = useState({
     name: '',
@@ -228,7 +229,8 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     }
 
     const icon = groupBy === 'type' ? 'shape' : 'currency-eur';
-    const isExpanded = expandedGroups[item.key] !== false;
+    // Groups are CLOSED by default for performance
+    const isExpanded = expandedGroups[item.key] === true;
 
     return (
       <AccordionGroup

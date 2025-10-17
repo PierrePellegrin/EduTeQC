@@ -13,7 +13,7 @@ type Props = {
   navigation: NativeStackNavigationProp<any>;
 };
 
-type GroupBy = 'none' | 'course' | 'niveau' | 'cycle';
+type GroupBy = 'none' | 'course' | 'category';
 
 export const AdminTestsScreen = ({ navigation }: Props) => {
   // Single useTheme() call at parent level
@@ -32,6 +32,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   const [searchQuery, setSearchQuery] = useState('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
+  // Initialize all groups as CLOSED for performance
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   
   const [formData, setFormData] = useState({
@@ -157,15 +158,9 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
         if (!groups[key]) groups[key] = [];
         groups[key].push(test);
       });
-    } else if (groupBy === 'niveau') {
+    } else if (groupBy === 'category') {
       filteredTests.forEach((test: any) => {
-        const key = test.course?.niveau?.name || 'Sans niveau';
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(test);
-      });
-    } else if (groupBy === 'cycle') {
-      filteredTests.forEach((test: any) => {
-        const key = test.course?.niveau?.cycle?.name || 'Sans cycle';
+        const key = test.course?.category || 'Sans matière';
         if (!groups[key]) groups[key] = [];
         groups[key].push(test);
       });
@@ -199,9 +194,9 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     }
 
     const icon = 
-      groupBy === 'course' ? 'book-open-variant' :
-      groupBy === 'niveau' ? 'school' : 'repeat';
-    const isExpanded = expandedGroups[item.key] !== false;
+      groupBy === 'course' ? 'book-open-variant' : 'shape';
+    // Groups are CLOSED by default for performance
+    const isExpanded = expandedGroups[item.key] === true;
 
     return (
       <AccordionGroup
@@ -253,8 +248,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
             buttons={[
               { value: 'none', label: 'Tous', icon: 'view-list' },
               { value: 'course', label: 'Cours', icon: 'book-open-variant' },
-              { value: 'niveau', label: 'Niveau', icon: 'school' },
-              { value: 'cycle', label: 'Cycle', icon: 'repeat' },
+              { value: 'category', label: 'Matière', icon: 'shape' },
             ]}
             style={styles.segmentedButtons}
           />
