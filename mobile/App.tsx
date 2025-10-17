@@ -24,6 +24,7 @@ import {
   AdminQuestionsScreen,
   AdminPackagesScreen,
   PackagesListScreen,
+  ResultsScreen,
 } from './src/screens';
 
 const Stack = createNativeStackNavigator();
@@ -43,10 +44,12 @@ function ClientTabs() {
                 let iconName: string = 'home';
                 if (route.name === 'CoursesTab') {
                   iconName = focused ? 'book-open' : 'book-open-outline';
-                } else if (route.name === 'ProfileTab') {
-                  iconName = focused ? 'account' : 'account-outline';
                 } else if (route.name === 'PackagesTab') {
                   iconName = focused ? 'package-variant' : 'package-variant-closed';
+                } else if (route.name === 'ResultsTab') {
+                  iconName = focused ? 'chart-line' : 'chart-line';
+                } else if (route.name === 'ProfileTab') {
+                  iconName = focused ? 'account' : 'account-outline';
                 }
                 return <Icon name={iconName as any} size={size} color={color} />;
               },
@@ -77,6 +80,11 @@ function ClientTabs() {
               name="PackagesTab"
               component={PackagesListScreen}
               options={{ title: 'Packages' }}
+            />
+            <Tab.Screen
+              name="ResultsTab"
+              component={ResultsScreen}
+              options={{ title: 'Résultats' }}
             />
             <Tab.Screen
               name="ProfileTab"
