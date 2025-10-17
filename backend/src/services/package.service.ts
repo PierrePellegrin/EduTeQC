@@ -3,15 +3,20 @@ import { prisma } from '../lib/prisma';
 export class PackageService {
   static async getAllAdmin() {
     return prisma.package.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        imageUrl: true,
+        isActive: true,
         courses: {
-          include: {
+          select: {
             course: {
               select: {
                 id: true,
                 title: true,
                 category: true,
-                imageUrl: true,
               },
             },
           },

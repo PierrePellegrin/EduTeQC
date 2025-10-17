@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useCallback, useDeferredValue } from 'react';
-import { View, FlatList, InteractionManager } from 'react-native';
-import { Text, Searchbar, FAB, SegmentedButtons } from 'react-native-paper';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useMemo, useCallback } from 'react';
+import { View, ScrollView, Alert } from 'react-native';
+import { Text, Searchbar, FAB, SegmentedButtons, List } from 'react-native-paper';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../../../contexts/ThemeContext';
-import { TestForm, TestsList, EmptyState, AccordionGroup } from './components';
+import { TestForm, TestsList, EmptyState } from './components';
 import { styles } from './styles';
 import { useTestMutations } from './consts';
 
@@ -16,21 +15,11 @@ type Props = {
 type GroupBy = 'none' | 'course' | 'niveau' | 'cycle';
 
 export const AdminTestsScreen = ({ navigation }: Props) => {
-  // Single useTheme() call at parent level
-  const { theme } = useTheme();
-  const themeColors = useMemo(() => ({
-    cardBackground: theme.colors.cardBackground,
-    onCardBackground: theme.colors.onCardBackground,
-    logoutColor: theme.colors.logoutColor,
-    primary: theme.colors.primary,
-    outline: theme.colors.outline,
-  }), [theme]);
-
+  const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTest, setEditingTest] = useState<any>(null);
   const [courseMenuVisible, setCourseMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   
@@ -46,17 +35,14 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   const { data: tests, isLoading } = useQuery({
     queryKey: ['adminTests'],
     queryFn: adminApi.getAllTests,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 
   const { data: courses } = useQuery({
     queryKey: ['adminCourses'],
     queryFn: adminApi.getAllCourses,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 
+  // ...existing code...
   const resetForm = useCallback(() => {
     setFormData({
       title: '',
@@ -64,17 +50,13 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
       courseId: '',
       duration: '',
       passingScore: '',
-      imageUrl: '',
+	  imageUrl: '',
     });
   }, []);
 
-  const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useTestMutations(
-    resetForm,
-    setShowCreateForm,
-    setEditingTest
-  );
+  // Use refactored CRUD mutations hook
+  const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useTestMutations(resetForm, setShowCreateForm, setEditingTest);
 
-  // Wrap mutations with InteractionManager to prevent UI blocking
   const handleSubmit = useCallback(() => {
     const data = {
       title: formData.title,
@@ -85,13 +67,11 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
       imageUrl: formData.imageUrl || undefined,
     };
 
-    InteractionManager.runAfterInteractions(() => {
-      if (editingTest) {
-        updateMutation?.mutate({ id: editingTest.id, data });
-      } else {
-        createMutation?.mutate(data);
-      }
-    });
+    if (editingTest) {
+      updateMutation?.mutate({ id: editingTest.id, data });
+    } else {
+      createMutation?.mutate(data);
+    }
   }, [formData, editingTest, createMutation, updateMutation]);
 
   const handleEdit = useCallback((test: any) => {
@@ -108,16 +88,31 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   }, []);
 
   const handleDelete = useCallback((id: string, title: string) => {
-    InteractionManager.runAfterInteractions(() => {
-      deleteMutation?.mutate(id);
-    });
+    Alert.alert(
+      'Confirmer la suppression',
+      `Voulez-vous vraiment supprimer le test "${title}" ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Supprimer', style: 'destructive', onPress: () => deleteMutation?.mutate(id) },
+      ]
+    );
   }, [deleteMutation]);
 
   const handleTogglePublish = useCallback((id: string, currentStatus: boolean, title: string) => {
     const newStatus = !currentStatus;
-    InteractionManager.runAfterInteractions(() => {
-      togglePublishMutation?.mutate({ id, data: { isPublished: newStatus } });
-    });
+    const action = newStatus ? 'publier' : 'dépublier';
+    
+    Alert.alert(
+      'Confirmer',
+      `Voulez-vous ${action} le test "${title}" ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { 
+          text: newStatus ? 'Publier' : 'Dépublier', 
+          onPress: () => togglePublishMutation?.mutate({ id, data: { isPublished: newStatus } })
+        },
+      ]
+    );
   }, [togglePublishMutation]);
 
   const handleNavigateToQuestions = useCallback((testId: string, testTitle: string) => {
@@ -130,23 +125,23 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     resetForm();
   }, [resetForm]);
 
-  // Filter tests (using deferred search query)
+  // Mémoriser le filtrage des tests
   const filteredTests = useMemo(() => {
     const allTests = tests?.tests || [];
-    if (!deferredSearchQuery) return allTests;
+    if (!searchQuery) return allTests;
     
-    const query = deferredSearchQuery.toLowerCase();
+    const query = searchQuery.toLowerCase();
     return allTests.filter((test: any) =>
       test.title.toLowerCase().includes(query) ||
       test.description?.toLowerCase().includes(query) ||
       test.course?.title?.toLowerCase().includes(query)
     );
-  }, [tests?.tests, deferredSearchQuery]);
+  }, [tests?.tests, searchQuery]);
 
-  // Group tests
+  // Regroupement des tests
   const groupedTests = useMemo(() => {
     if (groupBy === 'none') {
-      return [{ key: 'all', title: 'Tous', data: filteredTests }];
+      return { 'all': filteredTests };
     }
 
     const groups: Record<string, any[]> = {};
@@ -171,62 +166,8 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
       });
     }
 
-    return Object.entries(groups).map(([key, data]) => ({ key, title: key, data }));
+    return groups;
   }, [filteredTests, groupBy]);
-
-  const toggleGroup = useCallback((groupKey: string) => {
-    setExpandedGroups(prev => ({
-      ...prev,
-      [groupKey]: !prev[groupKey]
-    }));
-  }, []);
-
-  // FlatList render functions
-  const renderTestItem = useCallback(({ item }: { item: any }) => (
-    <TestsList
-      tests={[item]}
-      themeColors={themeColors}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onTogglePublish={handleTogglePublish}
-      onNavigateToQuestions={handleNavigateToQuestions}
-    />
-  ), [themeColors, handleEdit, handleDelete, handleTogglePublish, handleNavigateToQuestions]);
-
-  const renderGroupItem = useCallback(({ item }: { item: { key: string; title: string; data: any[] } }) => {
-    if (groupBy === 'none') {
-      return null; // Will use FlatList directly
-    }
-
-    const icon = 
-      groupBy === 'course' ? 'book-open-variant' :
-      groupBy === 'niveau' ? 'school' : 'repeat';
-    const isExpanded = expandedGroups[item.key] !== false;
-
-    return (
-      <AccordionGroup
-        title={item.title}
-        count={item.data.length}
-        icon={icon}
-        expanded={isExpanded}
-        themeColors={themeColors}
-        onToggle={() => toggleGroup(item.key)}
-      >
-        <TestsList
-          tests={item.data}
-          themeColors={themeColors}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onTogglePublish={handleTogglePublish}
-          onNavigateToQuestions={handleNavigateToQuestions}
-        />
-      </AccordionGroup>
-    );
-  }, [groupBy, expandedGroups, themeColors, toggleGroup, handleEdit, handleDelete, handleTogglePublish, handleNavigateToQuestions]);
-
-  const keyExtractor = useCallback((item: any, index: number) => {
-    return item.id || item.key || index.toString();
-  }, []);
 
   if (isLoading) {
     return (
@@ -235,6 +176,23 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
       </View>
     );
   }
+
+  const toggleGroup = useCallback((groupKey: string) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupKey]: !prev[groupKey]
+    }));
+  }, []);
+
+  const renderTestsList = useCallback((testsToRender: any[]) => (
+    <TestsList
+      tests={testsToRender}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+      onTogglePublish={handleTogglePublish}
+      onNavigateToQuestions={handleNavigateToQuestions}
+    />
+  ), [handleEdit, handleDelete, handleTogglePublish, handleNavigateToQuestions]);
 
   return (
     <View style={styles.container}>
@@ -261,51 +219,49 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
         )}
       </View>
 
-      {showCreateForm && (
-        <TestForm
-          formData={formData}
-          courses={courses?.courses || []}
-          courseMenuVisible={courseMenuVisible}
-          isEditing={!!editingTest}
-          isLoading={(createMutation?.isPending || false) || (updateMutation?.isPending || false)}
-          onFormChange={setFormData}
-          onCourseMenuToggle={setCourseMenuVisible}
-          onSubmit={handleSubmit}
-          onCancel={handleCancelForm}
-        />
-      )}
+      <ScrollView contentContainerStyle={styles.content}>
+        {showCreateForm && (
+          <TestForm
+            formData={formData}
+            courses={courses?.courses || []}
+            courseMenuVisible={courseMenuVisible}
+            isEditing={!!editingTest}
+            isLoading={(createMutation?.isPending || false) || (updateMutation?.isPending || false)}
+            onFormChange={setFormData}
+            onCourseMenuToggle={setCourseMenuVisible}
+            onSubmit={handleSubmit}
+            onCancel={handleCancelForm}
+          />
+        )}
 
-      {!showCreateForm && filteredTests.length > 0 && groupBy === 'none' && (
-        <FlatList
-          data={filteredTests}
-          renderItem={renderTestItem}
-          keyExtractor={keyExtractor}
-          windowSize={5}
-          maxToRenderPerBatch={10}
-          updateCellsBatchingPeriod={50}
-          removeClippedSubviews={true}
-          initialNumToRender={8}
-          contentContainerStyle={styles.content}
-        />
-      )}
+        {!showCreateForm && filteredTests.length > 0 && groupBy === 'none' && (
+          renderTestsList(filteredTests)
+        )}
 
-      {!showCreateForm && filteredTests.length > 0 && groupBy !== 'none' && (
-        <FlatList
-          data={groupedTests}
-          renderItem={renderGroupItem}
-          keyExtractor={keyExtractor}
-          windowSize={5}
-          maxToRenderPerBatch={5}
-          updateCellsBatchingPeriod={50}
-          removeClippedSubviews={true}
-          initialNumToRender={4}
-          contentContainerStyle={styles.content}
-        />
-      )}
+        {!showCreateForm && filteredTests.length > 0 && groupBy !== 'none' && (
+          <View>
+            {Object.entries(groupedTests).map(([groupKey, groupTests]) => (
+              <List.Accordion
+                key={groupKey}
+                title={`${groupKey} (${groupTests.length})`}
+                left={props => <List.Icon {...props} icon={
+                  groupBy === 'course' ? 'book-open-variant' :
+                  groupBy === 'niveau' ? 'school' : 'repeat'
+                } />}
+                expanded={expandedGroups[groupKey] !== false}
+                onPress={() => toggleGroup(groupKey)}
+                style={styles.accordion}
+              >
+                {renderTestsList(groupTests)}
+              </List.Accordion>
+            ))}
+          </View>
+        )}
 
-      {!showCreateForm && !filteredTests.length && (
-        <EmptyState hasSearchQuery={!!deferredSearchQuery} />
-      )}
+        {!filteredTests.length && !showCreateForm && (
+          <EmptyState hasSearchQuery={!!searchQuery} />
+        )}
+      </ScrollView>
 
       {!showCreateForm && (
         <FAB
@@ -317,3 +273,4 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     </View>
   );
 };
+

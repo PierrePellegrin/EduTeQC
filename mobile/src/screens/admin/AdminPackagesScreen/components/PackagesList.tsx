@@ -1,10 +1,17 @@
 import React, { memo, useCallback } from 'react';
 import { View } from 'react-native';
-import { PackageCard } from './PackageCard';
+import { LightPackageCard } from './LightPackageCard';
 import { styles } from '../styles';
 
 type PackagesListProps = {
   packages: any[];
+  themeColors: {
+    cardBackground: string;
+    onCardBackground: string;
+    logoutColor: string;
+    primary: string;
+    outline: string;
+  };
   onEdit: (pkg: any) => void;
   onDelete: (id: string, name: string) => void;
   onToggleActive: (id: string, isActive: boolean, name: string) => void;
@@ -12,6 +19,7 @@ type PackagesListProps = {
 
 const PackagesListComponent: React.FC<PackagesListProps> = ({
   packages,
+  themeColors,
   onEdit,
   onDelete,
   onToggleActive,
@@ -22,6 +30,7 @@ const PackagesListComponent: React.FC<PackagesListProps> = ({
         <MemoizedPackageItem
           key={pkg.id}
           package={pkg}
+          themeColors={themeColors}
           onEdit={onEdit}
           onDelete={onDelete}
           onToggleActive={onToggleActive}
@@ -33,19 +42,27 @@ const PackagesListComponent: React.FC<PackagesListProps> = ({
 
 type PackageItemProps = {
   package: any;
+  themeColors: {
+    cardBackground: string;
+    onCardBackground: string;
+    logoutColor: string;
+    primary: string;
+    outline: string;
+  };
   onEdit: (pkg: any) => void;
   onDelete: (id: string, name: string) => void;
   onToggleActive: (id: string, isActive: boolean, name: string) => void;
 };
 
-const PackageItem: React.FC<PackageItemProps> = ({ package: pkg, onEdit, onDelete, onToggleActive }) => {
+const PackageItem: React.FC<PackageItemProps> = ({ package: pkg, themeColors, onEdit, onDelete, onToggleActive }) => {
   const handleEdit = useCallback(() => onEdit(pkg), [pkg, onEdit]);
   const handleDelete = useCallback(() => onDelete(pkg.id, pkg.name), [pkg.id, pkg.name, onDelete]);
   const handleToggleActive = useCallback(() => onToggleActive(pkg.id, pkg.isActive, pkg.name), [pkg.id, pkg.isActive, pkg.name, onToggleActive]);
 
   return (
-    <PackageCard
+    <LightPackageCard
       package={pkg}
+      themeColors={themeColors}
       onEdit={handleEdit}
       onDelete={handleDelete}
       onToggleActive={handleToggleActive}

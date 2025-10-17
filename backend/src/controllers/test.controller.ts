@@ -74,22 +74,40 @@ export class TestController {
   static async getAllAdmin(req: Request, res: Response, next: NextFunction) {
     try {
       const tests = await prisma.test.findMany({
-        include: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          duration: true,
+          passingScore: true,
+          isPublished: true,
+          imageUrl: true,
+          courseId: true,
           course: {
             select: {
               id: true,
               title: true,
-            },
-          },
-          questions: {
-            include: {
-              options: {
-                orderBy: { order: 'asc' },
+              niveau: {
+                select: {
+                  id: true,
+                  name: true,
+                  cycle: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
               },
             },
-            orderBy: { order: 'asc' },
+          },
+          _count: {
+            select: {
+              questions: true,
+            },
           },
         },
+        orderBy: { id: 'desc' },
       });
 
       res.json({ tests });

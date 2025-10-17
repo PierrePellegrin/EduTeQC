@@ -1,15 +1,14 @@
-import React, { useState, useMemo, useCallback, useDeferredValue } from 'react';
-import { View, FlatList, InteractionManager } from 'react-native';
-import { Text, Searchbar, FAB, SegmentedButtons } from 'react-native-paper';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useMemo, useCallback } from 'react';
+import { View, ScrollView, Alert } from 'react-native';
+import { Text, Searchbar, FAB, SegmentedButtons, List } from 'react-native-paper';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../../../contexts/ThemeContext';
-import { PackageForm, PackagesList, EmptyState, AccordionGroup } from './components';
+import { PackageForm, PackagesList, EmptyState } from './components';
 import { styles } from './styles';
 import { usePackageMutations } from './consts';
 
-// Types
+// Type
 type Props = {
   navigation: NativeStackNavigationProp<any>;
 };
@@ -17,20 +16,10 @@ type Props = {
 type GroupBy = 'none' | 'price' | 'type';
 
 export const AdminPackagesScreen = ({ navigation }: Props) => {
-  // Single useTheme() call at parent level
-  const { theme } = useTheme();
-  const themeColors = useMemo(() => ({
-    cardBackground: theme.colors.cardBackground,
-    onCardBackground: theme.colors.onCardBackground,
-    logoutColor: theme.colors.logoutColor,
-    primary: theme.colors.primary,
-    outline: theme.colors.outline,
-  }), [theme]);
-
+  const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPackage, setEditingPackage] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [formData, setFormData] = useState({
@@ -44,15 +33,10 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
   const { data: packages, isLoading } = useQuery({
     queryKey: ['adminPackages'],
     queryFn: adminApi.getAllPackages,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
-
   const { data: courses } = useQuery({
     queryKey: ['adminCourses'],
     queryFn: adminApi.getAllCourses,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 
   const resetForm = useCallback(() => {
@@ -65,17 +49,12 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     setSelectedCourses([]);
   }, []);
 
-  const { createMutation, updateMutation, deleteMutation, toggleActiveMutation } = usePackageMutations(
-    resetForm,
-    setShowCreateForm,
-    setEditingPackage
-  );
+  // Use refactored CRUD mutations hook
+  const { createMutation, updateMutation, deleteMutation, toggleActiveMutation } = usePackageMutations(resetForm, setShowCreateForm, setEditingPackage);
 
-  // Wrap mutations with InteractionManager to prevent UI blocking
   const handleToggleActive = useCallback((id: string, isActive: boolean, name: string) => {
-    InteractionManager.runAfterInteractions(() => {
-      toggleActiveMutation?.mutate({ id, data: { isActive: !isActive } });
-    });
+    toggleActiveMutation?.mutate({ id, data: { isActive: !isActive } });
+    Alert.alert('Succès', `Le forfait "${name}" a été ${isActive ? 'désactivé' : 'activé'}.`);
   }, [toggleActiveMutation]);
 
   const handleEdit = useCallback((pkg: any) => {
@@ -91,19 +70,25 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
   }, []);
 
   const handleDelete = useCallback((id: string, name: string) => {
-    InteractionManager.runAfterInteractions(() => {
-      deleteMutation?.mutate(id);
-    });
+    Alert.alert(
+      'Confirmation',
+      `Supprimer le forfait "${name}" ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Supprimer', style: 'destructive', onPress: () => deleteMutation?.mutate(id) },
+      ]
+    );
   }, [deleteMutation]);
 
   const handleSubmit = useCallback(() => {
     if (!formData.name || !formData.description || !formData.price) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
       return;
     }
     if (selectedCourses.length === 0) {
+      Alert.alert('Erreur', 'Veuillez sélectionner au moins un cours');
       return;
     }
-    
     const data = {
       name: formData.name,
       description: formData.description,
@@ -111,14 +96,11 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
       imageUrl: formData.imageUrl || undefined,
       courseIds: selectedCourses,
     };
-
-    InteractionManager.runAfterInteractions(() => {
-      if (editingPackage) {
-        updateMutation?.mutate({ id: editingPackage.id, data });
-      } else {
-        createMutation?.mutate(data);
-      }
-    });
+    if (editingPackage) {
+      updateMutation?.mutate({ id: editingPackage.id, data });
+    } else {
+      createMutation?.mutate(data);
+    }
   }, [formData, selectedCourses, editingPackage, createMutation, updateMutation]);
 
   const toggleCourse = useCallback((courseId: string) => {
@@ -135,22 +117,22 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     resetForm();
   }, [resetForm]);
 
-  // Filter packages (using deferred search query)
+  // Mémoriser le filtrage des packages
   const filteredPackages = useMemo(() => {
     const allPackages = packages?.packages || [];
-    if (!deferredSearchQuery) return allPackages;
+    if (!searchQuery) return allPackages;
     
-    const query = deferredSearchQuery.toLowerCase();
+    const query = searchQuery.toLowerCase();
     return allPackages.filter((pkg: any) =>
       pkg.name.toLowerCase().includes(query) ||
       pkg.description?.toLowerCase().includes(query)
     );
-  }, [packages?.packages, deferredSearchQuery]);
+  }, [packages?.packages, searchQuery]);
 
-  // Group packages
+  // Regroupement des packages
   const groupedPackages = useMemo(() => {
     if (groupBy === 'none') {
-      return [{ key: 'all', title: 'Tous', data: filteredPackages }];
+      return { 'all': filteredPackages };
     }
 
     const groups: Record<string, any[]> = {};
@@ -167,6 +149,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
       });
     } else if (groupBy === 'type') {
       filteredPackages.forEach((pkg: any) => {
+        // Détecter le type de package par son nom
         let key = 'Autre';
         const name = pkg.name.toLowerCase();
         
@@ -190,8 +173,16 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
       });
     }
 
-    return Object.entries(groups).map(([key, data]) => ({ key, title: key, data }));
+    return groups;
   }, [filteredPackages, groupBy]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text>Chargement...</Text>
+      </View>
+    );
+  }
 
   const toggleGroup = useCallback((groupKey: string) => {
     setExpandedGroups(prev => ({
@@ -200,7 +191,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     }));
   }, []);
 
-  // Eliminate course duplicates by ID
+  // Éliminer les doublons de cours par ID
   const uniqueCourses = useMemo(() => 
     courses?.courses?.reduce((acc: any[], course: any) => {
       if (!acc.find(c => c.id === course.id)) {
@@ -210,57 +201,14 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     }, []) || []
   , [courses?.courses]);
 
-  // FlatList render functions
-  const renderPackageItem = useCallback(({ item }: { item: any }) => (
+  const renderPackagesList = useCallback((packagesToRender: any[]) => (
     <PackagesList
-      packages={[item]}
-      themeColors={themeColors}
+      packages={packagesToRender}
       onEdit={handleEdit}
       onDelete={handleDelete}
       onToggleActive={handleToggleActive}
     />
-  ), [themeColors, handleEdit, handleDelete, handleToggleActive]);
-
-  const renderGroupItem = useCallback(({ item }: { item: { key: string; title: string; data: any[] } }) => {
-    if (groupBy === 'none') {
-      // Flat list for "Tous" mode
-      return null; // Will use FlatList directly
-    }
-
-    const icon = groupBy === 'type' ? 'shape' : 'currency-eur';
-    const isExpanded = expandedGroups[item.key] !== false;
-
-    return (
-      <AccordionGroup
-        title={item.title}
-        count={item.data.length}
-        icon={icon}
-        expanded={isExpanded}
-        themeColors={themeColors}
-        onToggle={() => toggleGroup(item.key)}
-      >
-        <PackagesList
-          packages={item.data}
-          themeColors={themeColors}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onToggleActive={handleToggleActive}
-        />
-      </AccordionGroup>
-    );
-  }, [groupBy, expandedGroups, themeColors, toggleGroup, handleEdit, handleDelete, handleToggleActive]);
-
-  const keyExtractor = useCallback((item: any, index: number) => {
-    return item.id || item.key || index.toString();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <Text>Chargement...</Text>
-      </View>
-    );
-  }
+  ), [handleEdit, handleDelete, handleToggleActive]);
 
   return (
     <View style={styles.container}>
@@ -286,51 +234,48 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
         )}
       </View>
 
-      {showCreateForm && (
-        <PackageForm
-          formData={formData}
-          selectedCourses={selectedCourses}
-          availableCourses={uniqueCourses}
-          isEditing={!!editingPackage}
-          isLoading={(createMutation?.isPending || false) || (updateMutation?.isPending || false)}
-          onFormChange={setFormData}
-          onToggleCourse={toggleCourse}
-          onSubmit={handleSubmit}
-          onCancel={handleCancelForm}
-        />
-      )}
+      <ScrollView contentContainerStyle={styles.content}>
+        {showCreateForm && (
+          <PackageForm
+            formData={formData}
+            selectedCourses={selectedCourses}
+            availableCourses={uniqueCourses}
+            isEditing={!!editingPackage}
+            isLoading={(createMutation?.isPending || false) || (updateMutation?.isPending || false)}
+            onFormChange={setFormData}
+            onToggleCourse={toggleCourse}
+            onSubmit={handleSubmit}
+            onCancel={handleCancelForm}
+          />
+        )}
 
-      {!showCreateForm && filteredPackages.length > 0 && groupBy === 'none' && (
-        <FlatList
-          data={filteredPackages}
-          renderItem={renderPackageItem}
-          keyExtractor={keyExtractor}
-          windowSize={5}
-          maxToRenderPerBatch={10}
-          updateCellsBatchingPeriod={50}
-          removeClippedSubviews={true}
-          initialNumToRender={8}
-          contentContainerStyle={styles.content}
-        />
-      )}
+        {!showCreateForm && filteredPackages.length > 0 && groupBy === 'none' && (
+          renderPackagesList(filteredPackages)
+        )}
 
-      {!showCreateForm && filteredPackages.length > 0 && groupBy !== 'none' && (
-        <FlatList
-          data={groupedPackages}
-          renderItem={renderGroupItem}
-          keyExtractor={keyExtractor}
-          windowSize={5}
-          maxToRenderPerBatch={5}
-          updateCellsBatchingPeriod={50}
-          removeClippedSubviews={true}
-          initialNumToRender={4}
-          contentContainerStyle={styles.content}
-        />
-      )}
+        {!showCreateForm && filteredPackages.length > 0 && groupBy !== 'none' && (
+          <View>
+            {Object.entries(groupedPackages).map(([groupKey, groupPackages]) => (
+              <List.Accordion
+                key={groupKey}
+                title={`${groupKey} (${groupPackages.length})`}
+                left={props => <List.Icon {...props} icon={
+                  groupBy === 'type' ? 'shape' : 'currency-eur'
+                } />}
+                expanded={expandedGroups[groupKey] !== false}
+                onPress={() => toggleGroup(groupKey)}
+                style={styles.accordion}
+              >
+                {renderPackagesList(groupPackages)}
+              </List.Accordion>
+            ))}
+          </View>
+        )}
 
-      {!showCreateForm && !filteredPackages.length && (
-        <EmptyState hasSearchQuery={!!deferredSearchQuery} />
-      )}
+        {!filteredPackages.length && !showCreateForm && (
+          <EmptyState hasSearchQuery={!!searchQuery} />
+        )}
+      </ScrollView>
 
       {!showCreateForm && (
         <FAB
@@ -342,3 +287,4 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     </View>
   );
 };
+

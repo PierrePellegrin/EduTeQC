@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Image } from 'react-native';
 import { Card, Text, TextInput, Button, Menu, Icon } from 'react-native-paper';
 import { Slider } from '@rneui/themed';
@@ -24,7 +24,7 @@ type TestFormProps = {
   onCancel: () => void;
 };
 
-export const TestForm: React.FC<TestFormProps> = ({
+const TestFormComponent: React.FC<TestFormProps> = ({
   formData,
   courses,
   courseMenuVisible,
@@ -182,3 +182,21 @@ export const TestForm: React.FC<TestFormProps> = ({
     </Card>
   );
 };
+
+// Custom comparator to avoid re-renders
+const arePropsEqual = (prevProps: TestFormProps, nextProps: TestFormProps) => {
+  return (
+    prevProps.formData.title === nextProps.formData.title &&
+    prevProps.formData.description === nextProps.formData.description &&
+    prevProps.formData.courseId === nextProps.formData.courseId &&
+    prevProps.formData.duration === nextProps.formData.duration &&
+    prevProps.formData.passingScore === nextProps.formData.passingScore &&
+    prevProps.formData.imageUrl === nextProps.formData.imageUrl &&
+    prevProps.courses.length === nextProps.courses.length &&
+    prevProps.courseMenuVisible === nextProps.courseMenuVisible &&
+    prevProps.isEditing === nextProps.isEditing &&
+    prevProps.isLoading === nextProps.isLoading
+  );
+};
+
+export const TestForm = memo(TestFormComponent, arePropsEqual);

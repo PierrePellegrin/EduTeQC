@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Image } from 'react-native';
 import { Card, Text, TextInput, Button, Checkbox, Icon } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
@@ -21,7 +21,7 @@ type PackageFormProps = {
   onCancel: () => void;
 };
 
-export const PackageForm: React.FC<PackageFormProps> = ({
+const PackageFormComponent: React.FC<PackageFormProps> = ({
   formData,
   selectedCourses,
   availableCourses,
@@ -132,3 +132,19 @@ export const PackageForm: React.FC<PackageFormProps> = ({
     </Card>
   );
 };
+
+// Custom comparator to avoid re-renders
+const arePropsEqual = (prevProps: PackageFormProps, nextProps: PackageFormProps) => {
+  return (
+    prevProps.formData.name === nextProps.formData.name &&
+    prevProps.formData.description === nextProps.formData.description &&
+    prevProps.formData.price === nextProps.formData.price &&
+    prevProps.formData.imageUrl === nextProps.formData.imageUrl &&
+    prevProps.selectedCourses.length === nextProps.selectedCourses.length &&
+    prevProps.availableCourses.length === nextProps.availableCourses.length &&
+    prevProps.isEditing === nextProps.isEditing &&
+    prevProps.isLoading === nextProps.isLoading
+  );
+};
+
+export const PackageForm = memo(PackageFormComponent, arePropsEqual);
