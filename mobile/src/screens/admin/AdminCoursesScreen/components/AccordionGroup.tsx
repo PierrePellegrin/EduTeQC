@@ -30,44 +30,29 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
 }) => {
   const [shouldRenderContent, setShouldRenderContent] = useState(isExpanded);
   const [isAnimating, setIsAnimating] = useState(false);
-  const animatedOpacity = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
   const animatedRotation = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
 
   useEffect(() => {
     if (isExpanded) {
-      // Render children immediately
+      // Render children immediately - no delay
       setShouldRenderContent(true);
       setIsAnimating(true);
       
-      // Smooth parallel animations
-      Animated.parallel([
-        Animated.timing(animatedOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animatedRotation, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start(() => setIsAnimating(false));
+      // Only animate rotation - instant content display
+      Animated.timing(animatedRotation, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start(() => setIsAnimating(false));
     } else {
       setIsAnimating(true);
       
-      // Animate out
-      Animated.parallel([
-        Animated.timing(animatedOpacity, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animatedRotation, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
+      // Animate rotation before hiding
+      Animated.timing(animatedRotation, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }).start(() => {
         setShouldRenderContent(false);
         setIsAnimating(false);
       });
@@ -105,16 +90,9 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
         </Animated.View>
       </TouchableOpacity>
       {shouldRenderContent && (
-        <Animated.View 
-          style={[
-            styles.content,
-            {
-              opacity: animatedOpacity,
-            }
-          ]}
-        >
+        <View style={styles.content}>
           {children}
-        </Animated.View>
+        </View>
       )}
     </View>
   );
