@@ -15,6 +15,7 @@ type TestCardProps = {
     imageUrl?: string;
     course?: {
       title: string;
+      category?: string;
     };
     questions?: any[];
   };

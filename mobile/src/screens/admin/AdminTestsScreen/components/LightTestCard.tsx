@@ -13,6 +13,7 @@ type LightTestCardProps = {
     imageUrl?: string;
     course?: {
       title: string;
+      category?: string;
     };
     _count?: {
       questions: number;

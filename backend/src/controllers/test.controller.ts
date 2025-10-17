@@ -87,6 +87,7 @@ export class TestController {
             select: {
               id: true,
               title: true,
+              category: true,
               niveau: {
                 select: {
                   id: true,
