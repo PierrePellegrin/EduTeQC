@@ -35,16 +35,22 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
       // Render content immediately when expanding
       setShouldRenderContent(true);
     } else {
-      // Delay unmounting when collapsing for smooth animation
+      // Delay unmounting when collapsing for smooth animation - reduced from 300ms to 250ms
       const timer = setTimeout(() => {
         setShouldRenderContent(false);
-      }, 300);
+      }, 250);
       return () => clearTimeout(timer);
     }
   }, [isExpanded]);
 
   const handleToggle = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    // Optimized animation config - shorter duration for snappier feel
+    LayoutAnimation.configureNext({
+      duration: 150,
+      create: { type: 'linear', property: 'opacity' },
+      update: { type: 'easeInEaseOut', property: 'scaleY' },
+      delete: { type: 'linear', property: 'opacity' },
+    });
     onToggle();
   };
 
@@ -98,4 +104,17 @@ const styles = StyleSheet.create({
   },
 });
 
-export const AccordionGroup = memo(AccordionGroupComponent);
+// Custom comparison function for better memoization
+const arePropsEqual = (prev: AccordionGroupProps, next: AccordionGroupProps) => {
+  return (
+    prev.groupKey === next.groupKey &&
+    prev.groupCourses.length === next.groupCourses.length &&
+    prev.isExpanded === next.isExpanded &&
+    prev.icon === next.icon &&
+    prev.themeColors.cardBackground === next.themeColors.cardBackground &&
+    prev.themeColors.onCardBackground === next.themeColors.onCardBackground &&
+    prev.themeColors.primary === next.themeColors.primary
+  );
+};
+
+export const AccordionGroup = memo(AccordionGroupComponent, arePropsEqual);

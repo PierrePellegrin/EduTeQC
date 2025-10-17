@@ -31,33 +31,25 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   children,
 }) => {
   const [shouldRenderChildren, setShouldRenderChildren] = useState(expanded);
-  const [isFullyRendered, setIsFullyRendered] = useState(false);
 
   useEffect(() => {
     if (expanded) {
-      // Start rendering children immediately but not fully
+      // Start rendering children immediately
       setShouldRenderChildren(true);
-      setIsFullyRendered(false);
-      
-      // Wait for interaction to complete, then finish rendering
-      InteractionManager.runAfterInteractions(() => {
-        requestAnimationFrame(() => {
-          setIsFullyRendered(true);
-        });
-      });
     } else {
-      setIsFullyRendered(false);
       // Delay unmount for smooth animation
-      const timeout = setTimeout(() => setShouldRenderChildren(false), 300);
+      const timeout = setTimeout(() => setShouldRenderChildren(false), 250);
       return () => clearTimeout(timeout);
     }
   }, [expanded]);
 
   const handleToggle = () => {
+    // Optimized animation config - shorter duration for snappier feel
     LayoutAnimation.configureNext({
-      duration: 200,
-      update: { type: 'easeInEaseOut', property: 'opacity' },
-      delete: { type: 'easeInEaseOut', property: 'opacity' },
+      duration: 150,
+      create: { type: 'linear', property: 'opacity' },
+      update: { type: 'easeInEaseOut', property: 'scaleY' },
+      delete: { type: 'linear', property: 'opacity' },
     });
     onToggle();
   };
@@ -123,4 +115,17 @@ const styles = StyleSheet.create({
   },
 });
 
-export const AccordionGroup = memo(AccordionGroupComponent);
+// Custom comparison function for better memoization
+const arePropsEqual = (prev: AccordionGroupProps, next: AccordionGroupProps) => {
+  return (
+    prev.title === next.title &&
+    prev.count === next.count &&
+    prev.icon === next.icon &&
+    prev.expanded === next.expanded &&
+    prev.themeColors.cardBackground === next.themeColors.cardBackground &&
+    prev.themeColors.onCardBackground === next.themeColors.onCardBackground &&
+    prev.themeColors.primary === next.themeColors.primary
+  );
+};
+
+export const AccordionGroup = memo(AccordionGroupComponent, arePropsEqual);

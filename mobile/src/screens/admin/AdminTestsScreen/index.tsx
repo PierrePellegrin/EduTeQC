@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useCallback, useDeferredValue } from 'react';
 import { View, FlatList, InteractionManager } from 'react-native';
-import { Text, Searchbar, FAB, SegmentedButtons } from 'react-native-paper';
+import { Text, Searchbar, FAB } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
+import { MemoizedSegmentedButtons } from '../../../components';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { TestForm, TestsList, EmptyState, AccordionGroup } from './components';
@@ -223,6 +224,13 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     return item.id || item.key || index.toString();
   }, []);
 
+  // Optimized getItemLayout for FlatList - enables instant scroll to any position
+  const getItemLayout = useCallback((_: any, index: number) => ({
+    length: 100, // Approximate item height
+    offset: 100 * index,
+    index,
+  }), []);
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -242,7 +250,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
         />
 
         {!showCreateForm && (
-          <SegmentedButtons
+          <MemoizedSegmentedButtons
             value={groupBy}
             onValueChange={(value) => setGroupBy(value as GroupBy)}
             buttons={[
@@ -274,6 +282,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
           data={filteredTests}
           renderItem={renderTestItem}
           keyExtractor={keyExtractor}
+          getItemLayout={getItemLayout}
           windowSize={5}
           maxToRenderPerBatch={10}
           updateCellsBatchingPeriod={50}

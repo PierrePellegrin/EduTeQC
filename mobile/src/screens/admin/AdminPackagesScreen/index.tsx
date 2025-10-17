@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useCallback, useDeferredValue } from 'react';
 import { View, FlatList, InteractionManager } from 'react-native';
-import { Text, Searchbar, FAB, SegmentedButtons } from 'react-native-paper';
+import { Text, Searchbar, FAB } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { MemoizedSegmentedButtons } from '../../../components';
 import { PackageForm, PackagesList, EmptyState, AccordionGroup } from './components';
 import { styles } from './styles';
 import { usePackageMutations } from './consts';
@@ -246,6 +247,13 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     return item.id || item.key || index.toString();
   }, []);
 
+  // Optimized getItemLayout for FlatList - enables instant scroll to any position
+  const getItemLayout = useCallback((_: any, index: number) => ({
+    length: 100, // Approximate item height
+    offset: 100 * index,
+    index,
+  }), []);
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -265,7 +273,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
         />
 
         {!showCreateForm && (
-          <SegmentedButtons
+          <MemoizedSegmentedButtons
             value={groupBy}
             onValueChange={(value) => setGroupBy(value as GroupBy)}
             buttons={[
@@ -296,6 +304,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
           data={filteredPackages}
           renderItem={renderPackageItem}
           keyExtractor={keyExtractor}
+          getItemLayout={getItemLayout}
           windowSize={5}
           maxToRenderPerBatch={10}
           updateCellsBatchingPeriod={50}
