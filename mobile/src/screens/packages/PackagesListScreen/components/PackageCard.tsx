@@ -16,6 +16,7 @@ type PackageCardProps = {
   isPurchased?: boolean;
   showBuyButton?: boolean;
   onBuy?: () => void;
+  onCoursesPress?: () => void;
 };
 
 export const PackageCard: React.FC<PackageCardProps> = ({
@@ -23,6 +24,7 @@ export const PackageCard: React.FC<PackageCardProps> = ({
   isPurchased,
   showBuyButton,
   onBuy,
+  onCoursesPress,
 }) => {
   const { theme } = useTheme();
 
@@ -43,7 +45,12 @@ export const PackageCard: React.FC<PackageCardProps> = ({
             <Chip icon="currency-eur" compact style={styles.chip}>
               <Text>{typeof pkg.price === 'number' && !isNaN(pkg.price) ? `${pkg.price.toFixed(2)} €` : 'N/A'}</Text>
             </Chip>
-            <Chip icon="book-multiple" compact style={styles.chip}>
+            <Chip 
+              icon="book-multiple" 
+              compact 
+              style={styles.chip}
+              onPress={onCoursesPress}
+            >
               <Text>{Array.isArray(pkg.courses) ? `${pkg.courses.length} cours` : '0 cours'}</Text>
             </Chip>
           </View>

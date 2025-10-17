@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Text, List } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { adminApi } from '../../../services/api';
 import { styles } from './styles';
 import { usePackageMutations } from './consts';
 import { PackagesSection } from './components';
 
-export const PackagesListScreen = () => {
+type Props = {
+  navigation: NativeStackNavigationProp<any>;
+};
+
+export const PackagesListScreen = ({ navigation }: Props) => {
   const queryClient = useQueryClient();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     available: true,
@@ -58,6 +63,7 @@ export const PackagesListScreen = () => {
           packages={availablePackages}
           userPackages={userPackages}
           onBuy={(packageId) => buyMutation.mutate(packageId)}
+          onCoursesPress={(packageId) => navigation.navigate('PackageDetail', { packageId })}
         />
       </List.Accordion>
 
@@ -71,6 +77,7 @@ export const PackagesListScreen = () => {
         <PackagesSection
           packages={userPackages || []}
           isPurchasedSection
+          onCoursesPress={(packageId) => navigation.navigate('PackageDetail', { packageId })}
         />
       </List.Accordion>
     </ScrollView>

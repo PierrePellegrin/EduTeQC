@@ -26,6 +26,7 @@ import {
   PackagesListScreen,
   ResultsScreen,
 } from './src/screens';
+import { PackageDetailScreen } from './src/screens/packages/PackageDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -78,8 +79,8 @@ function ClientTabs() {
             />
             <Tab.Screen
               name="PackagesTab"
-              component={PackagesListScreen}
-              options={{ title: 'Packages' }}
+              component={PackagesStack}
+              options={{ title: 'Packages', headerShown: false }}
             />
             <Tab.Screen
               name="ResultsTab"
@@ -127,6 +128,40 @@ function CoursesStack() {
         name="TestDetail"
         component={TestScreen as React.ComponentType<any>}
         options={{ title: 'Test' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function PackagesStack() {
+  const { theme } = useTheme();
+  
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.headerBackground,
+        },
+        headerTintColor: theme.colors.onHeaderBackground,
+        headerTitleStyle: {
+          color: theme.colors.onHeaderBackground,
+        },
+      }}
+    >
+      <Stack.Screen
+        name="PackagesList"
+        component={PackagesListScreen as React.ComponentType<any>}
+        options={{ title: 'Packages' }}
+      />
+      <Stack.Screen
+        name="PackageDetail"
+        component={PackageDetailScreen as React.ComponentType<any>}
+        options={{ title: 'Détails du package' }}
+      />
+      <Stack.Screen
+        name="CourseDetail"
+        component={CourseDetailScreen as React.ComponentType<any>}
+        options={{ title: 'Détails du cours' }}
       />
     </Stack.Navigator>
   );

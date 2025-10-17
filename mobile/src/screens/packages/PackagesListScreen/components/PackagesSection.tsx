@@ -9,6 +9,7 @@ type PackagesSectionProps = {
   isPurchasedSection?: boolean;
   userPackages?: any[];
   onBuy?: (packageId: string) => void;
+  onCoursesPress?: (packageId: string) => void;
 };
 
 export const PackagesSection: React.FC<PackagesSectionProps> = ({
@@ -16,6 +17,7 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
   isPurchasedSection,
   userPackages,
   onBuy,
+  onCoursesPress,
 }) => {
   return (
     <View>
@@ -29,6 +31,7 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
           isPurchased={userPackages?.some((up: any) => up.packageId === pkg.id)}
           showBuyButton={!isPurchasedSection}
           onBuy={() => onBuy && onBuy(pkg.id)}
+          onCoursesPress={() => onCoursesPress && onCoursesPress(isPurchasedSection ? pkg.package.id : pkg.id)}
         />
       ))}
     </View>
