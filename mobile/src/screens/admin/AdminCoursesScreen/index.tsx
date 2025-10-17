@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, FlatList, Alert } from 'react-native';
 import { Text, Searchbar, FAB, SegmentedButtons } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CourseForm, CoursesList, EmptyState, AccordionGroup } from './components';
 import { styles } from './styles';
 import { useCourseMutations } from './consts';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -18,6 +19,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   // Performance tracking
   const renderStartTime = React.useRef(Date.now());
   
+  const { theme } = useTheme(); // Extraire le theme une seule fois
   const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
@@ -202,8 +204,9 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onTogglePublish={handleTogglePublish}
+      themeColors={theme.colors}
     />
-  ), [handleEdit, handleDelete, handleTogglePublish]);
+  ), [handleEdit, handleDelete, handleTogglePublish, theme.colors]);
 
   // Mémoriser les entrées des groupes pour éviter re-calculs
   const groupEntries = useMemo(() => 
@@ -246,6 +249,21 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     });
   }, []);
 
+  // FlatList render functions - DOIVENT être avant tout return conditionnel
+  const renderGroupItem = useCallback(({ item }: { item: [string, any[]] }) => {
+    const [groupKey, groupCourses] = item;
+    return renderAccordionGroup(groupKey, groupCourses);
+  }, [renderAccordionGroup]);
+
+  const keyExtractor = useCallback((item: [string, any[]]) => item[0], []);
+
+  // Optimisation: hauteur estimée pour chaque groupe accordéon
+  const getItemLayout = useCallback((data: any, index: number) => ({
+    length: 80, // Hauteur header de l'accordéon (fermé)
+    offset: 80 * index,
+    index,
+  }), []);
+
   if (isLoading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -274,8 +292,8 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
         )}
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {showCreateForm && (
+      {showCreateForm ? (
+        <ScrollView contentContainerStyle={styles.content}>
           <CourseForm
             formData={formData}
             isEditing={!!editingCourse}
@@ -284,24 +302,31 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
             onSubmit={handleSubmit}
             onCancel={handleCancelForm}
           />
-        )}
-
-        {!showCreateForm && filteredCourses.length > 0 && groupBy === 'none' && (
-          renderCoursesList(filteredCourses)
-        )}
-
-        {!showCreateForm && filteredCourses.length > 0 && groupBy !== 'none' && (
-          <View>
-            {groupEntries.map(([groupKey, groupCourses]) => 
-              renderAccordionGroup(groupKey, groupCourses)
-            )}
-          </View>
-        )}
-
-        {!filteredCourses.length && !showCreateForm && (
-          <EmptyState hasSearchQuery={!!searchQuery} />
-        )}
-      </ScrollView>
+        </ScrollView>
+      ) : filteredCourses.length > 0 && groupBy === 'none' ? (
+        <ScrollView contentContainerStyle={styles.content}>
+          {renderCoursesList(filteredCourses)}
+        </ScrollView>
+      ) : filteredCourses.length > 0 && groupBy !== 'none' ? (
+        <FlatList
+          data={groupEntries}
+          renderItem={renderGroupItem}
+          keyExtractor={keyExtractor}
+          getItemLayout={getItemLayout}
+          contentContainerStyle={styles.content}
+          windowSize={5}
+          maxToRenderPerBatch={3}
+          updateCellsBatchingPeriod={50}
+          removeClippedSubviews={true}
+          initialNumToRender={3}
+        />
+      ) : (
+        !showCreateForm && (
+          <ScrollView contentContainerStyle={styles.content}>
+            <EmptyState hasSearchQuery={!!searchQuery} />
+          </ScrollView>
+        )
+      )}
 
       {!showCreateForm && (
         <FAB

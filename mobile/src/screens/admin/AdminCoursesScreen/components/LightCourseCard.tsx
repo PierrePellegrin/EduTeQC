@@ -1,7 +1,6 @@
 import React, { memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useTheme } from '../../../../contexts/ThemeContext';
 
 type LightCourseCardProps = {
   course: {
@@ -17,6 +16,7 @@ type LightCourseCardProps = {
   onEdit: () => void;
   onDelete: () => void;
   onTogglePublish: () => void;
+  themeColors: any;
 };
 
 const LightCourseCardComponent: React.FC<LightCourseCardProps> = ({
@@ -24,30 +24,30 @@ const LightCourseCardComponent: React.FC<LightCourseCardProps> = ({
   onEdit,
   onDelete,
   onTogglePublish,
+  themeColors,
 }) => {
-  const { theme } = useTheme();
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.colors.cardBackground }]}>
+    <View style={[styles.card, { backgroundColor: themeColors.cardBackground }]}>
       <View style={styles.header}>
         <View style={styles.info}>
-          <Text style={[styles.title, { color: theme.colors.onCardBackground }]} numberOfLines={2}>
+          <Text style={[styles.title, { color: themeColors.onCardBackground }]} numberOfLines={2}>
             {course.title}
           </Text>
-          <Text style={[styles.description, { color: theme.colors.onCardBackground }]} numberOfLines={1}>
+          <Text style={[styles.description, { color: themeColors.onCardBackground }]} numberOfLines={1}>
             {course.description}
           </Text>
           
           <View style={styles.chips}>
-            <View style={[styles.chip, { backgroundColor: theme.colors.primary + '20' }]}>
-              <Icon name="tag" size={14} color={theme.colors.primary} />
-              <Text style={[styles.chipText, { color: theme.colors.primary }]}>{course.category}</Text>
+            <View style={[styles.chip, { backgroundColor: themeColors.primary + '20' }]}>
+              <Icon name="tag" size={14} color={themeColors.primary} />
+              <Text style={[styles.chipText, { color: themeColors.primary }]}>{course.category}</Text>
             </View>
             
             {course._count?.tests && course._count.tests > 0 && (
-              <View style={[styles.chip, { backgroundColor: theme.colors.primary + '20' }]}>
-                <Icon name="file-document" size={14} color={theme.colors.primary} />
-                <Text style={[styles.chipText, { color: theme.colors.primary }]}>
+              <View style={[styles.chip, { backgroundColor: themeColors.primary + '20' }]}>
+                <Icon name="file-document" size={14} color={themeColors.primary} />
+                <Text style={[styles.chipText, { color: themeColors.primary }]}>
                   {course._count.tests} test{course._count.tests > 1 ? 's' : ''}
                 </Text>
               </View>
@@ -58,8 +58,8 @@ const LightCourseCardComponent: React.FC<LightCourseCardProps> = ({
             style={[
               styles.publishButton,
               { 
-                backgroundColor: course.isPublished ? 'transparent' : theme.colors.primary,
-                borderColor: theme.colors.primary,
+                backgroundColor: course.isPublished ? 'transparent' : themeColors.primary,
+                borderColor: themeColors.primary,
               }
             ]}
             onPress={onTogglePublish}
@@ -68,11 +68,11 @@ const LightCourseCardComponent: React.FC<LightCourseCardProps> = ({
             <Icon 
               name={course.isPublished ? 'eye-off' : 'eye'} 
               size={16} 
-              color={course.isPublished ? theme.colors.primary : '#fff'} 
+              color={course.isPublished ? themeColors.primary : '#fff'} 
             />
             <Text style={[
               styles.publishButtonText,
-              { color: course.isPublished ? theme.colors.primary : '#fff' }
+              { color: course.isPublished ? themeColors.primary : '#fff' }
             ]}>
               {course.isPublished ? 'Dépublier' : 'Publier'}
             </Text>
@@ -81,19 +81,19 @@ const LightCourseCardComponent: React.FC<LightCourseCardProps> = ({
 
         <View style={styles.actions}>
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: theme.colors.primary + '20' }]}
+            style={[styles.actionButton, { backgroundColor: themeColors.primary + '20' }]}
             onPress={onEdit}
             activeOpacity={0.7}
           >
-            <Icon name="pencil" size={20} color={theme.colors.primary} />
+            <Icon name="pencil" size={20} color={themeColors.primary} />
           </TouchableOpacity>
           
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: theme.colors.error + '20' }]}
+            style={[styles.actionButton, { backgroundColor: themeColors.error + '20' }]}
             onPress={onDelete}
             activeOpacity={0.7}
           >
-            <Icon name="delete" size={20} color={theme.colors.error} />
+            <Icon name="delete" size={20} color={themeColors.error} />
           </TouchableOpacity>
         </View>
       </View>
@@ -174,4 +174,17 @@ const styles = StyleSheet.create({
   },
 });
 
-export const LightCourseCard = memo(LightCourseCardComponent);
+// Custom memo comparator - ne re-render que si les données du cours changent vraiment
+const arePropsEqual = (prevProps: LightCourseCardProps, nextProps: LightCourseCardProps) => {
+  return (
+    prevProps.course.id === nextProps.course.id &&
+    prevProps.course.title === nextProps.course.title &&
+    prevProps.course.description === nextProps.course.description &&
+    prevProps.course.category === nextProps.course.category &&
+    prevProps.course.isPublished === nextProps.course.isPublished &&
+    prevProps.course._count?.tests === nextProps.course._count?.tests &&
+    prevProps.themeColors === nextProps.themeColors
+  );
+};
+
+export const LightCourseCard = memo(LightCourseCardComponent, arePropsEqual);

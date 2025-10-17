@@ -8,6 +8,7 @@ type CoursesListProps = {
   onEdit: (course: any) => void;
   onDelete: (id: string, title: string) => void;
   onTogglePublish: (id: string, currentStatus: boolean, title: string) => void;
+  themeColors: any;
 };
 
 const CoursesListComponent: React.FC<CoursesListProps> = ({
@@ -15,6 +16,7 @@ const CoursesListComponent: React.FC<CoursesListProps> = ({
   onEdit,
   onDelete,
   onTogglePublish,
+  themeColors,
 }) => {
   const [visibleCount, setVisibleCount] = useState(8);
 
@@ -44,6 +46,7 @@ const CoursesListComponent: React.FC<CoursesListProps> = ({
           onEdit={onEdit}
           onDelete={onDelete}
           onTogglePublish={onTogglePublish}
+          themeColors={themeColors}
         />
       ))}
     </View>
@@ -55,9 +58,10 @@ type CourseItemProps = {
   onEdit: (course: any) => void;
   onDelete: (id: string, title: string) => void;
   onTogglePublish: (id: string, currentStatus: boolean, title: string) => void;
+  themeColors: any;
 };
 
-const CourseItem: React.FC<CourseItemProps> = ({ course, onEdit, onDelete, onTogglePublish }) => {
+const CourseItem: React.FC<CourseItemProps> = ({ course, onEdit, onDelete, onTogglePublish, themeColors }) => {
   const handleEdit = useCallback(() => onEdit(course), [course, onEdit]);
   const handleDelete = useCallback(() => onDelete(course.id, course.title), [course.id, course.title, onDelete]);
   const handleTogglePublish = useCallback(() => onTogglePublish(course.id, course.isPublished, course.title), [course.id, course.isPublished, course.title, onTogglePublish]);
@@ -68,6 +72,7 @@ const CourseItem: React.FC<CourseItemProps> = ({ course, onEdit, onDelete, onTog
       onEdit={handleEdit}
       onDelete={handleDelete}
       onTogglePublish={handleTogglePublish}
+      themeColors={themeColors}
     />
   );
 };
