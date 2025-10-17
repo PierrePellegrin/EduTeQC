@@ -45,11 +45,19 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   });
 
   const { data: tests, isLoading } = useQuery({
-    queryKey: ['adminTests'],
+    queryKey: ['adminTests', 'v2'], // v2: Added category to course data
     queryFn: adminApi.getAllTests,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
+
+  // Debug: Log test data to check if category is present
+  React.useEffect(() => {
+    if (tests?.tests && tests.tests.length > 0) {
+      console.log('First test:', JSON.stringify(tests.tests[0], null, 2));
+      console.log('Categories found:', tests.tests.map((t: any) => t.course?.category).filter(Boolean));
+    }
+  }, [tests]);
 
   const { data: courses } = useQuery({
     queryKey: ['adminCourses'],
@@ -161,6 +169,10 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     } else if (groupBy === 'category') {
       filteredTests.forEach((test: any) => {
         const key = test.course?.category || 'Sans matière';
+        // Debug log
+        if (!test.course?.category) {
+          console.log('Test without category:', test.title, 'course:', test.course);
+        }
         if (!groups[key]) groups[key] = [];
         groups[key].push(test);
       });
