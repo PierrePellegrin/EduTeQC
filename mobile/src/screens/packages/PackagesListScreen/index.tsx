@@ -29,6 +29,11 @@ export const PackagesListScreen = () => {
   // Achat package
   const { buyMutation } = usePackageMutations(queryClient);
 
+  // Filtrer les packages disponibles pour retirer ceux déjà achetés
+  const availablePackages = (packages?.packages || []).filter((pkg: any) => {
+    return !userPackages?.some((up: any) => up.packageId === pkg.id);
+  });
+
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -50,7 +55,7 @@ export const PackagesListScreen = () => {
         style={styles.accordion}
       >
         <PackagesSection
-          packages={packages?.packages || []}
+          packages={availablePackages}
           userPackages={userPackages}
           onBuy={(packageId) => buyMutation.mutate(packageId)}
         />
