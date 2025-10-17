@@ -89,11 +89,11 @@ const LightCourseCardComponent: React.FC<LightCourseCardProps> = ({
           </TouchableOpacity>
           
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: themeColors.error + '20' }]}
+            style={[styles.actionButton, { backgroundColor: themeColors.logoutColor + '20' }]}
             onPress={onDelete}
             activeOpacity={0.7}
           >
-            <Icon name="delete" size={20} color={themeColors.error} />
+            <Icon name="delete" size={20} color={themeColors.logoutColor} />
           </TouchableOpacity>
         </View>
       </View>

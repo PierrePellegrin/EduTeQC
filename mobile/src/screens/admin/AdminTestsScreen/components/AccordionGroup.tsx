@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
-import { View, Text, TouchableOpacity, LayoutAnimation, Platform, UIManager, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, LayoutAnimation, Platform, UIManager, StyleSheet, InteractionManager } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -31,11 +31,22 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   children,
 }) => {
   const [shouldRenderChildren, setShouldRenderChildren] = useState(expanded);
+  const [isFullyRendered, setIsFullyRendered] = useState(false);
 
   useEffect(() => {
     if (expanded) {
+      // Start rendering children immediately but not fully
       setShouldRenderChildren(true);
+      setIsFullyRendered(false);
+      
+      // Wait for interaction to complete, then finish rendering
+      InteractionManager.runAfterInteractions(() => {
+        requestAnimationFrame(() => {
+          setIsFullyRendered(true);
+        });
+      });
     } else {
+      setIsFullyRendered(false);
       // Delay unmount for smooth animation
       const timeout = setTimeout(() => setShouldRenderChildren(false), 300);
       return () => clearTimeout(timeout);

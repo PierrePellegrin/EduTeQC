@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { LightPackageCard } from './LightPackageCard';
 import { styles } from '../styles';
@@ -24,9 +24,27 @@ const PackagesListComponent: React.FC<PackagesListProps> = ({
   onDelete,
   onToggleActive,
 }) => {
+  // Progressive rendering: render first 4 items immediately, then rest after delay
+  const [itemsToRender, setItemsToRender] = useState(Math.min(4, packages.length));
+
+  useEffect(() => {
+    // Reset when packages change
+    setItemsToRender(Math.min(4, packages.length));
+
+    if (packages.length > 4) {
+      // Use requestAnimationFrame for smooth rendering
+      const timeout = requestAnimationFrame(() => {
+        setItemsToRender(packages.length);
+      });
+      return () => cancelAnimationFrame(timeout);
+    }
+  }, [packages]);
+
+  const visiblePackages = packages.slice(0, itemsToRender);
+
   return (
     <View style={styles.packagesList}>
-      {packages.map((pkg: any) => (
+      {visiblePackages.map((pkg: any) => (
         <MemoizedPackageItem
           key={pkg.id}
           package={pkg}

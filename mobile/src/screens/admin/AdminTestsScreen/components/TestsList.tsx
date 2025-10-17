@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { LightTestCard } from './LightTestCard';
 import { styles } from '../styles';
@@ -26,9 +26,27 @@ const TestsListComponent: React.FC<TestsListProps> = ({
   onTogglePublish,
   onNavigateToQuestions,
 }) => {
+  // Progressive rendering: render first 4 items immediately, then rest after delay
+  const [itemsToRender, setItemsToRender] = useState(Math.min(4, tests.length));
+
+  useEffect(() => {
+    // Reset when tests change
+    setItemsToRender(Math.min(4, tests.length));
+
+    if (tests.length > 4) {
+      // Use requestAnimationFrame for smooth rendering
+      const timeout = requestAnimationFrame(() => {
+        setItemsToRender(tests.length);
+      });
+      return () => cancelAnimationFrame(timeout);
+    }
+  }, [tests]);
+
+  const visibleTests = tests.slice(0, itemsToRender);
+
   return (
     <View style={styles.testsList}>
-      {tests.map((test: any) => (
+      {visibleTests.map((test: any) => (
         <MemoizedTestItem
           key={test.id}
           test={test}
