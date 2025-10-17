@@ -6,7 +6,17 @@ export class TestService {
       where: { userId },
       orderBy: { completedAt: 'desc' },
       include: {
-        test: true,
+        test: {
+          include: {
+            course: {
+              select: {
+                id: true,
+                title: true,
+                category: true,
+              },
+            },
+          },
+        },
       },
     });
   }
