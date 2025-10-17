@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View } from 'react-native';
 import { Card, Text, Button, IconButton, Chip } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
@@ -24,7 +24,7 @@ type TestCardProps = {
   onNavigateToQuestions: () => void;
 };
 
-export const TestCard: React.FC<TestCardProps> = ({
+const TestCardComponent: React.FC<TestCardProps> = ({
   test,
   onEdit,
   onDelete,
@@ -91,3 +91,5 @@ export const TestCard: React.FC<TestCardProps> = ({
     </Card>
   );
 };
+
+export const TestCard = memo(TestCardComponent);

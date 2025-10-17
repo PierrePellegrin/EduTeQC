@@ -77,11 +77,38 @@ model UserPackage {
   @@map("user_packages")
 }
 
+model Cycle {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  niveaux Niveau[]
+
+  @@map("cycles")
+}
+
+model Niveau {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  cycleId   String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cycle   Cycle    @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  courses Course[]
+
+  @@map("niveaux")
+}
+
 model Course {
   id          String   @id @default(uuid())
   title       String
   description String   @db.Text
   category    String
+  niveauId    String
   imageUrl    String?
   content     String   @db.Text
   order       Int      @default(0)
@@ -89,6 +116,7 @@ model Course {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  niveau          Niveau          @relation(fields: [niveauId], references: [id], onDelete: Cascade)
   tests           Test[]
   packageCourses  PackageCourse[]
 

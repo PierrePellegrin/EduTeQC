@@ -12,6 +12,18 @@ export class CourseService {
         category: true,
         imageUrl: true,
         order: true,
+        niveau: {
+          select: {
+            id: true,
+            name: true,
+            cycle: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -20,6 +32,11 @@ export class CourseService {
     return prisma.course.findUnique({
       where: { id },
       include: {
+        niveau: {
+          include: {
+            cycle: true,
+          },
+        },
         tests: {
           where: { isPublished: true },
           select: {
@@ -38,6 +55,13 @@ export class CourseService {
     return prisma.course.findMany({
       where: { category, isPublished: true },
       orderBy: { order: 'asc' },
+      include: {
+        niveau: {
+          include: {
+            cycle: true,
+          },
+        },
+      },
     });
   }
 
@@ -45,6 +69,11 @@ export class CourseService {
     return prisma.course.findMany({
       orderBy: { order: 'asc' },
       include: {
+        niveau: {
+          include: {
+            cycle: true,
+          },
+        },
         tests: {
           select: {
             id: true,

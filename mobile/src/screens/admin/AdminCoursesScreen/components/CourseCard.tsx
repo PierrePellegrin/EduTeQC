@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View } from 'react-native';
 import { Card, Text, Button, IconButton, Chip } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
@@ -20,7 +20,7 @@ type CourseCardProps = {
   onTogglePublish: () => void;
 };
 
-export const CourseCard: React.FC<CourseCardProps> = ({
+const CourseCardComponent: React.FC<CourseCardProps> = ({
   course,
   onEdit,
   onDelete,
@@ -79,3 +79,5 @@ export const CourseCard: React.FC<CourseCardProps> = ({
     </Card>
   );
 };
+
+export const CourseCard = memo(CourseCardComponent);

@@ -4,9 +4,20 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    marginBottom: 8,
+  },
   searchbar: {
     margin: 16,
+    marginBottom: 8,
     elevation: 2,
+  },
+  segmentedButtons: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+  },
+  accordion: {
+    marginBottom: 8,
   },
   content: {
     padding: 16,

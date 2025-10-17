@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { View } from 'react-native';
 import { PackageCard } from './PackageCard';
 import { styles } from '../styles';
@@ -10,7 +10,7 @@ type PackagesListProps = {
   onToggleActive: (id: string, isActive: boolean, name: string) => void;
 };
 
-export const PackagesList: React.FC<PackagesListProps> = ({
+const PackagesListComponent: React.FC<PackagesListProps> = ({
   packages,
   onEdit,
   onDelete,
@@ -19,14 +19,40 @@ export const PackagesList: React.FC<PackagesListProps> = ({
   return (
     <View style={styles.packagesList}>
       {packages.map((pkg: any) => (
-        <PackageCard
+        <MemoizedPackageItem
           key={pkg.id}
           package={pkg}
-          onEdit={() => onEdit(pkg)}
-          onDelete={() => onDelete(pkg.id, pkg.name)}
-          onToggleActive={() => onToggleActive(pkg.id, pkg.isActive, pkg.name)}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onToggleActive={onToggleActive}
         />
       ))}
     </View>
   );
 };
+
+type PackageItemProps = {
+  package: any;
+  onEdit: (pkg: any) => void;
+  onDelete: (id: string, name: string) => void;
+  onToggleActive: (id: string, isActive: boolean, name: string) => void;
+};
+
+const PackageItem: React.FC<PackageItemProps> = ({ package: pkg, onEdit, onDelete, onToggleActive }) => {
+  const handleEdit = useCallback(() => onEdit(pkg), [pkg, onEdit]);
+  const handleDelete = useCallback(() => onDelete(pkg.id, pkg.name), [pkg.id, pkg.name, onDelete]);
+  const handleToggleActive = useCallback(() => onToggleActive(pkg.id, pkg.isActive, pkg.name), [pkg.id, pkg.isActive, pkg.name, onToggleActive]);
+
+  return (
+    <PackageCard
+      package={pkg}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+      onToggleActive={handleToggleActive}
+    />
+  );
+};
+
+const MemoizedPackageItem = memo(PackageItem);
+
+export const PackagesList = memo(PackagesListComponent);

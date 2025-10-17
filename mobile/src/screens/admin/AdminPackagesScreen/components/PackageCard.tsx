@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View } from 'react-native';
 import { Card, Text, Button, IconButton, Chip } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
@@ -21,7 +21,7 @@ type PackageCardProps = {
   onToggleActive: () => void;
 };
 
-export const PackageCard: React.FC<PackageCardProps> = ({
+const PackageCardComponent: React.FC<PackageCardProps> = ({
   package: pkg,
   onEdit,
   onDelete,
@@ -98,3 +98,5 @@ export const PackageCard: React.FC<PackageCardProps> = ({
     </Card>
   );
 };
+
+export const PackageCard = memo(PackageCardComponent);

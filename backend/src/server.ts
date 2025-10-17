@@ -5,6 +5,8 @@ import authRoutes from './routes/auth.routes';
 import courseRoutes from './routes/course.routes';
 import testRoutes from './routes/test.routes';
 import adminRoutes from './routes/admin.routes';
+import packageRoutes from './routes/package.routes';
+import cycleRoutes from './routes/cycle.routes';
 import { errorHandler } from './middleware/error.middleware';
 
 dotenv.config();
@@ -18,13 +20,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-import packageRoutes from './routes/package.routes';
-
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/packages', packageRoutes);
+app.use('/api', cycleRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
