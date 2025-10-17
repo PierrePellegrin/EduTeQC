@@ -14,7 +14,7 @@ type Props = {
   navigation: NativeStackNavigationProp<any>;
 };
 
-type GroupBy = 'none' | 'price' | 'type';
+type GroupBy = 'none' | 'type';
 
 export const AdminPackagesScreen = ({ navigation }: Props) => {
   // Single useTheme() call at parent level
@@ -156,17 +156,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
 
     const groups: Record<string, any[]> = {};
 
-    if (groupBy === 'price') {
-      filteredPackages.forEach((pkg: any) => {
-        let key = 'Gratuit';
-        if (pkg.price > 0 && pkg.price < 40) key = 'Moins de 40€';
-        else if (pkg.price >= 40 && pkg.price < 70) key = '40€ - 70€';
-        else if (pkg.price >= 70) key = 'Plus de 70€';
-        
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(pkg);
-      });
-    } else if (groupBy === 'type') {
+    if (groupBy === 'type') {
       filteredPackages.forEach((pkg: any) => {
         let key = 'Autre';
         const name = pkg.name.toLowerCase();
@@ -228,7 +218,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
       return null; // Will use FlatList directly
     }
 
-    const icon = groupBy === 'type' ? 'shape' : 'currency-eur';
+    const icon = 'shape';
     // Groups are CLOSED by default for performance
     const isExpanded = expandedGroups[item.key] === true;
 
@@ -281,7 +271,6 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
             buttons={[
               { value: 'none', label: 'Tous', icon: 'view-list' },
               { value: 'type', label: 'Type', icon: 'shape' },
-              { value: 'price', label: 'Prix', icon: 'currency-eur' },
             ]}
             style={styles.segmentedButtons}
           />
