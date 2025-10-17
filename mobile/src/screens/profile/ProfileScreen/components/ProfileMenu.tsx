@@ -8,7 +8,6 @@ type ProfileMenuProps = {
   isDark: boolean;
   onToggleAdminMode: () => void;
   onToggleTheme: () => void;
-  onShowResults: () => void;
   onLogout: () => void;
 };
 
@@ -18,7 +17,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   isDark,
   onToggleAdminMode,
   onToggleTheme,
-  onShowResults,
   onLogout,
 }) => {
   const { theme } = useTheme();
@@ -54,18 +52,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
       />
 
       <Divider />
-
-      {(user?.role === 'CLIENT' || (user?.role === 'ADMIN' && !isAdminMode)) && (
-        <>
-          <List.Item
-            title="Mes résultats"
-            left={(props) => <List.Icon {...props} icon="chart-line" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={onShowResults}
-          />
-          <Divider />
-        </>
-      )}
 
       <List.Item
         title="Paramètres"

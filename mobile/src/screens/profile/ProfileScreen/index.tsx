@@ -4,14 +4,11 @@ import { Divider } from 'react-native-paper';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { ProfileHeader, ProfileMenu } from './components';
-// import { ResultsModal } from './components/ResultsModal';
 import { styles } from './styles';
-import { useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = () => {
   const { user, logout, isAdminMode, toggleAdminMode } = useAuth();
   const { isDark, toggleTheme } = useTheme();
-  const navigation = useNavigation<any>();
 
   return (
     <View style={styles.container}>
@@ -23,7 +20,6 @@ const ProfileScreen = () => {
         isDark={isDark}
         onToggleAdminMode={toggleAdminMode}
         onToggleTheme={toggleTheme}
-  onShowResults={() => navigation.navigate('ResultsTab' as never)}
         onLogout={logout}
       />
     </View>

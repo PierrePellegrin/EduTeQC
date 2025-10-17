@@ -18,8 +18,5 @@ export { PackagesListScreen } from './packages';
 // Profile screens
 export { default as ProfileScreen } from './profile/ProfileScreen';
 
-// Results screen
-export { ResultsScreen } from './results/ResultsScreen';
-
 // Test screens
 export { TestScreen } from './tests/TestScreen';
