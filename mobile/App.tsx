@@ -27,6 +27,7 @@ import {
   ResultsScreen,
 } from './src/screens';
 import { PackageDetailScreen } from './src/screens/packages/PackageDetailScreen';
+import PackagesShopScreen from './src/screens/packages/PackagesShopScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -152,6 +153,11 @@ function PackagesStack() {
         name="PackagesList"
         component={PackagesListScreen as React.ComponentType<any>}
         options={{ title: 'Forfaits' }}
+      />
+      <Stack.Screen
+        name="PackagesShop"
+        component={PackagesShopScreen as React.ComponentType<any>}
+        options={{ title: 'Acheter des forfaits' }}
       />
       <Stack.Screen
         name="PackageDetail"

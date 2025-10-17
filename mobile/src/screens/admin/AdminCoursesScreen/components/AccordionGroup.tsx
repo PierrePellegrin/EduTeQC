@@ -1,8 +1,10 @@
-import React, { memo, useState, useEffect, useRef } from 'react';
+import React, { memo } from 'react';
 import { View, TouchableOpacity, Animated, Platform, UIManager } from 'react-native';
 import { Text } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StyleSheet } from 'react-native';
+import { accordionStyles } from '../../../../components/accordionStyles';
+import { useAccordionRotation } from '../../../../components/useAccordionRotation';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -28,31 +30,17 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   children,
   themeColors,
 }) => {
-  const animatedRotation = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
-
-  useEffect(() => {
-    // Ultra-fast rotation animation - no state management delays
-    Animated.timing(animatedRotation, {
-      toValue: isExpanded ? 1 : 0,
-      duration: 100,
-      useNativeDriver: true,
-    }).start();
-  }, [isExpanded]);
-
-  const rotateInterpolation = animatedRotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
-  });
+  const rotateInterpolation = useAccordionRotation(isExpanded);
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={[styles.header, { backgroundColor: themeColors.cardBackground }]}
+        style={[accordionStyles.header, { backgroundColor: themeColors.cardBackground }]}
         onPress={onToggle}
         activeOpacity={0.7}
       >
-        <Icon name={icon} size={24} color={themeColors.primary} style={styles.icon} />
-        <Text variant="titleMedium" style={[styles.title, { color: themeColors.onCardBackground }]}>
+        <Icon name={icon} size={24} color={themeColors.primary} style={accordionStyles.icon} />
+        <Text variant="titleMedium" style={[accordionStyles.title, { color: themeColors.onCardBackground }]}>
           {groupKey} ({groupCourses.length})
         </Text>
         <Animated.View style={{ transform: [{ rotate: rotateInterpolation }] }}>
@@ -73,27 +61,8 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 8,
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 8,
-  },
-  icon: {
-    marginRight: 12,
-  },
-  title: {
-    flex: 1,
-    fontWeight: '600',
-  },
-  content: {
-    paddingTop: 4,
-  },
+  container: accordionStyles.container,
+  content: accordionStyles.content,
 });
 
 // Custom comparison function for better memoization

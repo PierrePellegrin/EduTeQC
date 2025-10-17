@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { View, ScrollView } from 'react-native';
-import { Text, ActivityIndicator, List, Card } from 'react-native-paper';
+import { View } from 'react-native';
+import { Text, ActivityIndicator, Card } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { styles } from './styles';
+import { AccordionGroup } from '../PackagesListScreen/components';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -81,16 +82,19 @@ export const PackageDetailScreen = ({ navigation, route }: Props) => {
         </Text>
       </View>
 
-      <ScrollView style={styles.scrollContent}>
+      <View style={styles.scrollContent}>
         {Object.entries(coursesByCategory).map(([category, courses]) => (
-          <List.Accordion
+          <AccordionGroup
             key={category}
             title={category}
-            description={`${courses.length} cours`}
-            left={props => <List.Icon {...props} icon="folder" />}
+            icon="folder"
             expanded={expandedCategories[category] || false}
-            onPress={() => toggleCategory(category)}
-            style={styles.accordion}
+            onToggle={() => toggleCategory(category)}
+            themeColors={{
+              cardBackground: theme.colors.cardBackground,
+              onCardBackground: theme.colors.onCardBackground,
+              primary: theme.colors.primary,
+            }}
           >
             {courses.map((course: any) => (
               <Card
@@ -111,9 +115,9 @@ export const PackageDetailScreen = ({ navigation, route }: Props) => {
                 </Card.Content>
               </Card>
             ))}
-          </List.Accordion>
+          </AccordionGroup>
         ))}
-      </ScrollView>
+      </View>
     </View>
   );
 };

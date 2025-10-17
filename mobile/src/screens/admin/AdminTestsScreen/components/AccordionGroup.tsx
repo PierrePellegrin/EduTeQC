@@ -1,6 +1,8 @@
-import React, { useState, useEffect, memo, useRef } from 'react';
+import React, { memo } from 'react';
 import { View, Text, TouchableOpacity, Animated, Platform, UIManager, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { accordionStyles } from '../../../../components/accordionStyles';
+import { useAccordionRotation } from '../../../../components/useAccordionRotation';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -30,32 +32,18 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   onToggle,
   children,
 }) => {
-  const animatedRotation = useRef(new Animated.Value(expanded ? 1 : 0)).current;
-
-  useEffect(() => {
-    // Ultra-fast rotation animation - no state management delays
-    Animated.timing(animatedRotation, {
-      toValue: expanded ? 1 : 0,
-      duration: 100,
-      useNativeDriver: true,
-    }).start();
-  }, [expanded]);
-
-  const rotateInterpolation = animatedRotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
-  });
+  const rotateInterpolation = useAccordionRotation(expanded);
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={[styles.header, { backgroundColor: themeColors.cardBackground }]}
+        style={[accordionStyles.header, { backgroundColor: themeColors.cardBackground }]}
         onPress={onToggle}
         activeOpacity={0.7}
       >
-        <View style={styles.headerContent}>
+        <View style={[accordionStyles.headerContent, { gap: 12 }]}>
           <Icon name={icon} size={24} color={themeColors.primary} />
-          <Text style={[styles.title, { color: themeColors.onCardBackground }]}>
+          <Text style={[accordionStyles.title, { color: themeColors.onCardBackground }]}>
             {title} ({count})
           </Text>
         </View>
@@ -78,35 +66,8 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginVertical: 4,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginHorizontal: 16,
-    borderRadius: 12,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  content: {
-    marginTop: 4,
-  },
+  container: accordionStyles.container,
+  content: accordionStyles.content,
 });
 
 // Custom comparison function for better memoization
