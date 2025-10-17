@@ -2,7 +2,6 @@ import React, { memo, useState, useEffect } from 'react';
 import { View, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Text } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useTheme } from '../../../../contexts/ThemeContext';
 import { StyleSheet } from 'react-native';
 
 // Enable LayoutAnimation on Android
@@ -17,6 +16,7 @@ type AccordionGroupProps = {
   onToggle: () => void;
   icon: string;
   children: React.ReactNode;
+  themeColors: any;
 };
 
 const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
@@ -26,8 +26,8 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   onToggle,
   icon,
   children,
+  themeColors,
 }) => {
-  const { theme } = useTheme();
   const [shouldRenderContent, setShouldRenderContent] = useState(isExpanded);
 
   useEffect(() => {
@@ -51,18 +51,18 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={[styles.header, { backgroundColor: theme.colors.cardBackground }]}
+        style={[styles.header, { backgroundColor: themeColors.cardBackground }]}
         onPress={handleToggle}
         activeOpacity={0.7}
       >
-        <Icon name={icon} size={24} color={theme.colors.primary} style={styles.icon} />
-        <Text variant="titleMedium" style={[styles.title, { color: theme.colors.onCardBackground }]}>
+        <Icon name={icon} size={24} color={themeColors.primary} style={styles.icon} />
+        <Text variant="titleMedium" style={[styles.title, { color: themeColors.onCardBackground }]}>
           {groupKey} ({groupCourses.length})
         </Text>
         <Icon
           name={isExpanded ? 'chevron-up' : 'chevron-down'}
           size={24}
-          color={theme.colors.onCardBackground}
+          color={themeColors.onCardBackground}
         />
       </TouchableOpacity>
       {shouldRenderContent && (

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useDeferredValue } from 'react';
 import { View, ScrollView, FlatList, Alert } from 'react-native';
 import { Text, Searchbar, FAB, SegmentedButtons } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -24,7 +24,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery); // React 18 optimization
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   
@@ -126,27 +126,18 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     );
   }, [togglePublishMutation]);
 
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  // Mémoriser le filtrage des cours
+  // Mémoriser le filtrage des cours avec useDeferredValue (plus performant que debounce manuel)
   const filteredCourses = useMemo(() => {
     const allCourses = courses?.courses || [];
-    if (!debouncedSearchQuery) return allCourses;
+    if (!deferredSearchQuery) return allCourses;
     
-    const query = debouncedSearchQuery.toLowerCase();
+    const query = deferredSearchQuery.toLowerCase();
     return allCourses.filter((course: any) =>
       course.title.toLowerCase().includes(query) ||
       course.description?.toLowerCase().includes(query) ||
       course.category?.toLowerCase().includes(query)
     );
-  }, [courses?.courses, debouncedSearchQuery]);
+  }, [courses?.courses, deferredSearchQuery]);
 
   // Regroupement des cours - optimisé
   const groupedCourses = useMemo(() => {
@@ -227,11 +218,12 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
         isExpanded={isExpanded}
         onToggle={() => toggleGroup(groupKey)}
         icon={icon}
+        themeColors={theme.colors}
       >
         {renderCoursesList(groupCourses)}
       </AccordionGroup>
     );
-  }, [expandedGroups, groupBy, toggleGroup, renderCoursesList]);
+  }, [expandedGroups, groupBy, toggleGroup, renderCoursesList, theme.colors]);
 
   const segmentedButtonsConfig = useMemo(() => [
     { value: 'none', label: 'Tous', icon: 'view-list' },
@@ -250,17 +242,48 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   }, []);
 
   // FlatList render functions - DOIVENT être avant tout return conditionnel
+  
+  // Pour les groupes d'accordéons
   const renderGroupItem = useCallback(({ item }: { item: [string, any[]] }) => {
     const [groupKey, groupCourses] = item;
     return renderAccordionGroup(groupKey, groupCourses);
   }, [renderAccordionGroup]);
 
-  const keyExtractor = useCallback((item: [string, any[]]) => item[0], []);
+  const keyExtractorGroup = useCallback((item: [string, any[]]) => item[0], []);
 
   // Optimisation: hauteur estimée pour chaque groupe accordéon
-  const getItemLayout = useCallback((data: any, index: number) => ({
+  const getItemLayoutGroup = useCallback((data: any, index: number) => ({
     length: 80, // Hauteur header de l'accordéon (fermé)
     offset: 80 * index,
+    index,
+  }), []);
+
+  // Pour les cours individuels (mode "Tous")
+  const renderCourseItem = useCallback(({ item }: { item: any }) => {
+    const handleEditCourse = () => handleEdit(item);
+    const handleDeleteCourse = () => handleDelete(item.id, item.title);
+    const handleToggleCourse = () => handleTogglePublish(item.id, item.isPublished, item.title);
+    
+    return (
+      <View style={{ paddingHorizontal: 16 }}>
+        {/* Utilise le composant LightCourseCard directement */}
+        <CoursesList
+          courses={[item]}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onTogglePublish={handleTogglePublish}
+          themeColors={theme.colors}
+        />
+      </View>
+    );
+  }, [handleEdit, handleDelete, handleTogglePublish, theme.colors]);
+
+  const keyExtractorCourse = useCallback((item: any) => item.id, []);
+
+  // Hauteur estimée pour chaque carte de cours
+  const getItemLayoutCourse = useCallback((data: any, index: number) => ({
+    length: 200, // Hauteur estimée d'une carte
+    offset: 200 * index,
     index,
   }), []);
 
@@ -304,15 +327,24 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
           />
         </ScrollView>
       ) : filteredCourses.length > 0 && groupBy === 'none' ? (
-        <ScrollView contentContainerStyle={styles.content}>
-          {renderCoursesList(filteredCourses)}
-        </ScrollView>
+        <FlatList
+          data={filteredCourses}
+          renderItem={renderCourseItem}
+          keyExtractor={keyExtractorCourse}
+          getItemLayout={getItemLayoutCourse}
+          contentContainerStyle={styles.content}
+          windowSize={5}
+          maxToRenderPerBatch={5}
+          updateCellsBatchingPeriod={50}
+          removeClippedSubviews={true}
+          initialNumToRender={10}
+        />
       ) : filteredCourses.length > 0 && groupBy !== 'none' ? (
         <FlatList
           data={groupEntries}
           renderItem={renderGroupItem}
-          keyExtractor={keyExtractor}
-          getItemLayout={getItemLayout}
+          keyExtractor={keyExtractorGroup}
+          getItemLayout={getItemLayoutGroup}
           contentContainerStyle={styles.content}
           windowSize={5}
           maxToRenderPerBatch={3}
