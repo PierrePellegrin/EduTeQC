@@ -29,7 +29,6 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   themeColors,
 }) => {
   const [shouldRenderContent, setShouldRenderContent] = useState(isExpanded);
-  const animatedHeight = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
   const animatedOpacity = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
 
   useEffect(() => {
@@ -37,33 +36,19 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
       // Render children immediately
       setShouldRenderContent(true);
       
-      // Smooth parallel animations
-      Animated.parallel([
-        Animated.timing(animatedHeight, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: false,
-        }),
-        Animated.timing(animatedOpacity, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      // Smooth fade-in animation
+      Animated.timing(animatedOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
     } else {
-      // Animate out
-      Animated.parallel([
-        Animated.timing(animatedHeight, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: false,
-        }),
-        Animated.timing(animatedOpacity, {
-          toValue: 0,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
+      // Fade out
+      Animated.timing(animatedOpacity, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }).start(() => {
         // Unmount after animation completes
         setShouldRenderContent(false);
       });
@@ -97,9 +82,6 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
             styles.content,
             {
               opacity: animatedOpacity,
-              transform: [{
-                scaleY: animatedHeight,
-              }],
             }
           ]}
         >
