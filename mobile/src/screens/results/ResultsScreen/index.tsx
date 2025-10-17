@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { testsApi } from '../../../services/api';
 import { styles } from './styles';
 import { useTheme } from '../../../contexts/ThemeContext';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type GroupBy = 'none' | 'course' | 'category';
 
@@ -83,18 +84,35 @@ export const ResultsScreen = () => {
     const d = new Date(value);
     if (isNaN(d.getTime())) return '-';
     try {
-      return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' } as any);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${day}/${month}/${year} ${hours}:${minutes}`;
     } catch {
-      return d.toLocaleString();
+      return '-';
     }
   };
 
   const renderResultCard = (result: any, idx: number) => (
     <Card key={result.id || idx} style={[styles.resultCard, { backgroundColor: theme.colors.cardBackground }]}>
-      <Card.Cover
-        source={{ uri: result?.test?.imageUrl || 'https://via.placeholder.com/800x400?text=Test' }}
-        style={styles.cardCover}
-      />
+      <View style={styles.cardImageContainer}>
+        <Card.Cover
+          source={{ uri: result?.test?.imageUrl || 'https://via.placeholder.com/800x400?text=Test' }}
+          style={styles.cardCover}
+        />
+        <View style={[
+          styles.statusChipOverlay,
+          { backgroundColor: result.passed ? '#4CAF50' : '#F44336' }
+        ]}>
+          <Icon 
+            name={result.passed ? 'check-circle' : 'close-circle'} 
+            size={24} 
+            color="#FFFFFF" 
+          />
+        </View>
+      </View>
       <Card.Content>
         <Text variant="titleMedium" style={styles.cardTitle}>
           {result.test?.title || 'Inconnu'}
@@ -105,26 +123,9 @@ export const ResultsScreen = () => {
           </Text>
         )}
         <View style={styles.chipContainer}>
-          {(() => {
-            const scoreNum = typeof result.score === 'number' ? result.score : undefined;
-            const passThreshold = typeof result?.test?.passingScore === 'number' ? result.test.passingScore : undefined;
-            const meets = typeof scoreNum === 'number' && typeof passThreshold === 'number' && scoreNum >= passThreshold;
-            const chipStyle = [
-              styles.chip,
-              meets ? { backgroundColor: theme.colors.successContainer } : null,
-            ];
-            const textStyle = meets ? { color: theme.colors.onSuccessContainer } : undefined;
-            return (
-              <Chip compact icon="percent" style={chipStyle as any} textStyle={textStyle as any}>
-                {typeof result.score === 'number' ? result.score.toFixed(1) : '-'}%
-              </Chip>
-            );
-          })()}
-          <Chip compact icon={result.passed ? 'check-circle' : 'close-circle'} style={styles.chip}>
-            {result.passed ? 'Réussi' : 'Échoué'}
+          <Chip compact icon="percent" style={styles.chip}>
+            {typeof result.score === 'number' ? Math.round(result.score) : '-'}%
           </Chip>
-        </View>
-        <View style={styles.chipContainer}>
           <Chip compact icon="calendar" style={styles.chip}>
             {formatDateTime(result.completedAt)}
           </Chip>
@@ -152,8 +153,6 @@ export const ResultsScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text variant="titleLarge" style={styles.title}>Mes résultats</Text>
-        
         <Searchbar
           placeholder="Rechercher..."
           onChangeText={setSearchQuery}
