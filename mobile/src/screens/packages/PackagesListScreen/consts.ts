@@ -7,7 +7,7 @@ export const usePackageMutations = (queryClient: QueryClient) => {
     mutationFn: adminApi.buyPackage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userPackages'] });
-      Alert.alert('Succès', 'Package acheté avec succès');
+      Alert.alert('Succès', 'Forfait acheté avec succès');
     },
     onError: (error: any) => {
       Alert.alert('Erreur', error.response?.data?.message || 'Erreur lors de l\'achat');

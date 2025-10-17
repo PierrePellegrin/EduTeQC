@@ -62,7 +62,7 @@ export const PackageDetailScreen = ({ navigation, route }: Props) => {
   if (!packageData) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <Text>Package non trouvé</Text>
+        <Text>Forfait non trouvé</Text>
       </View>
     );
   }

@@ -73,7 +73,7 @@ export const CoursesListScreen = ({ navigation }: Props) => {
         
         if (relatedPackages && relatedPackages.length > 0) {
           relatedPackages.forEach((up: any) => {
-            const key = up.package.name || 'Sans package';
+            const key = up.package.name || 'Sans forfait';
             if (!groups[key]) groups[key] = [];
             // Éviter les doublons
             if (!groups[key].find(c => c.id === course.id)) {
@@ -81,7 +81,7 @@ export const CoursesListScreen = ({ navigation }: Props) => {
             }
           });
         } else {
-          const key = 'Sans package';
+          const key = 'Sans forfait';
           if (!groups[key]) groups[key] = [];
           groups[key].push(course);
         }
@@ -134,7 +134,7 @@ export const CoursesListScreen = ({ navigation }: Props) => {
           buttons={[
             { value: 'none', label: 'Tous', icon: 'view-list' },
             { value: 'category', label: 'Par matière', icon: 'folder' },
-            { value: 'package', label: 'Par package', icon: 'package-variant' },
+            { value: 'package', label: 'Par forfait', icon: 'package-variant' },
           ]}
           style={styles.segmentedButtons}
         />

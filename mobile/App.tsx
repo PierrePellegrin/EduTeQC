@@ -80,7 +80,7 @@ function ClientTabs() {
             <Tab.Screen
               name="PackagesTab"
               component={PackagesStack}
-              options={{ title: 'Packages', headerShown: false }}
+              options={{ title: 'Forfaits', headerShown: false }}
             />
             <Tab.Screen
               name="ResultsTab"
@@ -151,12 +151,12 @@ function PackagesStack() {
       <Stack.Screen
         name="PackagesList"
         component={PackagesListScreen as React.ComponentType<any>}
-        options={{ title: 'Packages' }}
+        options={{ title: 'Forfaits' }}
       />
       <Stack.Screen
         name="PackageDetail"
         component={PackageDetailScreen as React.ComponentType<any>}
-        options={{ title: 'Détails du package' }}
+        options={{ title: 'Détails du forfait' }}
       />
       <Stack.Screen
         name="CourseDetail"
@@ -280,7 +280,7 @@ function AdminTabs() {
       <Tab.Screen
         name="PackagesTab"
         component={AdminPackagesScreen}
-        options={{ title: 'Packages' }}
+        options={{ title: 'Forfaits' }}
       />
       <Tab.Screen
         name="ProfileTab"

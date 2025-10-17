@@ -22,7 +22,7 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
   return (
     <View>
       {packages.length === 0 && isPurchasedSection && (
-        <Text style={styles.emptyText}>Aucun package acheté.</Text>
+        <Text style={styles.emptyText}>Aucun forfait acheté.</Text>
       )}
       {packages.map((pkg: any) => (
         <PackageCard

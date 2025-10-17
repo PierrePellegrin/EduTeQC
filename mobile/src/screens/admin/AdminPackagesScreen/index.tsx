@@ -50,7 +50,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
 
   const handleToggleActive = (id: string, isActive: boolean, name: string) => {
     toggleActiveMutation.mutate({ id, isActive: !isActive });
-    Alert.alert('Succès', `Le package "${name}" a été ${isActive ? 'désactivé' : 'activé'}.`);
+    Alert.alert('Succès', `Le forfait "${name}" a été ${isActive ? 'désactivé' : 'activé'}.`);
   };
 
   const handleEdit = (pkg: any) => {
@@ -68,7 +68,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
   const handleDelete = (id: string, name: string) => {
     Alert.alert(
       'Confirmation',
-      `Supprimer le package "${name}" ?`,
+      `Supprimer le forfait "${name}" ?`,
       [
         { text: 'Annuler', style: 'cancel' },
         { text: 'Supprimer', style: 'destructive', onPress: () => deleteMutation.mutate(id) },

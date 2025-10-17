@@ -53,7 +53,7 @@ export const PackagesListScreen = ({ navigation }: Props) => {
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <List.Accordion
-        title="Packages disponibles"
+        title="Forfaits disponibles"
         left={props => <List.Icon {...props} icon="cart" />}
         expanded={expandedSections['available'] || false}
         onPress={() => toggleSection('available')}
@@ -68,7 +68,7 @@ export const PackagesListScreen = ({ navigation }: Props) => {
       </List.Accordion>
 
       <List.Accordion
-        title="Mes packages achetés"
+        title="Mes forfaits achetés"
         left={props => <List.Icon {...props} icon="package-variant-closed" />}
         expanded={expandedSections['purchased'] || false}
         onPress={() => toggleSection('purchased')}
