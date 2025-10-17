@@ -154,7 +154,7 @@ export const ResultsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Searchbar
-          placeholder="Rechercher..."
+          placeholder="Rechercher"
           onChangeText={setSearchQuery}
           value={searchQuery}
           style={styles.searchBar}

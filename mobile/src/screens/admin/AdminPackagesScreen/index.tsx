@@ -137,7 +137,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
       <Searchbar
-        placeholder="Rechercher un package..."
+        placeholder="Rechercher"
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchbar}

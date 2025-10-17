@@ -138,7 +138,7 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
       <Searchbar
-        placeholder="Rechercher un test..."
+        placeholder="Rechercher"
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchbar}

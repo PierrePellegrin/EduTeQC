@@ -129,7 +129,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
       <Searchbar
-        placeholder="Rechercher un cours..."
+        placeholder="Rechercher"
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchbar}
