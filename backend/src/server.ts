@@ -19,6 +19,20 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Request logging middleware (performance monitoring)
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    if (duration > 100) {
+      console.log(`⚠️ SLOW: ${req.method} ${req.path} - ${duration}ms`);
+    } else {
+      console.log(`✅ ${req.method} ${req.path} - ${duration}ms`);
+    }
+  });
+  next();
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);

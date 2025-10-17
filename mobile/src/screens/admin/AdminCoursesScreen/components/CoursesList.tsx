@@ -1,6 +1,6 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import { View } from 'react-native';
-import { CourseCard } from './CourseCard';
+import { LightCourseCard } from './LightCourseCard';
 import { styles } from '../styles';
 
 type CoursesListProps = {
@@ -16,9 +16,28 @@ const CoursesListComponent: React.FC<CoursesListProps> = ({
   onDelete,
   onTogglePublish,
 }) => {
+  const [visibleCount, setVisibleCount] = useState(8);
+
+  useEffect(() => {
+    // Reset to 8 when courses change
+    setVisibleCount(8);
+    
+    // Load remaining courses progressively
+    if (courses.length > 8) {
+      const timer = setTimeout(() => {
+        requestAnimationFrame(() => {
+          setVisibleCount(courses.length);
+        });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [courses.length]);
+
+  const visibleCourses = courses.slice(0, visibleCount);
+
   return (
     <View style={styles.coursesList}>
-      {courses.map((course: any) => (
+      {visibleCourses.map((course: any) => (
         <MemoizedCourseItem
           key={course.id}
           course={course}
@@ -44,7 +63,7 @@ const CourseItem: React.FC<CourseItemProps> = ({ course, onEdit, onDelete, onTog
   const handleTogglePublish = useCallback(() => onTogglePublish(course.id, course.isPublished, course.title), [course.id, course.isPublished, course.title, onTogglePublish]);
 
   return (
-    <CourseCard
+    <LightCourseCard
       course={course}
       onEdit={handleEdit}
       onDelete={handleDelete}

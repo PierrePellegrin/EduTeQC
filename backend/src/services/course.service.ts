@@ -68,17 +68,31 @@ export class CourseService {
   static async getAllAdmin() {
     return prisma.course.findMany({
       orderBy: { order: 'asc' },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        content: true,
+        imageUrl: true,
+        isPublished: true,
+        order: true,
+        niveauId: true,
         niveau: {
-          include: {
-            cycle: true,
-          },
-        },
-        tests: {
           select: {
             id: true,
-            title: true,
-            isPublished: true,
+            name: true,
+            cycle: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            tests: true,
           },
         },
       },

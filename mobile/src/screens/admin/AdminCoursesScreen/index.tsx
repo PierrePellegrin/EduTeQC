@@ -1,10 +1,10 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
-import { Text, Searchbar, FAB, SegmentedButtons, List } from 'react-native-paper';
+import { Text, Searchbar, FAB, SegmentedButtons } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CourseForm, CoursesList, EmptyState } from './components';
+import { CourseForm, CoursesList, EmptyState, AccordionGroup } from './components';
 import { styles } from './styles';
 import { useCourseMutations } from './consts';
 
@@ -15,10 +15,14 @@ type Props = {
 type GroupBy = 'none' | 'category' | 'niveau' | 'cycle';
 
 export const AdminCoursesScreen = ({ navigation }: Props) => {
+  // Performance tracking
+  const renderStartTime = React.useRef(Date.now());
+  
   const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   
@@ -30,10 +34,21 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     imageUrl: '',
   });
 
-  const { data: courses, isLoading } = useQuery({
+  const { data: courses, isLoading, dataUpdatedAt } = useQuery({
     queryKey: ['adminCourses'],
     queryFn: adminApi.getAllCourses,
+    staleTime: 5 * 60 * 1000, // 5 minutes - données considérées fraîches
+    gcTime: 10 * 60 * 1000, // 10 minutes - garde en cache
   });
+
+  // Log performance when data loads
+  React.useEffect(() => {
+    if (courses && !isLoading) {
+      const renderTime = Date.now() - renderStartTime.current;
+      console.log(`📊 AdminCoursesScreen: Data loaded in ${renderTime}ms`);
+      console.log(`📚 Courses count: ${courses.courses?.length || 0}`);
+    }
+  }, [courses, isLoading]);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -109,63 +124,70 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     );
   }, [togglePublishMutation]);
 
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Mémoriser le filtrage des cours
   const filteredCourses = useMemo(() => {
     const allCourses = courses?.courses || [];
-    if (!searchQuery) return allCourses;
+    if (!debouncedSearchQuery) return allCourses;
     
-    const query = searchQuery.toLowerCase();
+    const query = debouncedSearchQuery.toLowerCase();
     return allCourses.filter((course: any) =>
       course.title.toLowerCase().includes(query) ||
       course.description?.toLowerCase().includes(query) ||
       course.category?.toLowerCase().includes(query)
     );
-  }, [courses?.courses, searchQuery]);
+  }, [courses?.courses, debouncedSearchQuery]);
 
-  // Regroupement des cours
+  // Regroupement des cours - optimisé
   const groupedCourses = useMemo(() => {
     if (groupBy === 'none') {
       return { 'all': filteredCourses };
     }
 
     const groups: Record<string, any[]> = {};
-
-    if (groupBy === 'category') {
-      filteredCourses.forEach((course: any) => {
-        const key = course.category || 'Sans catégorie';
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(course);
-      });
-    } else if (groupBy === 'niveau') {
-      filteredCourses.forEach((course: any) => {
-        const key = course.niveau?.name || 'Sans niveau';
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(course);
-      });
-    } else if (groupBy === 'cycle') {
-      filteredCourses.forEach((course: any) => {
-        const key = course.niveau?.cycle?.name || 'Sans cycle';
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(course);
-      });
-    }
+    
+    // Utiliser reduce pour performance
+    filteredCourses.reduce((acc: Record<string, any[]>, course: any) => {
+      let key: string;
+      
+      switch (groupBy) {
+        case 'category':
+          key = course.category || 'Sans catégorie';
+          break;
+        case 'niveau':
+          key = course.niveau?.name || 'Sans niveau';
+          break;
+        case 'cycle':
+          key = course.niveau?.cycle?.name || 'Sans cycle';
+          break;
+        default:
+          key = 'all';
+      }
+      
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(course);
+      return acc;
+    }, groups);
 
     return groups;
   }, [filteredCourses, groupBy]);
 
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <Text>Chargement...</Text>
-      </View>
-    );
-  }
-
   const toggleGroup = useCallback((groupKey: string) => {
-    setExpandedGroups(prev => ({
-      ...prev,
-      [groupKey]: !prev[groupKey]
-    }));
+    // Utiliser requestAnimationFrame pour smoother animation
+    requestAnimationFrame(() => {
+      setExpandedGroups(prev => ({
+        ...prev,
+        [groupKey]: !prev[groupKey]
+      }));
+    });
   }, []);
 
   const handleCancelForm = useCallback(() => {
@@ -183,24 +205,54 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     />
   ), [handleEdit, handleDelete, handleTogglePublish]);
 
+  // Mémoriser les entrées des groupes pour éviter re-calculs
+  const groupEntries = useMemo(() => 
+    Object.entries(groupedCourses),
+    [groupedCourses]
+  );
+
   const renderAccordionGroup = useCallback((groupKey: string, groupCourses: any[]) => {
-    const isExpanded = expandedGroups[groupKey] !== false;
+    const isExpanded = expandedGroups[groupKey] === true;
+    const icon = groupBy === 'category' ? 'folder' :
+                 groupBy === 'niveau' ? 'school' : 'repeat';
+    
     return (
-      <List.Accordion
+      <AccordionGroup
         key={groupKey}
-        title={`${groupKey} (${groupCourses.length})`}
-        left={props => <List.Icon {...props} icon={
-          groupBy === 'category' ? 'folder' :
-          groupBy === 'niveau' ? 'school' : 'repeat'
-        } />}
-        expanded={isExpanded}
-        onPress={() => toggleGroup(groupKey)}
-        style={styles.accordion}
+        groupKey={groupKey}
+        groupCourses={groupCourses}
+        isExpanded={isExpanded}
+        onToggle={() => toggleGroup(groupKey)}
+        icon={icon}
       >
-        {isExpanded && renderCoursesList(groupCourses)}
-      </List.Accordion>
+        {renderCoursesList(groupCourses)}
+      </AccordionGroup>
     );
   }, [expandedGroups, groupBy, toggleGroup, renderCoursesList]);
+
+  const segmentedButtonsConfig = useMemo(() => [
+    { value: 'none', label: 'Tous', icon: 'view-list' },
+    { value: 'category', label: 'Matière', icon: 'folder' },
+    { value: 'niveau', label: 'Niveau', icon: 'school' },
+    { value: 'cycle', label: 'Cycle', icon: 'repeat' },
+  ], []);
+
+  const handleGroupByChange = useCallback((value: string) => {
+    // Fermer tous les accordéons lors du changement de tab
+    setExpandedGroups({});
+    // Changer le groupBy après un court délai pour une transition plus smooth
+    requestAnimationFrame(() => {
+      setGroupBy(value as GroupBy);
+    });
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text variant="titleLarge">Chargement des cours...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -215,13 +267,8 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
         {!showCreateForm && (
           <SegmentedButtons
             value={groupBy}
-            onValueChange={(value) => setGroupBy(value as GroupBy)}
-            buttons={[
-              { value: 'none', label: 'Tous', icon: 'view-list' },
-              { value: 'category', label: 'Matière', icon: 'folder' },
-              { value: 'niveau', label: 'Niveau', icon: 'school' },
-              { value: 'cycle', label: 'Cycle', icon: 'repeat' },
-            ]}
+            onValueChange={handleGroupByChange}
+            buttons={segmentedButtonsConfig}
             style={styles.segmentedButtons}
           />
         )}
@@ -245,7 +292,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
 
         {!showCreateForm && filteredCourses.length > 0 && groupBy !== 'none' && (
           <View>
-            {Object.entries(groupedCourses).map(([groupKey, groupCourses]) => 
+            {groupEntries.map(([groupKey, groupCourses]) => 
               renderAccordionGroup(groupKey, groupCourses)
             )}
           </View>
