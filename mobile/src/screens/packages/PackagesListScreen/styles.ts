@@ -28,15 +28,25 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
     opacity: 0.8,
   },
+  chipContainerWithButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
   chipContainer: {
     flexDirection: 'row',
-    marginBottom: 8,
     marginHorizontal: -4,
     flexWrap: 'wrap',
+    flex: 1,
   },
   chip: {
     marginHorizontal: 4,
     marginVertical: 4,
+  },
+  buyIconButton: {
+    marginLeft: 8,
+    marginRight: 0,
   },
   buyButton: {
     marginTop: 8,

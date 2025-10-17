@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Card, Text, Button, Chip } from 'react-native-paper';
+import { Card, Text, IconButton, Chip } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { styles } from '../styles';
 
@@ -38,24 +38,27 @@ export const PackageCard: React.FC<PackageCardProps> = ({
         <Text style={styles.packageDesc}>
           {typeof pkg.description === 'string' && pkg.description.trim() !== '' ? pkg.description : 'N/A'}
         </Text>
-        <View style={styles.chipContainer}>
-          <Chip icon="currency-eur" compact style={styles.chip}>
-            <Text>{typeof pkg.price === 'number' && !isNaN(pkg.price) ? `${pkg.price.toFixed(2)} €` : 'N/A'}</Text>
-          </Chip>
-          <Chip icon="book-multiple" compact style={styles.chip}>
-            <Text>{Array.isArray(pkg.courses) ? `${pkg.courses.length} cours` : '0 cours'}</Text>
-          </Chip>
+        <View style={styles.chipContainerWithButton}>
+          <View style={styles.chipContainer}>
+            <Chip icon="currency-eur" compact style={styles.chip}>
+              <Text>{typeof pkg.price === 'number' && !isNaN(pkg.price) ? `${pkg.price.toFixed(2)} €` : 'N/A'}</Text>
+            </Chip>
+            <Chip icon="book-multiple" compact style={styles.chip}>
+              <Text>{Array.isArray(pkg.courses) ? `${pkg.courses.length} cours` : '0 cours'}</Text>
+            </Chip>
+          </View>
+          {showBuyButton && (
+            <IconButton
+              icon="cart"
+              mode="contained"
+              onPress={onBuy}
+              disabled={isPurchased}
+              style={styles.buyIconButton}
+              iconColor={isPurchased ? theme.colors.onSurfaceDisabled : theme.colors.onPrimary}
+              containerColor={isPurchased ? theme.colors.surfaceDisabled : theme.colors.primary}
+            />
+          )}
         </View>
-        {showBuyButton && (
-          <Button
-            mode="contained"
-            onPress={onBuy}
-            disabled={isPurchased}
-            style={styles.buyButton}
-          >
-            {isPurchased ? 'Déjà acheté' : 'Acheter'}
-          </Button>
-        )}
       </Card.Content>
     </Card>
   );
