@@ -4,9 +4,23 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    padding: 16,
+    paddingBottom: 8,
+  },
   searchbar: {
-    margin: 16,
+    marginBottom: 12,
     elevation: 2,
+  },
+  segmentedButtons: {
+    marginBottom: 8,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingTop: 8,
+  },
+  accordion: {
+    marginBottom: 8,
   },
   list: {
     padding: 16,
