@@ -29,35 +29,61 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   themeColors,
 }) => {
   const [shouldRenderContent, setShouldRenderContent] = useState(isExpanded);
+  const [isAnimating, setIsAnimating] = useState(false);
   const animatedOpacity = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
+  const animatedRotation = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
 
   useEffect(() => {
     if (isExpanded) {
       // Render children immediately
       setShouldRenderContent(true);
+      setIsAnimating(true);
       
-      // Smooth fade-in animation
-      Animated.timing(animatedOpacity, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
+      // Smooth parallel animations
+      Animated.parallel([
+        Animated.timing(animatedOpacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animatedRotation, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => setIsAnimating(false));
     } else {
-      // Fade out
-      Animated.timing(animatedOpacity, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }).start(() => {
-        // Unmount after animation completes
+      setIsAnimating(true);
+      
+      // Animate out
+      Animated.parallel([
+        Animated.timing(animatedOpacity, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animatedRotation, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
         setShouldRenderContent(false);
+        setIsAnimating(false);
       });
     }
   }, [isExpanded]);
 
   const handleToggle = () => {
-    onToggle();
+    if (!isAnimating) {
+      onToggle();
+    }
   };
+
+  const rotateInterpolation = animatedRotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
 
   return (
     <View style={styles.container}>
@@ -70,8 +96,14 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
         <Text variant="titleMedium" style={[styles.title, { color: themeColors.onCardBackground }]}>
           {groupKey} ({groupCourses.length})
         </Text>
-        <Icon
-          name={isExpanded ? 'chevron-up' : 'chevron-down'}
+        <Animated.View style={{ transform: [{ rotate: rotateInterpolation }] }}>
+          <Icon
+            name="chevron-down"
+            size={24}
+            color={themeColors.onCardBackground}
+          />
+        </Animated.View>
+      </TouchableOpacity>
           size={24}
           color={themeColors.onCardBackground}
         />
