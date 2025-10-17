@@ -1,6 +1,6 @@
-import React from 'react';
-import { ScrollView } from 'react-native';
-import { Text } from 'react-native-paper';
+import React, { useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import { Text, List } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { styles } from './styles';
@@ -9,6 +9,10 @@ import { PackagesSection } from './components';
 
 export const PackagesListScreen = () => {
   const queryClient = useQueryClient();
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    available: true,
+    purchased: true,
+  });
 
   // Packages disponibles
   const { data: packages, isLoading } = useQuery({
@@ -25,24 +29,45 @@ export const PackagesListScreen = () => {
   // Achat package
   const { buyMutation } = usePackageMutations(queryClient);
 
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
   if (isLoading) {
     return <Text>Chargement...</Text>;
   }
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <PackagesSection
+      <List.Accordion
         title="Packages disponibles"
-        packages={packages?.packages || []}
-        userPackages={userPackages}
-        onBuy={(packageId) => buyMutation.mutate(packageId)}
-      />
+        left={props => <List.Icon {...props} icon="cart" />}
+        expanded={expandedSections['available'] || false}
+        onPress={() => toggleSection('available')}
+        style={styles.accordion}
+      >
+        <PackagesSection
+          packages={packages?.packages || []}
+          userPackages={userPackages}
+          onBuy={(packageId) => buyMutation.mutate(packageId)}
+        />
+      </List.Accordion>
 
-      <PackagesSection
+      <List.Accordion
         title="Mes packages achetés"
-        packages={userPackages || []}
-        isPurchasedSection
-      />
+        left={props => <List.Icon {...props} icon="package-variant-closed" />}
+        expanded={expandedSections['purchased'] || false}
+        onPress={() => toggleSection('purchased')}
+        style={styles.accordion}
+      >
+        <PackagesSection
+          packages={userPackages || []}
+          isPurchasedSection
+        />
+      </List.Accordion>
     </ScrollView>
   );
 };

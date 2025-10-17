@@ -1,10 +1,10 @@
 import React from 'react';
+import { View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { PackageCard } from './PackageCard';
 import { styles } from '../styles';
 
 type PackagesSectionProps = {
-  title: string;
   packages: any[];
   isPurchasedSection?: boolean;
   userPackages?: any[];
@@ -12,17 +12,13 @@ type PackagesSectionProps = {
 };
 
 export const PackagesSection: React.FC<PackagesSectionProps> = ({
-  title,
   packages,
   isPurchasedSection,
   userPackages,
   onBuy,
 }) => {
   return (
-    <>
-      <Text variant="titleLarge" style={styles.sectionTitle}>
-        {title}
-      </Text>
+    <View>
       {packages.length === 0 && isPurchasedSection && (
         <Text style={styles.emptyText}>Aucun package acheté.</Text>
       )}
@@ -35,6 +31,6 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
           onBuy={() => onBuy && onBuy(pkg.id)}
         />
       ))}
-    </>
+    </View>
   );
 };

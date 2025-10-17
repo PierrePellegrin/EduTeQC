@@ -5,6 +5,9 @@ export const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
   },
+  accordion: {
+    marginBottom: 8,
+  },
   sectionTitle: {
     marginTop: 16,
     marginBottom: 8,
