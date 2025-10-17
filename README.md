@@ -249,7 +249,7 @@ L'application a été **massivement optimisée** pour offrir une expérience ult
 
 ### 📚 Documentation Complète
 
-Consultez le **[Guide Complet des Optimisations](./COMPLETE_PERFORMANCE_GUIDE.md)** pour :
+Consultez le **[Guide Complet des Optimisations](./docs/COMPLETE_PERFORMANCE_GUIDE.md)** pour :
 - 5 phases d'optimisation détaillées
 - Métriques avant/après chaque phase
 - Techniques React Native avancées (FlatList, memo, useDeferredValue)
@@ -257,6 +257,21 @@ Consultez le **[Guide Complet des Optimisations](./COMPLETE_PERFORMANCE_GUIDE.md
 - Guide de maintenance et évolution
 
 **Résultat** : AdminCoursesScreen passe de 2-3s de chargement à 200ms, avec 60 FPS constant sur toutes les interactions.
+
+## 📖 Documentation
+
+Toute la documentation du projet est disponible dans le dossier [`docs/`](./docs/) :
+
+- **[Quickstart Guide](./docs/QUICKSTART.md)** - Démarrage rapide
+- **[Overview](./docs/OVERVIEW.md)** - Vue d'ensemble du projet
+- **[API Examples](./docs/API_EXAMPLES.md)** - Exemples d'utilisation de l'API
+- **[Android Setup](./docs/ANDROID_SETUP.md)** - Configuration Android
+- **[Design Guide](./docs/DESIGN_GUIDE.md)** - Guide de design
+- **[Deployment](./docs/DEPLOYMENT.md)** - Guide de déploiement
+- **[Performance Guide](./docs/COMPLETE_PERFORMANCE_GUIDE.md)** - Guide complet des optimisations
+- **[Refactoring Backend](./docs/REFACTORING_BACKEND.md)** - Documentation refactoring backend
+- **[Refactoring Frontend](./docs/REFACTORING_FRONTEND.md)** - Documentation refactoring frontend
+- **[React Hooks Rules](./docs/REACT_HOOKS_RULES.md)** - Règles des hooks React
 
 ## 📄 License
 
