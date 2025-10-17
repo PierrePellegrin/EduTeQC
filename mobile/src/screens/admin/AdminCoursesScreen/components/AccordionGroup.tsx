@@ -1,5 +1,5 @@
-import React, { memo, useState, useEffect } from 'react';
-import { View, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import React, { memo, useState, useEffect, useRef } from 'react';
+import { View, TouchableOpacity, Animated, Platform, UIManager } from 'react-native';
 import { Text } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StyleSheet } from 'react-native';
@@ -29,28 +29,48 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   themeColors,
 }) => {
   const [shouldRenderContent, setShouldRenderContent] = useState(isExpanded);
+  const animatedHeight = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
+  const animatedOpacity = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
 
   useEffect(() => {
     if (isExpanded) {
-      // Render content immediately for instant expansion
+      // Render children immediately
       setShouldRenderContent(true);
+      
+      // Smooth parallel animations
+      Animated.parallel([
+        Animated.timing(animatedHeight, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedOpacity, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
     } else {
-      // Reduced delay for faster collapse
-      const timer = setTimeout(() => {
+      // Animate out
+      Animated.parallel([
+        Animated.timing(animatedHeight, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedOpacity, {
+          toValue: 0,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // Unmount after animation completes
         setShouldRenderContent(false);
-      }, 150);
-      return () => clearTimeout(timer);
+      });
     }
   }, [isExpanded]);
 
   const handleToggle = () => {
-    // Ultra-fast animation config for instant feel
-    LayoutAnimation.configureNext({
-      duration: 100, // Reduced from 150ms to 100ms
-      create: { type: 'linear', property: 'opacity' },
-      update: { type: 'linear', property: 'scaleY' },
-      delete: { type: 'linear', property: 'opacity' },
-    });
     onToggle();
   };
 
@@ -72,9 +92,19 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
         />
       </TouchableOpacity>
       {shouldRenderContent && (
-        <View style={[styles.content, { opacity: isExpanded ? 1 : 0 }]}>
+        <Animated.View 
+          style={[
+            styles.content,
+            {
+              opacity: animatedOpacity,
+              transform: [{
+                scaleY: animatedHeight,
+              }],
+            }
+          ]}
+        >
           {children}
-        </View>
+        </Animated.View>
       )}
     </View>
   );
