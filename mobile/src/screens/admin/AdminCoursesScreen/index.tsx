@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useDeferredValue } from 'react';
-import { View, ScrollView, FlatList, Alert } from 'react-native';
+import { View, ScrollView, FlatList, Alert, InteractionManager } from 'react-native';
 import { Text, Searchbar, FAB, SegmentedButtons } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
@@ -79,11 +79,14 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
       imageUrl: formData.imageUrl || undefined,
     };
 
-    if (editingCourse) {
-      updateMutation?.mutate({ id: editingCourse.id, data });
-    } else {
-      createMutation?.mutate(data);
-    }
+    // Utiliser InteractionManager pour ne pas bloquer l'UI
+    InteractionManager.runAfterInteractions(() => {
+      if (editingCourse) {
+        updateMutation?.mutate({ id: editingCourse.id, data });
+      } else {
+        createMutation?.mutate(data);
+      }
+    });
   }, [formData, editingCourse, createMutation, updateMutation]);
 
   const handleEdit = useCallback((course: any) => {
@@ -104,7 +107,16 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
       `Voulez-vous vraiment supprimer le cours "${title}" ?\nCela supprimera également tous les tests associés.`,
       [
         { text: 'Annuler', style: 'cancel' },
-        { text: 'Supprimer', style: 'destructive', onPress: () => deleteMutation?.mutate(id) },
+        { 
+          text: 'Supprimer', 
+          style: 'destructive', 
+          onPress: () => {
+            // Utiliser InteractionManager pour ne pas bloquer l'UI
+            InteractionManager.runAfterInteractions(() => {
+              deleteMutation?.mutate(id);
+            });
+          }
+        },
       ]
     );
   }, [deleteMutation]);
@@ -120,7 +132,12 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
         { text: 'Annuler', style: 'cancel' },
         { 
           text: newStatus ? 'Publier' : 'Dépublier', 
-          onPress: () => togglePublishMutation?.mutate({ id, data: { isPublished: newStatus } })
+          onPress: () => {
+            // Utiliser InteractionManager pour ne pas bloquer l'UI
+            InteractionManager.runAfterInteractions(() => {
+              togglePublishMutation?.mutate({ id, data: { isPublished: newStatus } });
+            });
+          }
         },
       ]
     );

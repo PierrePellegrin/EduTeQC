@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, Text } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { styles } from '../styles';
@@ -7,7 +7,7 @@ type EmptyStateProps = {
   hasSearchQuery: boolean;
 };
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ hasSearchQuery }) => {
+const EmptyStateComponent: React.FC<EmptyStateProps> = ({ hasSearchQuery }) => {
   const { theme } = useTheme();
 
   return (
@@ -22,3 +22,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ hasSearchQuery }) => {
     </Card>
   );
 };
+
+// Memo pour éviter re-renders inutiles
+export const EmptyState = memo(EmptyStateComponent);

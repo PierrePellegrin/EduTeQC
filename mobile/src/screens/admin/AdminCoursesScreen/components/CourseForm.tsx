@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Image } from 'react-native';
 import { Card, Text, TextInput, Button, Icon } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
@@ -19,7 +19,7 @@ type CourseFormProps = {
   onCancel: () => void;
 };
 
-export const CourseForm: React.FC<CourseFormProps> = ({
+const CourseFormComponent: React.FC<CourseFormProps> = ({
   formData,
   isEditing,
   isLoading,
@@ -123,3 +123,18 @@ export const CourseForm: React.FC<CourseFormProps> = ({
     </Card>
   );
 };
+
+// Memo avec custom comparator pour éviter re-renders inutiles
+const arePropsEqual = (prevProps: CourseFormProps, nextProps: CourseFormProps) => {
+  return (
+    prevProps.formData.title === nextProps.formData.title &&
+    prevProps.formData.description === nextProps.formData.description &&
+    prevProps.formData.category === nextProps.formData.category &&
+    prevProps.formData.content === nextProps.formData.content &&
+    prevProps.formData.imageUrl === nextProps.formData.imageUrl &&
+    prevProps.isEditing === nextProps.isEditing &&
+    prevProps.isLoading === nextProps.isLoading
+  );
+};
+
+export const CourseForm = memo(CourseFormComponent, arePropsEqual);
