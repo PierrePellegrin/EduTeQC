@@ -256,8 +256,8 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <Text>Chargement...</Text>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text variant="titleLarge">Chargement des packages...</Text>
       </View>
     );
   }
