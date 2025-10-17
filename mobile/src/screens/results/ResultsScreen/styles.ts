@@ -33,6 +33,9 @@ export const styles = StyleSheet.create({
   segmentedButtons: {
     marginBottom: 8,
   },
+  accordion: {
+    marginBottom: 8,
+  },
   sectionTitle: {
     marginTop: 16,
     marginBottom: 12,
@@ -41,6 +44,8 @@ export const styles = StyleSheet.create({
   },
   resultCard: {
     marginBottom: 16,
+    marginLeft: 0,
+    marginRight: 0,
   },
   cardCover: {
     height: 180,

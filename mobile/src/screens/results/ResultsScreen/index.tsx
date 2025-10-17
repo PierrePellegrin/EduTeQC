@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Text, ActivityIndicator, Card, Chip, Searchbar, SegmentedButtons } from 'react-native-paper';
+import { Text, ActivityIndicator, Card, Chip, Searchbar, SegmentedButtons, List } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { testsApi } from '../../../services/api';
 import { styles } from './styles';
@@ -12,6 +12,7 @@ export const ResultsScreen = () => {
   const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['userResults'],
@@ -69,6 +70,13 @@ export const ResultsScreen = () => {
       hasResults: filtered.length > 0,
     };
   }, [data, searchQuery, groupBy]);
+
+  const toggleGroup = (groupKey: string) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }));
+  };
 
   const formatDateTime = (value?: string) => {
     if (!value) return '-';
@@ -167,18 +175,34 @@ export const ResultsScreen = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {hasResults ? (
-          Object.keys(groupedResults).map((groupKey) => (
-            <View key={groupKey}>
-              {groupBy !== 'none' && (
-                <Text variant="titleMedium" style={styles.sectionTitle}>
-                  {groupKey}
-                </Text>
-              )}
-              {groupedResults[groupKey].map((result: any, idx: number) =>
+          Object.keys(groupedResults).map((groupKey) => {
+            const results = groupedResults[groupKey];
+            const resultsCount = results.length;
+            
+            if (groupBy === 'none') {
+              // No grouping - render all cards directly
+              return results.map((result: any, idx: number) =>
                 renderResultCard(result, idx)
-              )}
-            </View>
-          ))
+              );
+            }
+
+            // Grouped view with accordion
+            return (
+              <List.Accordion
+                key={groupKey}
+                title={groupKey}
+                description={`${resultsCount} résultat${resultsCount > 1 ? 's' : ''}`}
+                left={(props) => <List.Icon {...props} icon={groupBy === 'course' ? 'book' : 'folder'} />}
+                expanded={expandedGroups[groupKey] || false}
+                onPress={() => toggleGroup(groupKey)}
+                style={styles.accordion}
+              >
+                {results.map((result: any, idx: number) =>
+                  renderResultCard(result, idx)
+                )}
+              </List.Accordion>
+            );
+          })
         ) : (
           <Text style={styles.emptyText}>
             {searchQuery ? 'Aucun résultat ne correspond à votre recherche.' : 'Aucun résultat trouvé.'}
