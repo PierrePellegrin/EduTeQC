@@ -17,7 +17,10 @@ export const styles = StyleSheet.create({
     elevation: 2,
   },
   cover: {
-    height: 180,
+    height: 120,
+    marginHorizontal: 20,
+    marginTop: 12,
+    borderRadius: 8,
   },
   cardContent: {
     paddingTop: 16,

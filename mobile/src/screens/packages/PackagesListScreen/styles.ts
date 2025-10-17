@@ -13,7 +13,10 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cover: {
-    height: 180,
+    height: 120,
+    marginHorizontal: 20,
+    marginTop: 12,
+    borderRadius: 8,
   },
   packageTitle: {
     marginBottom: 4,
