@@ -30,42 +30,16 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   onToggle,
   children,
 }) => {
-  const [shouldRenderChildren, setShouldRenderChildren] = useState(expanded);
-  const [isAnimating, setIsAnimating] = useState(false);
   const animatedRotation = useRef(new Animated.Value(expanded ? 1 : 0)).current;
 
   useEffect(() => {
-    if (expanded) {
-      // Render children immediately - no delay
-      setShouldRenderChildren(true);
-      setIsAnimating(true);
-      
-      // Only animate rotation - instant content display
-      Animated.timing(animatedRotation, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }).start(() => setIsAnimating(false));
-    } else {
-      setIsAnimating(true);
-      
-      // Animate rotation before hiding
-      Animated.timing(animatedRotation, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }).start(() => {
-        setShouldRenderChildren(false);
-        setIsAnimating(false);
-      });
-    }
+    // Ultra-fast rotation animation - no state management delays
+    Animated.timing(animatedRotation, {
+      toValue: expanded ? 1 : 0,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
   }, [expanded]);
-
-  const handleToggle = () => {
-    if (!isAnimating) {
-      onToggle();
-    }
-  };
 
   const rotateInterpolation = animatedRotation.interpolate({
     inputRange: [0, 1],
@@ -76,7 +50,7 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
     <View style={styles.container}>
       <TouchableOpacity
         style={[styles.header, { backgroundColor: themeColors.cardBackground }]}
-        onPress={handleToggle}
+        onPress={onToggle}
         activeOpacity={0.7}
       >
         <View style={styles.headerContent}>
@@ -94,7 +68,7 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
         </Animated.View>
       </TouchableOpacity>
 
-      {shouldRenderChildren && (
+      {expanded && (
         <View style={styles.content}>
           {children}
         </View>

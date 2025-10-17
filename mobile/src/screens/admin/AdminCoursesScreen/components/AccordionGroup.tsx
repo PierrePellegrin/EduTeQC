@@ -28,42 +28,16 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
   children,
   themeColors,
 }) => {
-  const [shouldRenderContent, setShouldRenderContent] = useState(isExpanded);
-  const [isAnimating, setIsAnimating] = useState(false);
   const animatedRotation = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
 
   useEffect(() => {
-    if (isExpanded) {
-      // Render children immediately - no delay
-      setShouldRenderContent(true);
-      setIsAnimating(true);
-      
-      // Only animate rotation - instant content display
-      Animated.timing(animatedRotation, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }).start(() => setIsAnimating(false));
-    } else {
-      setIsAnimating(true);
-      
-      // Animate rotation before hiding
-      Animated.timing(animatedRotation, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }).start(() => {
-        setShouldRenderContent(false);
-        setIsAnimating(false);
-      });
-    }
+    // Ultra-fast rotation animation - no state management delays
+    Animated.timing(animatedRotation, {
+      toValue: isExpanded ? 1 : 0,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
   }, [isExpanded]);
-
-  const handleToggle = () => {
-    if (!isAnimating) {
-      onToggle();
-    }
-  };
 
   const rotateInterpolation = animatedRotation.interpolate({
     inputRange: [0, 1],
@@ -74,7 +48,7 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
     <View style={styles.container}>
       <TouchableOpacity
         style={[styles.header, { backgroundColor: themeColors.cardBackground }]}
-        onPress={handleToggle}
+        onPress={onToggle}
         activeOpacity={0.7}
       >
         <Icon name={icon} size={24} color={themeColors.primary} style={styles.icon} />
@@ -89,7 +63,7 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
           />
         </Animated.View>
       </TouchableOpacity>
-      {shouldRenderContent && (
+      {isExpanded && (
         <View style={styles.content}>
           {children}
         </View>
