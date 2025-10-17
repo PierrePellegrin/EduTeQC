@@ -34,21 +34,21 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
 
   useEffect(() => {
     if (expanded) {
-      // Start rendering children immediately
+      // Render children immediately for instant expansion
       setShouldRenderChildren(true);
     } else {
-      // Delay unmount for smooth animation - reduced from 300ms to 250ms
-      const timeout = setTimeout(() => setShouldRenderChildren(false), 250);
+      // Reduced delay for faster collapse
+      const timeout = setTimeout(() => setShouldRenderChildren(false), 150);
       return () => clearTimeout(timeout);
     }
   }, [expanded]);
 
   const handleToggle = () => {
-    // Optimized animation config - shorter duration for snappier feel
+    // Ultra-fast animation config for instant feel
     LayoutAnimation.configureNext({
-      duration: 150,
+      duration: 100, // Reduced from 150ms to 100ms
       create: { type: 'linear', property: 'opacity' },
-      update: { type: 'easeInEaseOut', property: 'scaleY' },
+      update: { type: 'linear', property: 'scaleY' },
       delete: { type: 'linear', property: 'opacity' },
     });
     onToggle();

@@ -32,23 +32,23 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
 
   useEffect(() => {
     if (isExpanded) {
-      // Render content immediately when expanding
+      // Render content immediately for instant expansion
       setShouldRenderContent(true);
     } else {
-      // Delay unmounting when collapsing for smooth animation - reduced from 300ms to 250ms
+      // Reduced delay for faster collapse
       const timer = setTimeout(() => {
         setShouldRenderContent(false);
-      }, 250);
+      }, 150);
       return () => clearTimeout(timer);
     }
   }, [isExpanded]);
 
   const handleToggle = () => {
-    // Optimized animation config - shorter duration for snappier feel
+    // Ultra-fast animation config for instant feel
     LayoutAnimation.configureNext({
-      duration: 150,
+      duration: 100, // Reduced from 150ms to 100ms
       create: { type: 'linear', property: 'opacity' },
-      update: { type: 'easeInEaseOut', property: 'scaleY' },
+      update: { type: 'linear', property: 'scaleY' },
       delete: { type: 'linear', property: 'opacity' },
     });
     onToggle();

@@ -24,19 +24,16 @@ const PackagesListComponent: React.FC<PackagesListProps> = ({
   onDelete,
   onToggleActive,
 }) => {
-  // Progressive rendering: render first 4 items immediately, then rest after delay
-  const [itemsToRender, setItemsToRender] = useState(Math.min(4, packages.length));
+  // Progressive rendering: render first 6 items immediately, then rest instantly
+  const [itemsToRender, setItemsToRender] = useState(Math.min(6, packages.length));
 
   useEffect(() => {
     // Reset when packages change
-    setItemsToRender(Math.min(4, packages.length));
+    setItemsToRender(Math.min(6, packages.length));
 
-    if (packages.length > 4) {
-      // Use requestAnimationFrame for smooth rendering
-      const timeout = requestAnimationFrame(() => {
-        setItemsToRender(packages.length);
-      });
-      return () => cancelAnimationFrame(timeout);
+    if (packages.length > 6) {
+      // Immediate render for remaining items - no delay
+      setItemsToRender(packages.length);
     }
   }, [packages]);
 

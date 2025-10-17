@@ -26,19 +26,16 @@ const TestsListComponent: React.FC<TestsListProps> = ({
   onTogglePublish,
   onNavigateToQuestions,
 }) => {
-  // Progressive rendering: render first 4 items immediately, then rest after delay
-  const [itemsToRender, setItemsToRender] = useState(Math.min(4, tests.length));
+  // Progressive rendering: render first 6 items immediately, then rest instantly
+  const [itemsToRender, setItemsToRender] = useState(Math.min(6, tests.length));
 
   useEffect(() => {
     // Reset when tests change
-    setItemsToRender(Math.min(4, tests.length));
+    setItemsToRender(Math.min(6, tests.length));
 
-    if (tests.length > 4) {
-      // Use requestAnimationFrame for smooth rendering
-      const timeout = requestAnimationFrame(() => {
-        setItemsToRender(tests.length);
-      });
-      return () => cancelAnimationFrame(timeout);
+    if (tests.length > 6) {
+      // Immediate render for remaining items - no delay
+      setItemsToRender(tests.length);
     }
   }, [tests]);
 
