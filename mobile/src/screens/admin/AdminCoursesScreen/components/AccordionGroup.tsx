@@ -104,10 +104,6 @@ const AccordionGroupComponent: React.FC<AccordionGroupProps> = ({
           />
         </Animated.View>
       </TouchableOpacity>
-          size={24}
-          color={themeColors.onCardBackground}
-        />
-      </TouchableOpacity>
       {shouldRenderContent && (
         <Animated.View 
           style={[
