@@ -74,8 +74,8 @@ const LightPackageCardComponent: React.FC<LightPackageCardProps> = ({
               <Text style={[styles.coursesLabel, { color: themeColors.onCardBackground }]}>
                 Cours inclus :
               </Text>
-              {pkg.courses.map((c: any) => (
-                <Text key={c.id} style={[styles.courseItem, { color: themeColors.onCardBackground }]} numberOfLines={1}>
+              {pkg.courses.map((c: any, index: number) => (
+                <Text key={c.id || `course-${index}`} style={[styles.courseItem, { color: themeColors.onCardBackground }]} numberOfLines={1}>
                   {`• ${typeof c?.course?.title === 'string' ? c.course.title : 'Sans titre'}`}
                 </Text>
               ))}
