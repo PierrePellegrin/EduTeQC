@@ -13,8 +13,6 @@ export const styles = StyleSheet.create({
   },
   searchbar: {
     elevation: 1,
-    minHeight: 36,
-    fontSize: 14,
   },
   filterToggle: {
     margin: 0,
@@ -88,3 +86,5 @@ export const styles = StyleSheet.create({
     borderRadius: 14,
   },
 });
+
+

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, ScrollView } from 'react-native';
-import { Searchbar, IconButton, Chip, List } from 'react-native-paper';
+import { IconButton, Chip, List } from 'react-native-paper';
+import { CustomSearchbar } from '../../../../components';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { styles } from './styles';
 
@@ -75,7 +76,7 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
     <View style={styles.filterContainer}>
       {/* Search bar and toggle button */}
       <View style={styles.searchRow}>
-        <Searchbar
+        <CustomSearchbar
           placeholder="Rechercher un forfait"
           onChangeText={handleSearchChange}
           value={filters.search}
@@ -185,3 +186,5 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
     </View>
   );
 };
+
+
