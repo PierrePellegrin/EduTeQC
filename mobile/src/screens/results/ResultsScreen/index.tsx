@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { Text, ActivityIndicator, Card, Chip, SegmentedButtons, List } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { testsApi } from '../../../services/api';
-import { CustomSearchbar } from '../../../components';
+import { FilterMenu, ResultsFilterState } from './components';
 import { styles } from './styles';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -12,7 +12,11 @@ type GroupBy = 'none' | 'course' | 'category';
 
 export const ResultsScreen = () => {
   const { theme } = useTheme();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<ResultsFilterState>({
+    search: '',
+    category: null,
+    course: null,
+  });
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
@@ -24,13 +28,29 @@ export const ResultsScreen = () => {
     },
   });
 
-  // Filter and group results
-  const { groupedResults, hasResults } = useMemo(() => {
-    let filtered = Array.isArray(data) ? [...data] : [];
+  // Extraire catégories et cours uniques
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    (data || []).forEach((result: any) => {
+      if (result?.test?.course?.category) cats.add(result.test.course.category);
+    });
+    return Array.from(cats).sort();
+  }, [data]);
 
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+  const courses = useMemo(() => {
+    const crs = new Set<string>();
+    (data || []).forEach((result: any) => {
+      if (result?.test?.course?.title) crs.add(result.test.course.title);
+    });
+    return Array.from(crs).sort();
+  }, [data]);
+
+  // Filtrage avancé
+  const filteredResults = useMemo(() => {
+    let filtered = Array.isArray(data) ? [...data] : [];
+    // Filtre recherche
+    if (filters.search.trim()) {
+      const query = filters.search.toLowerCase();
       filtered = filtered.filter((result: any) => {
         const testTitle = result?.test?.title?.toLowerCase() || '';
         const courseTitle = result?.test?.course?.title?.toLowerCase() || '';
@@ -38,40 +58,46 @@ export const ResultsScreen = () => {
         return testTitle.includes(query) || courseTitle.includes(query) || category.includes(query);
       });
     }
+    // Filtre catégorie
+    if (filters.category) {
+      filtered = filtered.filter((result: any) => result?.test?.course?.category === filters.category);
+    }
+    // Filtre cours
+    if (filters.course) {
+      filtered = filtered.filter((result: any) => result?.test?.course?.title === filters.course);
+    }
+    return filtered;
+  }, [data, filters]);
 
-    // Sort by date desc
+  // Grouping
+  const { groupedResults, hasResults } = useMemo(() => {
+    let filtered = filteredResults;
     filtered.sort((a: any, b: any) => {
       const tb = b?.completedAt ? new Date(b.completedAt).getTime() : 0;
       const ta = a?.completedAt ? new Date(a.completedAt).getTime() : 0;
       return tb - ta;
     });
-
     let grouped: Record<string, any[]> = {};
-
     if (groupBy === 'course') {
-      // Group by course
       filtered.forEach((result: any) => {
         const courseTitle = result?.test?.course?.title || 'Sans cours';
         if (!grouped[courseTitle]) grouped[courseTitle] = [];
         grouped[courseTitle].push(result);
       });
     } else if (groupBy === 'category') {
-      // Group by category (package-like)
       filtered.forEach((result: any) => {
         const category = result?.test?.course?.category || 'Sans catégorie';
         if (!grouped[category]) grouped[category] = [];
         grouped[category].push(result);
       });
     } else {
-      // No grouping
       grouped['all'] = filtered;
     }
-
     return {
       groupedResults: grouped,
       hasResults: filtered.length > 0,
     };
-  }, [data, searchQuery, groupBy]);
+  }, [filteredResults, groupBy]);
 
   const toggleGroup = (groupKey: string) => {
     setExpandedGroups((prev) => ({
@@ -153,14 +179,14 @@ export const ResultsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <CustomSearchbar
-          placeholder="Rechercher"
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchBar}
-        />
+      <FilterMenu
+        filters={filters}
+        onFiltersChange={setFilters}
+        categories={categories}
+        courses={courses}
+      />
 
+      <View style={styles.header}>
         <SegmentedButtons
           value={groupBy}
           onValueChange={(value) => setGroupBy(value as GroupBy)}
@@ -205,7 +231,7 @@ export const ResultsScreen = () => {
           })
         ) : (
           <Text style={styles.emptyText}>
-            {searchQuery ? 'Aucun résultat ne correspond à votre recherche.' : 'Aucun résultat trouvé.'}
+            {filters.search ? 'Aucun résultat ne correspond à votre recherche.' : 'Aucun résultat trouvé.'}
           </Text>
         )}
       </ScrollView>

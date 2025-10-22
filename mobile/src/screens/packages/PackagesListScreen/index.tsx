@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { adminApi } from '../../../services/api';
 import { styles } from './styles';
-import { AccordionGroup, PackageCard } from './components';
+import { AccordionGroup, PackageCard, FilterMenu, PackageFilterState } from './components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { MemoizedSegmentedButtons, CustomSearchbar } from '../../../components';
 
@@ -17,8 +17,12 @@ type GroupBy = 'none' | 'type';
 
 export const PackagesListScreen = ({ navigation }: Props) => {
   const { theme } = useTheme();
-  const [searchQuery, setSearchQuery] = useState('');
-  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const [filters, setFilters] = useState<PackageFilterState>({
+    search: '',
+    category: null,
+    cycle: null,
+  });
+  const deferredSearchQuery = useDeferredValue(filters.search);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
@@ -33,14 +37,51 @@ export const PackagesListScreen = ({ navigation }: Props) => {
     return (userPackages || []).map((up: any) => up.package).filter(Boolean);
   }, [userPackages]);
 
-  // Filtre (useDeferredValue)
+  // Extraire catégories et cycles uniques
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    purchasedPackages.forEach((pkg: any) => {
+      pkg.courses?.forEach((pc: any) => {
+        if (pc.course?.category) cats.add(pc.course.category);
+      });
+    });
+    return Array.from(cats).sort();
+  }, [purchasedPackages]);
+
+  const cycles = useMemo(() => {
+    const cyc = new Set<string>();
+    purchasedPackages.forEach((pkg: any) => {
+      pkg.courses?.forEach((pc: any) => {
+        if (pc.course?.cycle) cyc.add(pc.course.cycle);
+      });
+    });
+    return Array.from(cyc).sort();
+  }, [purchasedPackages]);
+
+  // Filtre avancé
   const filteredPackages = useMemo(() => {
-    if (!deferredSearchQuery) return purchasedPackages;
-    const q = deferredSearchQuery.toLowerCase();
-    return purchasedPackages.filter((pkg: any) =>
-      pkg.name.toLowerCase().includes(q) || pkg.description?.toLowerCase().includes(q)
-    );
-  }, [purchasedPackages, deferredSearchQuery]);
+    let filtered = purchasedPackages;
+    // Filtre recherche
+    if (deferredSearchQuery) {
+      const q = deferredSearchQuery.toLowerCase();
+      filtered = filtered.filter((pkg: any) =>
+        pkg.name.toLowerCase().includes(q) || pkg.description?.toLowerCase().includes(q)
+      );
+    }
+    // Filtre catégorie
+    if (filters.category) {
+      filtered = filtered.filter((pkg: any) =>
+        pkg.courses?.some((pc: any) => pc.course?.category === filters.category)
+      );
+    }
+    // Filtre cycle
+    if (filters.cycle) {
+      filtered = filtered.filter((pkg: any) =>
+        pkg.courses?.some((pc: any) => pc.course?.cycle === filters.cycle)
+      );
+    }
+    return filtered;
+  }, [purchasedPackages, deferredSearchQuery, filters.category, filters.cycle]);
 
   // Grouping (même logique que AdminPackagesScreen)
   const groupedPackages = useMemo(() => {
@@ -129,22 +170,12 @@ export const PackagesListScreen = ({ navigation }: Props) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ padding: 16 }}>
-        <CustomSearchbar
-          placeholder="Rechercher"
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={{ marginBottom: 16 }}
-        />
-        <MemoizedSegmentedButtons
-          value={groupBy}
-          onValueChange={(value) => setGroupBy(value as GroupBy)}
-          buttons={[
-            { value: 'none', label: 'Tous', icon: 'view-list' },
-            { value: 'type', label: 'Type', icon: 'shape' },
-          ]}
-        />
-      </View>
+      <FilterMenu
+        filters={filters}
+        onFiltersChange={setFilters}
+        categories={categories}
+        cycles={cycles}
+      />
 
       {filteredPackages.length > 0 && groupBy === 'none' && (
         <FlatList
