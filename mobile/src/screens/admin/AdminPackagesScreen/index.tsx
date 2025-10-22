@@ -5,8 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { MemoizedSegmentedButtons, CustomSearchbar } from '../../../components';
-import { PackageForm, PackagesList, EmptyState, AccordionGroup } from './components';
+import { MemoizedSegmentedButtons } from '../../../components';
+import { PackageForm, PackagesList, EmptyState, AccordionGroup, FilterMenu, PackageAdminFilterState } from './components';
 import { styles } from './styles';
 import { usePackageMutations } from './consts';
 
@@ -30,8 +30,11 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPackage, setEditingPackage] = useState<any>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const [filters, setFilters] = useState<PackageAdminFilterState>({
+    search: '',
+    type: null,
+  });
+  const deferredSearchQuery = useDeferredValue(filters.search);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   // Initialize all groups as CLOSED for performance
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
@@ -137,17 +140,73 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     resetForm();
   }, [resetForm]);
 
-  // Filter packages (using deferred search query)
+  // Extraire types uniques
+  const types = useMemo(() => {
+    const typeSet = new Set<string>();
+    (packages?.packages || []).forEach((pkg: any) => {
+      const name = pkg.name.toLowerCase();
+      let type = 'Autre';
+      
+      if (name.includes('primaire') || name.includes('collège') || name.includes('lycée')) {
+        if (name.includes('français') || name.includes('mathématiques') || name.includes('histoire')) {
+          type = 'Par cycle et matière';
+        } else {
+          type = 'Par cycle';
+        }
+      } else if (name.includes('cp') || name.includes('ce1') || name.includes('ce2') || 
+                 name.includes('cm1') || name.includes('cm2') || name.includes('6ème') || 
+                 name.includes('5ème') || name.includes('4ème') || name.includes('3ème') ||
+                 name.includes('2nd') || name.includes('1ère') || name.includes('terminale')) {
+        type = 'Par niveau';
+      } else if (name.includes('français') || name.includes('mathématiques') || name.includes('histoire')) {
+        type = 'Par matière';
+      }
+      
+      typeSet.add(type);
+    });
+    return Array.from(typeSet).sort();
+  }, [packages?.packages]);
+
+  // Filter packages avancé
   const filteredPackages = useMemo(() => {
-    const allPackages = packages?.packages || [];
-    if (!deferredSearchQuery) return allPackages;
+    let filtered = packages?.packages || [];
     
-    const query = deferredSearchQuery.toLowerCase();
-    return allPackages.filter((pkg: any) =>
-      pkg.name.toLowerCase().includes(query) ||
-      pkg.description?.toLowerCase().includes(query)
-    );
-  }, [packages?.packages, deferredSearchQuery]);
+    // Filtre recherche
+    if (deferredSearchQuery) {
+      const query = deferredSearchQuery.toLowerCase();
+      filtered = filtered.filter((pkg: any) =>
+        pkg.name.toLowerCase().includes(query) ||
+        pkg.description?.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filtre type
+    if (filters.type) {
+      filtered = filtered.filter((pkg: any) => {
+        const name = pkg.name.toLowerCase();
+        let type = 'Autre';
+        
+        if (name.includes('primaire') || name.includes('collège') || name.includes('lycée')) {
+          if (name.includes('français') || name.includes('mathématiques') || name.includes('histoire')) {
+            type = 'Par cycle et matière';
+          } else {
+            type = 'Par cycle';
+          }
+        } else if (name.includes('cp') || name.includes('ce1') || name.includes('ce2') || 
+                   name.includes('cm1') || name.includes('cm2') || name.includes('6ème') || 
+                   name.includes('5ème') || name.includes('4ème') || name.includes('3ème') ||
+                   name.includes('2nd') || name.includes('1ère') || name.includes('terminale')) {
+          type = 'Par niveau';
+        } else if (name.includes('français') || name.includes('mathématiques') || name.includes('histoire')) {
+          type = 'Par matière';
+        }
+        
+        return type === filters.type;
+      });
+    }
+    
+    return filtered;
+  }, [packages?.packages, deferredSearchQuery, filters.type]);
 
   // Group packages
   const groupedPackages = useMemo(() => {
@@ -264,15 +323,14 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <CustomSearchbar
-          placeholder="Rechercher"
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchbar}
-        />
+      <FilterMenu
+        filters={filters}
+        onFiltersChange={setFilters}
+        types={types}
+      />
 
-        {!showCreateForm && (
+      {!showCreateForm && filteredPackages.length > 0 && (
+        <View style={styles.header}>
           <MemoizedSegmentedButtons
             value={groupBy}
             onValueChange={(value) => setGroupBy(value as GroupBy)}
@@ -282,8 +340,8 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
             ]}
             style={styles.segmentedButtons}
           />
-        )}
-      </View>
+        </View>
+      )}
 
       {showCreateForm && (
         <PackageForm

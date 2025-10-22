@@ -6,7 +6,7 @@ import { adminApi } from '../../../services/api';
 import { MemoizedSegmentedButtons, CustomSearchbar } from '../../../components';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { TestForm, TestsList, EmptyState, AccordionGroup } from './components';
+import { TestForm, TestsList, EmptyState, AccordionGroup, FilterMenu, TestAdminFilterState } from './components';
 import { styles } from './styles';
 import { useTestMutations } from './consts';
 
@@ -30,8 +30,12 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTest, setEditingTest] = useState<any>(null);
   const [courseMenuVisible, setCourseMenuVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const [filters, setFilters] = useState<TestAdminFilterState>({
+    search: '',
+    course: null,
+    category: null,
+  });
+  const deferredSearchQuery = useDeferredValue(filters.search);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   // Initialize all groups as CLOSED for performance
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
@@ -132,18 +136,55 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
     resetForm();
   }, [resetForm]);
 
+  // Extract unique courses and categories for filters
+  const { uniqueCourses, uniqueCategories } = useMemo(() => {
+    const allTests = tests?.tests || [];
+    const coursesSet = new Set<string>();
+    const categoriesSet = new Set<string>();
+
+    allTests.forEach((test: any) => {
+      if (test.course?.title) {
+        coursesSet.add(test.course.title);
+      }
+      if (test.course?.category) {
+        categoriesSet.add(test.course.category);
+      }
+    });
+
+    return {
+      uniqueCourses: Array.from(coursesSet).sort(),
+      uniqueCategories: Array.from(categoriesSet).sort(),
+    };
+  }, [tests?.tests]);
+
   // Filter tests (using deferred search query)
   const filteredTests = useMemo(() => {
     const allTests = tests?.tests || [];
-    if (!deferredSearchQuery) return allTests;
     
-    const query = deferredSearchQuery.toLowerCase();
-    return allTests.filter((test: any) =>
-      test.title.toLowerCase().includes(query) ||
-      test.description?.toLowerCase().includes(query) ||
-      test.course?.title?.toLowerCase().includes(query)
-    );
-  }, [tests?.tests, deferredSearchQuery]);
+    return allTests.filter((test: any) => {
+      // Search filter
+      if (deferredSearchQuery) {
+        const query = deferredSearchQuery.toLowerCase();
+        const matchesSearch =
+          test.title.toLowerCase().includes(query) ||
+          test.description?.toLowerCase().includes(query) ||
+          test.course?.title?.toLowerCase().includes(query);
+        if (!matchesSearch) return false;
+      }
+
+      // Course filter
+      if (filters.course && test.course?.title !== filters.course) {
+        return false;
+      }
+
+      // Category filter
+      if (filters.category && test.course?.category !== filters.category) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [tests?.tests, deferredSearchQuery, filters.course, filters.category]);
 
   // Group tests
   const groupedTests = useMemo(() => {
@@ -241,27 +282,25 @@ export const AdminTestsScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <CustomSearchbar
-          placeholder="Rechercher"
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchbar}
-        />
+      <FilterMenu
+        filters={filters}
+        onFiltersChange={setFilters}
+        courses={uniqueCourses}
+        categories={uniqueCategories}
+      />
 
-        {!showCreateForm && (
-          <MemoizedSegmentedButtons
-            value={groupBy}
-            onValueChange={(value) => setGroupBy(value as GroupBy)}
-            buttons={[
-              { value: 'none', label: 'Tous', icon: 'view-list' },
-              { value: 'course', label: 'Cours', icon: 'book-open-variant' },
-              { value: 'category', label: 'Matière', icon: 'shape' },
-            ]}
-            style={styles.segmentedButtons}
-          />
-        )}
-      </View>
+      {!showCreateForm && filteredTests.length > 0 && (
+        <MemoizedSegmentedButtons
+          value={groupBy}
+          onValueChange={(value) => setGroupBy(value as GroupBy)}
+          buttons={[
+            { value: 'none', label: 'Tous', icon: 'view-list' },
+            { value: 'course', label: 'Cours', icon: 'book-open-variant' },
+            { value: 'category', label: 'Matière', icon: 'shape' },
+          ]}
+          style={styles.segmentedButtons}
+        />
+      )}
 
       {showCreateForm && (
         <TestForm

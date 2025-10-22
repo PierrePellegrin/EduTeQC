@@ -4,3 +4,4 @@ export { LightTestCard } from './LightTestCard';
 export { TestsList } from './TestsList';
 export { EmptyState } from './EmptyState';
 export { AccordionGroup } from './AccordionGroup';
+export { FilterMenu, type TestAdminFilterState } from './FilterMenu';

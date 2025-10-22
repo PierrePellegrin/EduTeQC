@@ -4,8 +4,7 @@ import { Text, FAB, SegmentedButtons } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CourseForm, CoursesList, EmptyState, AccordionGroup } from './components';
-import { CustomSearchbar } from '../../../components';
+import { CourseForm, CoursesList, EmptyState, AccordionGroup, FilterMenu, CourseAdminFilterState } from './components';
 import { styles } from './styles';
 import { useCourseMutations } from './consts';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -24,8 +23,13 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const deferredSearchQuery = useDeferredValue(searchQuery); // React 18 optimization
+  const [filters, setFilters] = useState<CourseAdminFilterState>({
+    search: '',
+    category: null,
+    cycle: null,
+    niveau: null,
+  });
+  const deferredSearchQuery = useDeferredValue(filters.search); // React 18 optimization
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   
@@ -144,18 +148,62 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     );
   }, [togglePublishMutation]);
 
-  // Mémoriser le filtrage des cours avec useDeferredValue (plus performant que debounce manuel)
+  // Extraire catégories, cycles et niveaux uniques
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    (courses?.courses || []).forEach((course: any) => {
+      if (course.category) cats.add(course.category);
+    });
+    return Array.from(cats).sort();
+  }, [courses?.courses]);
+
+  const cycles = useMemo(() => {
+    const cyc = new Set<string>();
+    (courses?.courses || []).forEach((course: any) => {
+      if (course.niveau?.cycle?.name) cyc.add(course.niveau.cycle.name);
+    });
+    return Array.from(cyc).sort();
+  }, [courses?.courses]);
+
+  const niveaux = useMemo(() => {
+    const niv = new Set<string>();
+    (courses?.courses || []).forEach((course: any) => {
+      if (course.niveau?.name) niv.add(course.niveau.name);
+    });
+    return Array.from(niv).sort();
+  }, [courses?.courses]);
+
+  // Mémoriser le filtrage des cours avec filtres avancés
   const filteredCourses = useMemo(() => {
-    const allCourses = courses?.courses || [];
-    if (!deferredSearchQuery) return allCourses;
+    let filtered = courses?.courses || [];
     
-    const query = deferredSearchQuery.toLowerCase();
-    return allCourses.filter((course: any) =>
-      course.title.toLowerCase().includes(query) ||
-      course.description?.toLowerCase().includes(query) ||
-      course.category?.toLowerCase().includes(query)
-    );
-  }, [courses?.courses, deferredSearchQuery]);
+    // Filtre recherche
+    if (deferredSearchQuery) {
+      const query = deferredSearchQuery.toLowerCase();
+      filtered = filtered.filter((course: any) =>
+        course.title.toLowerCase().includes(query) ||
+        course.description?.toLowerCase().includes(query) ||
+        course.category?.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filtre catégorie
+    if (filters.category) {
+      filtered = filtered.filter((course: any) => course.category === filters.category);
+    }
+    
+    // Filtre cycle
+    if (filters.cycle) {
+      filtered = filtered.filter((course: any) => course.niveau?.cycle?.name === filters.cycle);
+    }
+    
+    // Filtre niveau
+    if (filters.niveau) {
+      filtered = filtered.filter((course: any) => course.niveau?.name === filters.niveau);
+    }
+    
+    return filtered;
+  }, [courses?.courses, deferredSearchQuery, filters.category, filters.cycle, filters.niveau]);
 
   // Regroupement des cours - optimisé
   const groupedCourses = useMemo(() => {
@@ -315,23 +363,24 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <CustomSearchbar
-          placeholder="Rechercher"
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchbar}
-        />
+      <FilterMenu
+        filters={filters}
+        onFiltersChange={setFilters}
+        categories={categories}
+        cycles={cycles}
+        niveaux={niveaux}
+      />
 
-        {!showCreateForm && (
+      {!showCreateForm && filteredCourses.length > 0 && (
+        <View style={styles.header}>
           <SegmentedButtons
             value={groupBy}
             onValueChange={handleGroupByChange}
             buttons={segmentedButtonsConfig}
             style={styles.segmentedButtons}
           />
-        )}
-      </View>
+        </View>
+      )}
 
       {showCreateForm ? (
         <ScrollView contentContainerStyle={styles.content}>
@@ -373,7 +422,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
       ) : (
         !showCreateForm && (
           <ScrollView contentContainerStyle={styles.content}>
-            <EmptyState hasSearchQuery={!!searchQuery} />
+            <EmptyState hasSearchQuery={!!filters.search} />
           </ScrollView>
         )
       )}
