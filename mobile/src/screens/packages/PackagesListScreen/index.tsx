@@ -52,7 +52,7 @@ export const PackagesListScreen = ({ navigation }: Props) => {
     const cyc = new Set<string>();
     purchasedPackages.forEach((pkg: any) => {
       pkg.courses?.forEach((pc: any) => {
-        if (pc.course?.cycle) cyc.add(pc.course.cycle);
+        if (pc.course?.niveau?.cycle?.name) cyc.add(pc.course.niveau.cycle.name);
       });
     });
     return Array.from(cyc).sort();
@@ -77,7 +77,7 @@ export const PackagesListScreen = ({ navigation }: Props) => {
     // Filtre cycle
     if (filters.cycle) {
       filtered = filtered.filter((pkg: any) =>
-        pkg.courses?.some((pc: any) => pc.course?.cycle === filters.cycle)
+        pkg.courses?.some((pc: any) => pc.course?.niveau?.cycle?.name === filters.cycle)
       );
     }
     return filtered;

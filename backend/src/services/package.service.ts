@@ -122,6 +122,18 @@ export class PackageService {
                     title: true,
                     category: true,
                     imageUrl: true,
+                    niveau: {
+                      select: {
+                        id: true,
+                        name: true,
+                        cycle: {
+                          select: {
+                            id: true,
+                            name: true,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
