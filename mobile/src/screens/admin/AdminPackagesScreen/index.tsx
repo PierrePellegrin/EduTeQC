@@ -152,8 +152,8 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
         if (pc.course?.category) {
           catsSet.add(pc.course.category);
         }
-        if (pc.course?.cycle) {
-          cyclesSet.add(pc.course.cycle);
+        if (pc.course?.niveau?.cycle?.name) {
+          cyclesSet.add(pc.course.niveau.cycle.name);
         }
       });
     });
@@ -171,7 +171,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     const niveauxSet = new Set<string>();
     (packages?.packages || []).forEach((pkg: any) => {
       pkg.courses?.forEach((pc: any) => {
-        if (pc.course?.cycle === filters.cycle && pc.course?.niveau?.name) {
+        if (pc.course?.niveau?.cycle?.name === filters.cycle && pc.course?.niveau?.name) {
           niveauxSet.add(pc.course.niveau.name);
         }
       });
@@ -203,7 +203,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     // Filtre cycle
     if (filters.cycle) {
       filtered = filtered.filter((pkg: any) =>
-        pkg.courses?.some((pc: any) => pc.course?.cycle === filters.cycle)
+        pkg.courses?.some((pc: any) => pc.course?.niveau?.cycle?.name === filters.cycle)
       );
     }
     
