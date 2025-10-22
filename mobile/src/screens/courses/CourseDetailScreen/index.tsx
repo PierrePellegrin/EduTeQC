@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { CourseContent, TestsList } from './components';
 import { styles } from './styles';
+import { useSettings } from '../../../contexts/SettingsContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -15,15 +16,18 @@ type Props = {
 
 export const CourseDetailScreen = ({ navigation, route }: Props) => {
   const { courseId } = route.params;
+  // Convertir courseId en string au cas où il serait passé comme number
+  const courseIdString = String(courseId);
+  const { showImages } = useSettings();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['course', courseId],
-    queryFn: () => coursesApi.getById(courseId),
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['course', courseIdString],
+    queryFn: () => coursesApi.getById(courseIdString),
   });
 
   const course = data?.course;
 
-  if (isLoading || !course) {
+  if (isLoading) {
     return (
       <View style={styles.centerContainer}>
         <Text>Chargement...</Text>
@@ -31,10 +35,30 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text>Erreur lors du chargement du cours</Text>
+      </View>
+    );
+  }
+
+  if (!course) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text>Cours introuvable</Text>
+      </View>
+    );
+  }
+
+  // Image par défaut si pas d'imageUrl
+  const defaultImage = 'https://via.placeholder.com/800x400/4A90E2/FFFFFF?text=' + encodeURIComponent(course.category);
+  const imageSource = course.imageUrl || defaultImage;
+
   return (
     <ScrollView style={styles.container}>
-      {course.imageUrl && (
-        <Card.Cover source={{ uri: course.imageUrl }} style={styles.cover} />
+      {showImages && (
+        <Card.Cover source={{ uri: imageSource }} style={styles.cover} />
       )}
 
       <CourseContent course={course} />

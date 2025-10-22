@@ -156,7 +156,7 @@ export const CoursesListScreen = ({ navigation }: Props) => {
     }));
   }, []);
 
-  const handleCoursePress = useCallback((courseId: number) => {
+  const handleCoursePress = useCallback((courseId: string) => {
     navigation.navigate('CourseDetail', { courseId });
   }, [navigation]);
 
@@ -164,7 +164,7 @@ export const CoursesListScreen = ({ navigation }: Props) => {
   const renderCourseItem = useCallback(({ item }: { item: Course }) => (
     <MemoizedCourseCard
         course={item}
-        onPress={() => handleCoursePress(Number(item.id))}
+        onPress={() => handleCoursePress(item.id)}
       theme={themeColors}
     />
   ), [handleCoursePress, themeColors]);
@@ -252,7 +252,7 @@ export const CoursesListScreen = ({ navigation }: Props) => {
                 <MemoizedCourseCard
                   key={course.id}
                   course={course}
-                    onPress={() => handleCoursePress(Number(course.id))}
+                    onPress={() => handleCoursePress(course.id)}
                   theme={themeColors}
                 />
               ))}

@@ -9,7 +9,7 @@ import { AccordionGroup, PackageCard } from '../PackagesListScreen/components';
 import { styles } from '../PackagesListScreen/styles';
 import { MemoizedSegmentedButtons } from '../../../components';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { FilterMenu, FilterState } from './components';
+import { FilterMenu, FilterState } from './components/FilterMenu';
 
  type Props = {
    navigation: NativeStackNavigationProp<any>;
@@ -22,9 +22,9 @@ import { FilterMenu, FilterState } from './components';
    const queryClient = useQueryClient();
    const [filters, setFilters] = useState<FilterState>({
      search: '',
-     cycleId: null,
+     cycle: null,
      category: null,
-     niveauId: null,
+     niveau: null,
    });
    const deferredSearchQuery = useDeferredValue(filters.search);
    const [groupBy, setGroupBy] = useState<GroupBy>('none');
@@ -44,16 +44,10 @@ import { FilterMenu, FilterState } from './components';
      queryKey: ['cycles'],
      queryFn: cyclesApi.getAllCycles,
    });
-
-   const { data: niveauxData } = useQuery({
-     queryKey: ['niveaux'],
-     queryFn: cyclesApi.getAllNiveaux,
-   });
  
    const { buyMutation } = usePackageMutations(queryClient);
 
-   const cycles = cyclesData?.cycles || [];
-   const niveaux = niveauxData?.niveaux || [];
+   const cycles = (cyclesData?.cycles || []).map((c: any) => c.name);
  
    const availablePackages = useMemo(() => {
      const all = packages?.packages || [];
@@ -92,25 +86,21 @@ import { FilterMenu, FilterState } from './components';
      }
 
      // Niveau filter (year/grade)
-     if (filters.niveauId) {
+     if (filters.niveau) {
        filtered = filtered.filter((pkg: any) =>
-         pkg.courses?.some((pc: any) => pc.course?.niveauId === filters.niveauId)
+         pkg.courses?.some((pc: any) => pc.course?.niveau?.name === filters.niveau)
        );
      }
 
      // Cycle filter (if niveau not selected)
-     if (filters.cycleId && !filters.niveauId) {
-       const cycleNiveauxIds = niveaux
-         .filter((n: any) => n.cycleId === filters.cycleId)
-         .map((n: any) => n.id);
-       
+     if (filters.cycle && !filters.niveau) {
        filtered = filtered.filter((pkg: any) =>
-         pkg.courses?.some((pc: any) => cycleNiveauxIds.includes(pc.course?.niveauId))
+         pkg.courses?.some((pc: any) => pc.course?.niveau?.cycle?.name === filters.cycle)
        );
      }
 
      return filtered;
-   }, [availablePackages, deferredSearchQuery, filters, niveaux]);
+   }, [availablePackages, deferredSearchQuery, filters]);
  
    const groupedPackages = useMemo(() => {
      if (groupBy === 'none') {
@@ -194,9 +184,7 @@ import { FilterMenu, FilterState } from './components';
          filters={filters}
          onFiltersChange={setFilters}
          cycles={cycles}
-         niveaux={niveaux}
          categories={categories}
-         filteredPackagesCount={filteredPackages.length}
        />
 
        {filteredPackages.length > 0 && (

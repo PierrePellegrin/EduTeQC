@@ -6,12 +6,14 @@ import { testsApi } from '../../../services/api';
 import { FilterMenu, ResultsFilterState } from './components';
 import { styles } from './styles';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { useSettings } from '../../../contexts/SettingsContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type GroupBy = 'none' | 'course' | 'category';
 
 export const ResultsScreen = () => {
   const { theme } = useTheme();
+  const { showImages } = useSettings();
   const [filters, setFilters] = useState<ResultsFilterState>({
     search: '',
     category: null,
@@ -122,28 +124,47 @@ export const ResultsScreen = () => {
     }
   };
 
-  const renderResultCard = (result: any, idx: number) => (
-    <Card key={result.id || idx} style={[styles.resultCard, { backgroundColor: theme.colors.cardBackground }]}>
-      <View style={styles.cardImageContainer}>
-        <Card.Cover
-          source={{ uri: result?.test?.imageUrl || 'https://via.placeholder.com/800x400?text=Test' }}
-          style={styles.cardCover}
-        />
-        <View style={[
-          styles.statusChipOverlay,
-          { backgroundColor: result.passed ? '#4CAF50' : '#F44336' }
-        ]}>
-          <Icon 
-            name={result.passed ? 'check-circle' : 'close-circle'} 
-            size={24} 
-            color="#FFFFFF" 
-          />
-        </View>
-      </View>
+  const renderResultCard = (result: any, idx: number) => {
+    // Image par défaut si pas d'imageUrl
+    const defaultImage = 'https://via.placeholder.com/800x400/FF9800/FFFFFF?text=Test';
+    const imageSource = result?.test?.imageUrl || defaultImage;
+
+    return (
+      <Card key={result.id || idx} style={[styles.resultCard, { backgroundColor: theme.colors.cardBackground }]}>
+        {showImages && (
+          <View style={styles.cardImageContainer}>
+            <Card.Cover
+              source={{ uri: imageSource }}
+              style={styles.cardCover}
+            />
+            <View style={[
+              styles.statusChipOverlay,
+              { backgroundColor: result.passed ? '#4CAF50' : '#F44336' }
+            ]}>
+              <Icon 
+                name={result.passed ? 'check-circle' : 'close-circle'} 
+                size={24} 
+                color="#FFFFFF" 
+              />
+            </View>
+          </View>
+        )}
       <Card.Content>
-        <Text variant="titleMedium" style={styles.cardTitle}>
-          {result.test?.title || 'Inconnu'}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text variant="titleMedium" style={[styles.cardTitle, { flex: 1 }]}>
+            {result.test?.title || 'Inconnu'}
+          </Text>
+          {!showImages && (
+            <Chip 
+              compact 
+              icon={result.passed ? 'check-circle' : 'close-circle'} 
+              style={{ backgroundColor: result.passed ? '#4CAF50' : '#F44336' }}
+              textStyle={{ color: '#FFFFFF' }}
+            >
+              {result.passed ? 'Réussi' : 'Échoué'}
+            </Chip>
+          )}
+        </View>
         {result?.test?.course && (
           <Text variant="bodySmall" style={styles.courseInfo}>
             📚 {result.test.course.title}
@@ -159,7 +180,8 @@ export const ResultsScreen = () => {
         </View>
       </Card.Content>
     </Card>
-  );
+    );
+  };
 
   if (isLoading) {
     return (

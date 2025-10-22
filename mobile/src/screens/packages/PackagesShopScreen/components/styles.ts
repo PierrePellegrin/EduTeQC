@@ -28,27 +28,10 @@ export const styles = StyleSheet.create({
     marginTop: 4,
     gap: 8,
   },
-  filterGroup: {
-    gap: 4,
-    marginBottom: 2,
-  },
-  filterHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 2,
-  },
   chipScroll: {
     flexDirection: 'row',
     paddingVertical: 2,
     marginBottom: 2,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    gap: 4,
-    overflow: 'scroll',
-    maxHeight: 32,
   },
   chip: {
     height: 28,
@@ -72,19 +55,4 @@ export const styles = StyleSheet.create({
     marginTop: 0,
     marginBottom: 0,
   },
-  clearButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginTop: 2,
-    marginBottom: 2,
-  },
-  clearButton: {
-    height: 28,
-    marginRight: 4,
-    paddingHorizontal: 8,
-    borderRadius: 14,
-  },
 });
-
-

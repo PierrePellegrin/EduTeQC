@@ -1,6 +1,7 @@
 import React from 'react';
 import { List, IconButton, Divider } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 
 type ProfileMenuProps = {
   user: any;
@@ -20,6 +21,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onLogout,
 }) => {
   const { theme } = useTheme();
+  const navigation = useNavigation<any>();
 
   return (
     <List.Section>
@@ -57,7 +59,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         title="Paramètres"
         left={(props) => <List.Icon {...props} icon="cog" />}
         right={(props) => <List.Icon {...props} icon="chevron-right" />}
-        onPress={() => {}}
+        onPress={() => navigation.navigate('Settings')}
       />
 
       <Divider />

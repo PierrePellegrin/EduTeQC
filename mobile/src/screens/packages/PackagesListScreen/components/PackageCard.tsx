@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { Card, Text, IconButton, Chip } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
+import { useSettings } from '../../../../contexts/SettingsContext';
 import { styles } from '../styles';
 
 type PackageCardProps = {
@@ -27,11 +28,16 @@ export const PackageCard: React.FC<PackageCardProps> = ({
   onCoursesPress,
 }) => {
   const { theme } = useTheme();
+  const { showImages } = useSettings();
+
+  // Image par défaut si pas d'imageUrl
+  const defaultImage = 'https://via.placeholder.com/800x400/2E7D32/FFFFFF?text=' + encodeURIComponent(pkg.name || 'Package');
+  const imageSource = pkg.imageUrl || defaultImage;
 
   return (
     <Card style={[styles.packageCard, { backgroundColor: theme.colors.cardBackground }]}>
-      {pkg.imageUrl && (
-        <Card.Cover source={{ uri: pkg.imageUrl }} style={styles.cover} />
+      {showImages && (
+        <Card.Cover source={{ uri: imageSource }} style={styles.cover} />
       )}
       <Card.Content>
         <Text variant="titleMedium" style={styles.packageTitle}>

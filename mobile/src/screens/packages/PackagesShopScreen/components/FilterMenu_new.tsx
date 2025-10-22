@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { IconButton, Chip, List } from 'react-native-paper';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { CustomSearchbar } from '../../../../components';
-import { cyclesApi } from '../../../../services/api';
 import { styles } from './styles';
 
-export type FilterState = {
+export type PackageFilterState = {
   search: string;
   category: string | null;
   cycle: string | null;
-  niveau: string | null;
 };
 
 type FilterMenuProps = {
-  filters: FilterState;
-  onFiltersChange: (filters: FilterState) => void;
+  filters: PackageFilterState;
+  onFiltersChange: (filters: PackageFilterState) => void;
   categories: string[];
   cycles: string[];
 };
@@ -28,28 +26,7 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
 }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [openAccordion, setOpenAccordion] = useState<'category' | 'cycle' | 'niveau' | null>(null);
-  const [niveaux, setNiveaux] = useState<Array<{ id: number; name: string }>>([]);
-
-  useEffect(() => {
-    const loadNiveaux = async () => {
-      if (filters.cycle) {
-        try {
-          const allNiveaux = await cyclesApi.getAllNiveaux();
-          const cycleNiveaux = allNiveaux.filter(
-            (n: any) => n.cycle?.name === filters.cycle
-          );
-          setNiveaux(cycleNiveaux);
-        } catch (error) {
-          console.error('Erreur chargement niveaux:', error);
-          setNiveaux([]);
-        }
-      } else {
-        setNiveaux([]);
-      }
-    };
-    loadNiveaux();
-  }, [filters.cycle]);
+  const [openAccordion, setOpenAccordion] = useState<'category' | 'cycle' | null>(null);
 
   const handleSearchChange = (text: string) => {
     onFiltersChange({ ...filters, search: text });
@@ -62,16 +39,7 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
 
   const handleCycleSelect = (cycle: string) => {
     const newCycle = filters.cycle === cycle ? null : cycle;
-    onFiltersChange({ 
-      ...filters, 
-      cycle: newCycle,
-      niveau: newCycle === null ? null : filters.niveau
-    });
-  };
-
-  const handleNiveauSelect = (niveau: string) => {
-    const newNiveau = filters.niveau === niveau ? null : niveau;
-    onFiltersChange({ ...filters, niveau: newNiveau });
+    onFiltersChange({ ...filters, cycle: newCycle });
   };
 
   const handleClearFilters = () => {
@@ -79,11 +47,10 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
       search: '',
       category: null,
       cycle: null,
-      niveau: null,
     });
   };
 
-  const hasActiveFilters = filters.category || filters.cycle || filters.niveau;
+  const hasActiveFilters = filters.category || filters.cycle;
 
   return (
     <View style={styles.filterContainer}>
@@ -167,32 +134,6 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
                 ))}
               </ScrollView>
             </List.Accordion>
-
-            {filters.cycle && niveaux.length > 0 && (
-              <List.Accordion
-                title={`Année (${niveaux.length})`}
-                expanded={openAccordion === 'niveau'}
-                onPress={() => setOpenAccordion(openAccordion === 'niveau' ? null : 'niveau')}
-                left={(props) => <List.Icon {...props} icon="numeric" />}
-                style={{ paddingVertical: 0, marginVertical: 0 }}
-                titleStyle={{ fontSize: 14 }}
-              >
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-                  {niveaux.map((niveau) => (
-                    <Chip
-                      key={niveau.id}
-                      selected={filters.niveau === niveau.name}
-                      onPress={() => handleNiveauSelect(niveau.name)}
-                      style={styles.chip}
-                      mode={filters.niveau === niveau.name ? 'flat' : 'outlined'}
-                      textStyle={styles.chipText}
-                    >
-                      {niveau.name}
-                    </Chip>
-                  ))}
-                </ScrollView>
-              </List.Accordion>
-            )}
           </View>
         </View>
       )}

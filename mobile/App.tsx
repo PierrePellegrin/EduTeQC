@@ -10,6 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
+import { SettingsProvider } from './src/contexts/SettingsContext';
 
 // Screens
 import {
@@ -18,6 +19,7 @@ import {
   CourseDetailScreen,
   TestScreen,
   ProfileScreen,
+  SettingsScreen,
   AdminDashboardScreen,
   AdminCoursesScreen,
   AdminTestsScreen,
@@ -32,6 +34,35 @@ import PackagesShopScreen from './src/screens/packages/PackagesShopScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const queryClient = new QueryClient();
+
+function ProfileStack() {
+  const { theme } = useTheme();
+  
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.headerBackground,
+        },
+        headerTintColor: theme.colors.onHeaderBackground,
+        headerTitleStyle: {
+          color: theme.colors.onHeaderBackground,
+        },
+      }}
+    >
+      <Stack.Screen
+        name="ProfileMain"
+        component={ProfileScreen as React.ComponentType<any>}
+        options={{ title: 'Profil', headerShown: false }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen as React.ComponentType<any>}
+        options={{ title: 'Paramètres' }}
+      />
+    </Stack.Navigator>
+  );
+}
 
 function ClientTabs() {
   const { theme } = useTheme();
@@ -90,8 +121,8 @@ function ClientTabs() {
             />
             <Tab.Screen
               name="ProfileTab"
-              component={ProfileScreen}
-              options={{ title: 'Profil' }}
+              component={ProfileStack}
+              options={{ title: 'Profil', headerShown: false }}
             />
           </Tab.Navigator>
         )}
@@ -290,8 +321,8 @@ function AdminTabs() {
       />
       <Tab.Screen
         name="ProfileTab"
-        component={ProfileScreen}
-        options={{ title: 'Profil' }}
+        component={ProfileStack}
+        options={{ title: 'Profil', headerShown: false }}
       />
     </Tab.Navigator>
   );
@@ -325,7 +356,9 @@ export default function App() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <AppContent />
+          <SettingsProvider>
+            <AppContent />
+          </SettingsProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

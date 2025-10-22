@@ -6,6 +6,7 @@ import { RouteProp } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { useSettings } from '../../../contexts/SettingsContext';
 import { styles } from './styles';
 import { AccordionGroup } from '../PackagesListScreen/components';
 
@@ -17,6 +18,7 @@ type Props = {
 export const PackageDetailScreen = ({ navigation, route }: Props) => {
   const { packageId } = route.params;
   const { theme } = useTheme();
+  const { showImages } = useSettings();
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
   // Récupérer les détails du package
@@ -96,14 +98,19 @@ export const PackageDetailScreen = ({ navigation, route }: Props) => {
               primary: theme.colors.primary,
             }}
           >
-            {courses.map((course: any) => (
+          {courses.map((course: any) => {
+            // Image par défaut si pas d'imageUrl
+            const defaultImage = 'https://via.placeholder.com/800x400/4A90E2/FFFFFF?text=' + encodeURIComponent(course.category || 'Cours');
+            const imageSource = course.imageUrl || defaultImage;
+
+            return (
               <Card
                 key={course.id}
                 style={[styles.courseCard, { backgroundColor: theme.colors.cardBackground }]}
                 onPress={() => navigation.navigate('CourseDetail', { courseId: course.id })}
               >
-                {course.imageUrl && (
-                  <Card.Cover source={{ uri: course.imageUrl }} style={styles.cover} />
+                {showImages && (
+                  <Card.Cover source={{ uri: imageSource }} style={styles.cover} />
                 )}
                 <Card.Content>
                   <Text variant="titleMedium" style={styles.courseTitle}>
@@ -114,7 +121,8 @@ export const PackageDetailScreen = ({ navigation, route }: Props) => {
                   </Text>
                 </Card.Content>
               </Card>
-            ))}
+            );
+          })}
           </AccordionGroup>
         ))}
       </View>
