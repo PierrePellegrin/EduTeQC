@@ -17,6 +17,7 @@ type FilterMenuProps = {
   cycles: any[];
   niveaux: any[];
   categories: string[];
+  filteredPackagesCount: number;
 };
 
 export const FilterMenu: React.FC<FilterMenuProps> = ({
@@ -25,6 +26,7 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
   cycles,
   niveaux,
   categories,
+  filteredPackagesCount,
 }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -105,7 +107,7 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
 
           <View style={styles.filtersSection}>
             <List.Accordion
-              title="Cycle"
+              title={`Cycle (${cycles.length})`}
               expanded={openAccordion === 'cycle'}
               onPress={() => setOpenAccordion(openAccordion === 'cycle' ? null : 'cycle')}
               left={(props) => <List.Icon {...props} icon="school" />}
@@ -129,7 +131,7 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
             </List.Accordion>
 
             <List.Accordion
-              title="Matière"
+              title={`Matière (${categories.length})`}
               expanded={openAccordion === 'category'}
               onPress={() => setOpenAccordion(openAccordion === 'category' ? null : 'category')}
               left={(props) => <List.Icon {...props} icon="book" />}
@@ -154,7 +156,7 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
 
             {filters.cycleId && (
               <List.Accordion
-                title="Année"
+                title={`Année (${filteredNiveaux.length})`}
                 expanded={openAccordion === 'niveau'}
                 onPress={() => setOpenAccordion(openAccordion === 'niveau' ? null : 'niveau')}
                 left={(props) => <List.Icon {...props} icon="calendar" />}
