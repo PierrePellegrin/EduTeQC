@@ -30,6 +30,8 @@ import {
 } from './src/screens';
 import { PackageDetailScreen } from './src/screens/packages/PackageDetailScreen';
 import PackagesShopScreen from './src/screens/packages/PackagesShopScreen';
+import { CourseSectionsScreen } from './src/screens/CourseSectionsScreen';
+import { SectionDetailScreen } from './src/screens/SectionDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -157,6 +159,16 @@ function CoursesStack() {
         options={{ title: 'Détails du cours' }}
       />
       <Stack.Screen
+        name="CourseSections"
+        component={CourseSectionsScreen as React.ComponentType<any>}
+        options={{ title: 'Sections du cours' }}
+      />
+      <Stack.Screen
+        name="SectionDetail"
+        component={SectionDetailScreen as React.ComponentType<any>}
+        options={{ title: 'Section' }}
+      />
+      <Stack.Screen
         name="TestDetail"
         component={TestScreen as React.ComponentType<any>}
         options={{ title: 'Test' }}
@@ -199,6 +211,21 @@ function PackagesStack() {
         name="CourseDetail"
         component={CourseDetailScreen as React.ComponentType<any>}
         options={{ title: 'Détails du cours' }}
+      />
+      <Stack.Screen
+        name="CourseSections"
+        component={CourseSectionsScreen as React.ComponentType<any>}
+        options={{ title: 'Sections du cours' }}
+      />
+      <Stack.Screen
+        name="SectionDetail"
+        component={SectionDetailScreen as React.ComponentType<any>}
+        options={{ title: 'Section' }}
+      />
+      <Stack.Screen
+        name="TestDetail"
+        component={TestScreen as React.ComponentType<any>}
+        options={{ title: 'Test' }}
       />
     </Stack.Navigator>
   );

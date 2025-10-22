@@ -36,44 +36,98 @@ async function main() {
   });
   console.log('✅ Client créé:', client.email);
 
+  // Créer les cycles et niveaux
+  console.log('\n📚 Création des cycles et niveaux...');
+
+  // Cycle Primaire
+  const cyclePrimaire = await prisma.cycle.upsert({
+    where: { name: 'Primaire' },
+    update: {},
+    create: {
+      name: 'Primaire',
+      order: 1,
+    },
+  });
+
+  const niveauxPrimaire = ['CP', 'CE1', 'CE2', 'CM1', 'CM2'];
+  for (let i = 0; i < niveauxPrimaire.length; i++) {
+    await prisma.niveau.upsert({
+      where: { name: niveauxPrimaire[i] },
+      update: {},
+      create: {
+        name: niveauxPrimaire[i],
+        cycleId: cyclePrimaire.id,
+        order: i + 1,
+      },
+    });
+  }
+  console.log('✅ Cycle Primaire créé avec niveaux:', niveauxPrimaire.join(', '));
+
+  // Cycle Collège
+  const cycleCollege = await prisma.cycle.upsert({
+    where: { name: 'Collège' },
+    update: {},
+    create: {
+      name: 'Collège',
+      order: 2,
+    },
+  });
+
+  const niveauxCollege = ['6ème', '5ème', '4ème', '3ème'];
+  for (let i = 0; i < niveauxCollege.length; i++) {
+    await prisma.niveau.upsert({
+      where: { name: niveauxCollege[i] },
+      update: {},
+      create: {
+        name: niveauxCollege[i],
+        cycleId: cycleCollege.id,
+        order: i + 1,
+      },
+    });
+  }
+  console.log('✅ Cycle Collège créé avec niveaux:', niveauxCollege.join(', '));
+
+  // Cycle Lycée
+  const cycleLycee = await prisma.cycle.upsert({
+    where: { name: 'Lycée' },
+    update: {},
+    create: {
+      name: 'Lycée',
+      order: 3,
+    },
+  });
+
+  const niveauxLycee = ['2nd', '1ère', 'Terminale'];
+  for (let i = 0; i < niveauxLycee.length; i++) {
+    await prisma.niveau.upsert({
+      where: { name: niveauxLycee[i] },
+      update: {},
+      create: {
+        name: niveauxLycee[i],
+        cycleId: cycleLycee.id,
+        order: i + 1,
+      },
+    });
+  }
+  console.log('✅ Cycle Lycée créé avec niveaux:', niveauxLycee.join(', '));
+
+  // Récupérer un niveau par défaut pour les cours (CE2 pour l'exemple)
+  const niveauCE2 = await prisma.niveau.findUnique({
+    where: { name: 'CE2' },
+  });
+
+  if (!niveauCE2) {
+    throw new Error('Niveau CE2 non trouvé');
+  }
+
   // Créer des cours
+  console.log('\n📖 Création des cours...');
   const mathCourse = await prisma.course.create({
     data: {
       title: 'Mathématiques - Niveau Débutant',
       description: 'Découvrez les bases des mathématiques avec ce cours complet',
       category: 'Mathématiques',
-      content: `
-# Introduction aux Mathématiques
-
-## Les Nombres
-
-Les nombres sont la base des mathématiques. On distingue plusieurs types :
-- **Nombres naturels** : 0, 1, 2, 3...
-- **Nombres entiers** : ..., -2, -1, 0, 1, 2...
-- **Nombres décimaux** : 3.14, 2.5, 0.75...
-
-## Les Opérations de Base
-
-### Addition (+)
-L'addition permet de combiner deux nombres.
-Exemple: 5 + 3 = 8
-
-### Soustraction (-)
-La soustraction permet de retirer un nombre d'un autre.
-Exemple: 10 - 4 = 6
-
-### Multiplication (×)
-La multiplication est une addition répétée.
-Exemple: 4 × 3 = 12 (c'est-à-dire 4 + 4 + 4)
-
-### Division (÷)
-La division permet de partager en parts égales.
-Exemple: 12 ÷ 3 = 4
-
-## Exercices Pratiques
-
-Vous pouvez maintenant passer au test pour évaluer vos connaissances !
-      `,
+      niveauId: niveauCE2.id,
       imageUrl: 'https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800',
       order: 1,
       isPublished: true,
@@ -86,48 +140,7 @@ Vous pouvez maintenant passer au test pour évaluer vos connaissances !
       title: 'Français - Grammaire de Base',
       description: 'Maîtrisez les fondamentaux de la grammaire française',
       category: 'Français',
-      content: `
-# Grammaire Française
-
-## Les Classes de Mots
-
-### Le Nom
-Le nom désigne une personne, un animal, une chose ou une idée.
-Exemples: chat, table, liberté, Marie
-
-### Le Verbe
-Le verbe exprime une action ou un état.
-Exemples: manger, courir, être, avoir
-
-### L'Adjectif
-L'adjectif qualifie le nom.
-Exemples: beau, grand, intelligent, rouge
-
-### Les Déterminants
-Les déterminants accompagnent le nom.
-Exemples: le, la, un, une, mon, ta, ce
-
-## Les Temps Verbaux
-
-### Présent
-Il exprime ce qui se passe maintenant.
-Exemple: Je mange une pomme.
-
-### Passé composé
-Il exprime une action terminée dans le passé.
-Exemple: J'ai mangé une pomme.
-
-### Futur
-Il exprime ce qui va se passer.
-Exemple: Je mangerai une pomme.
-
-## La Phrase
-
-Une phrase commence par une majuscule et se termine par un point.
-Elle contient au minimum un sujet et un verbe.
-
-Exemple: Le chat dort.
-      `,
+      niveauId: niveauCE2.id,
       imageUrl: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800',
       order: 2,
       isPublished: true,

@@ -39,6 +39,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     category: '',
     content: '',
     imageUrl: '',
+    niveauId: '',
   });
 
   const { data: courses, isLoading, dataUpdatedAt } = useQuery({
@@ -64,6 +65,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
       category: '',
       content: '',
       imageUrl: '',
+      niveauId: '',
     });
   }, []);
 
@@ -71,7 +73,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   const { createMutation, updateMutation, deleteMutation, togglePublishMutation } = useCourseMutations(resetForm, setShowCreateForm, setEditingCourse);
 
   const handleSubmit = useCallback(() => {
-    if (!formData.title || !formData.description || !formData.category || !formData.content) {
+    if (!formData.title || !formData.description || !formData.category || !formData.content || !formData.niveauId) {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
       return;
     }
@@ -81,6 +83,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
       description: formData.description,
       category: formData.category,
       content: formData.content,
+      niveauId: formData.niveauId,
       imageUrl: formData.imageUrl || undefined,
     };
 
@@ -102,6 +105,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
       category: course.category,
       content: course.content || '',
       imageUrl: course.imageUrl || '',
+      niveauId: course.niveauId || '',
     });
     setShowCreateForm(true);
   }, []);

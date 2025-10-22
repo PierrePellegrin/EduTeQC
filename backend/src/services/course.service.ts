@@ -37,8 +37,30 @@ export class CourseService {
             cycle: true,
           },
         },
+        sections: {
+          where: { parentId: null }, // Seulement les sections racines
+          include: {
+            children: {
+              include: {
+                children: {
+                  include: {
+                    children: true,
+                  },
+                },
+              },
+              orderBy: { order: 'asc' },
+            },
+            tests: {
+              where: { isPublished: true },
+            },
+          },
+          orderBy: { order: 'asc' },
+        },
         tests: {
-          where: { isPublished: true },
+          where: { 
+            isPublished: true,
+            // Tests globaux du cours uniquement (pas liés à une section)
+          },
           select: {
             id: true,
             title: true,
@@ -73,7 +95,6 @@ export class CourseService {
         title: true,
         description: true,
         category: true,
-        content: true,
         imageUrl: true,
         isPublished: true,
         order: true,
@@ -93,6 +114,7 @@ export class CourseService {
         _count: {
           select: {
             tests: true,
+            sections: true,
           },
         },
       },
