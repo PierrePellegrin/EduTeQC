@@ -86,8 +86,29 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
             </View>
           )}
 
-          <View style={styles.filtersSection}>
-            <List.Accordion
+          <View style={styles.filtersSection}>`n            <List.Accordion
+              title={`Matière (${categories.length})`}
+              expanded={openAccordion === 'category'}
+              onPress={() => setOpenAccordion(openAccordion === 'category' ? null : 'category')}
+              left={(props) => <List.Icon {...props} icon="book" />}
+              style={{ paddingVertical: 0, marginVertical: 0 }}
+              titleStyle={{ fontSize: 14 }}
+            >
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+                {categories.map((category) => (
+                  <Chip
+                    key={category}
+                    selected={filters.category === category}
+                    onPress={() => handleCategorySelect(category)}
+                    style={styles.chip}
+                    mode={filters.category === category ? 'flat' : 'outlined'}
+                    textStyle={styles.chipText}
+                  >
+                    {category}
+                  </Chip>
+                ))}
+              </ScrollView>
+            </List.Accordion>`n`n            <List.Accordion
               title={`Cours (${courses.length})`}
               expanded={openAccordion === 'course'}
               onPress={() => setOpenAccordion(openAccordion === 'course' ? null : 'course')}
@@ -110,33 +131,11 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
                 ))}
               </ScrollView>
             </List.Accordion>
-
-            <List.Accordion
-              title={`Matière (${categories.length})`}
-              expanded={openAccordion === 'category'}
-              onPress={() => setOpenAccordion(openAccordion === 'category' ? null : 'category')}
-              left={(props) => <List.Icon {...props} icon="book" />}
-              style={{ paddingVertical: 0, marginVertical: 0 }}
-              titleStyle={{ fontSize: 14 }}
-            >
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-                {categories.map((category) => (
-                  <Chip
-                    key={category}
-                    selected={filters.category === category}
-                    onPress={() => handleCategorySelect(category)}
-                    style={styles.chip}
-                    mode={filters.category === category ? 'flat' : 'outlined'}
-                    textStyle={styles.chipText}
-                  >
-                    {category}
-                  </Chip>
-                ))}
-              </ScrollView>
-            </List.Accordion>
           </View>
         </View>
       )}
     </View>
   );
 };
+
+

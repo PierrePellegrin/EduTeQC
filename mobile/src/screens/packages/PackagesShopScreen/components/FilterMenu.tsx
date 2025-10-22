@@ -106,32 +106,7 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
             </View>
           )}
 
-          <View style={styles.filtersSection}>
-            <List.Accordion
-              title={`Cycle (${cycles.length})`}
-              expanded={openAccordion === 'cycle'}
-              onPress={() => setOpenAccordion(openAccordion === 'cycle' ? null : 'cycle')}
-              left={(props) => <List.Icon {...props} icon="school" />}
-              style={{ paddingVertical: 0, marginVertical: 0 }}
-              titleStyle={{ fontSize: 14 }}
-            >
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-                {cycles.map((cycle) => (
-                  <Chip
-                    key={cycle.id}
-                    selected={filters.cycleId === cycle.id}
-                    onPress={() => handleCycleSelect(cycle.id)}
-                    style={styles.chip}
-                    mode={filters.cycleId === cycle.id ? 'flat' : 'outlined'}
-                    textStyle={styles.chipText}
-                  >
-                    {cycle.name}
-                  </Chip>
-                ))}
-              </ScrollView>
-            </List.Accordion>
-
-            <List.Accordion
+          <View style={styles.filtersSection}>`n            <List.Accordion
               title={`Matière (${categories.length})`}
               expanded={openAccordion === 'category'}
               onPress={() => setOpenAccordion(openAccordion === 'category' ? null : 'category')}
@@ -150,6 +125,28 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
                     textStyle={styles.chipText}
                   >
                     {category}
+                  </Chip>
+                ))}
+              </ScrollView>
+            </List.Accordion>`n`n            <List.Accordion
+              title={`Cycle (${cycles.length})`}
+              expanded={openAccordion === 'cycle'}
+              onPress={() => setOpenAccordion(openAccordion === 'cycle' ? null : 'cycle')}
+              left={(props) => <List.Icon {...props} icon="school" />}
+              style={{ paddingVertical: 0, marginVertical: 0 }}
+              titleStyle={{ fontSize: 14 }}
+            >
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+                {cycles.map((cycle) => (
+                  <Chip
+                    key={cycle.id}
+                    selected={filters.cycleId === cycle.id}
+                    onPress={() => handleCycleSelect(cycle.id)}
+                    style={styles.chip}
+                    mode={filters.cycleId === cycle.id ? 'flat' : 'outlined'}
+                    textStyle={styles.chipText}
+                  >
+                    {cycle.name}
                   </Chip>
                 ))}
               </ScrollView>
@@ -186,5 +183,7 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
     </View>
   );
 };
+
+
 
 
