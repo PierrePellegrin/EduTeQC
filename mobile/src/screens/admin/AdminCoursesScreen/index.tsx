@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useCallback, useEffect, useDeferredValue } from 'react';
 import { View, ScrollView, FlatList, Alert, InteractionManager } from 'react-native';
-import { Text, Searchbar, FAB, SegmentedButtons } from 'react-native-paper';
+import { Text, FAB, SegmentedButtons } from 'react-native-paper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CourseForm, CoursesList, EmptyState, AccordionGroup } from './components';
+import { CustomSearchbar } from '../../../components';
 import { styles } from './styles';
 import { useCourseMutations } from './consts';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -315,7 +316,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Searchbar
+        <CustomSearchbar
           placeholder="Rechercher"
           onChangeText={setSearchQuery}
           value={searchQuery}

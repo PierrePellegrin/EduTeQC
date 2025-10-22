@@ -97,6 +97,24 @@ export const testsApi = {
   },
 };
 
+// Cycles and Niveaux API
+export const cyclesApi = {
+  getAllCycles: async () => {
+    const response = await api.get('/cycles');
+    return response.data;
+  },
+
+  getAllNiveaux: async () => {
+    const response = await api.get('/niveaux');
+    return response.data;
+  },
+
+  getNiveauxByCycle: async (cycleId: string) => {
+    const response = await api.get(`/cycles/${cycleId}/niveaux`);
+    return response.data;
+  },
+};
+
 // Admin API
 export const adminApi = {
   // Client Packages

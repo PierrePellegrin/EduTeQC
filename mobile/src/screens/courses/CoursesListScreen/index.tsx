@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useCallback, useDeferredValue } from 'react';
 import { View, FlatList } from 'react-native';
-import { Text, Searchbar, ActivityIndicator } from 'react-native-paper';
+import { Text, ActivityIndicator } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { coursesApi, adminApi } from '../../../services/api';
 import { Course } from '../../../types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MemoizedSegmentedButtons, LoadingScreen } from '../../../components';
-import { CourseCard, EmptyState, AccordionGroup } from './components';
+import { CourseCard, EmptyState, AccordionGroup, FilterMenu, CourseFilterState } from './components';
 import { styles } from './styles';
 import { useTheme } from '../../../contexts/ThemeContext';
 
@@ -24,8 +24,12 @@ const MemoizedCourseCard = React.memo(CourseCard, (prev, next) =>
 );
 
 export const CoursesListScreen = ({ navigation }: Props) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const deferredSearchQuery = useDeferredValue(searchQuery); // React 18 optimization
+  const [filters, setFilters] = useState<CourseFilterState>({
+    search: '',
+    category: null,
+    packageId: null,
+  });
+  const deferredSearchQuery = useDeferredValue(filters.search); // React 18 optimization
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   
@@ -58,13 +62,50 @@ export const CoursesListScreen = ({ navigation }: Props) => {
     courses = [];
   }
 
-  // Filtre par recherche
+  // Extract unique categories and packages
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    courses.forEach((course) => {
+      if (course.category) cats.add(course.category);
+    });
+    return Array.from(cats).sort();
+  }, [courses]);
+
+  const packages = useMemo(() => {
+    if (!userPackages) return [];
+    return userPackages.map((up: any) => ({
+      id: up.packageId,
+      name: up.package.name,
+    }));
+  }, [userPackages]);
+
+  // Filtre par recherche, catégorie et package
   const filteredCourses = useMemo(() => {
-    return courses.filter((course) =>
-      course.title.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
-      course.category.toLowerCase().includes(deferredSearchQuery.toLowerCase())
-    );
-  }, [courses, deferredSearchQuery]);
+    let filtered = courses;
+
+    // Filtre par recherche
+    if (deferredSearchQuery) {
+      filtered = filtered.filter((course) =>
+        course.title.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+        course.category.toLowerCase().includes(deferredSearchQuery.toLowerCase())
+      );
+    }
+
+    // Filtre par catégorie
+    if (filters.category) {
+      filtered = filtered.filter((course) => course.category === filters.category);
+    }
+
+    // Filtre par package
+    if (filters.packageId) {
+      const packageCourseIds = userPackages
+        ?.find((up: any) => up.packageId === filters.packageId)
+        ?.package.courses.map((c: any) => c.course.id) || [];
+      filtered = filtered.filter((course) => packageCourseIds.includes(course.id));
+    }
+
+    return filtered;
+  }, [courses, deferredSearchQuery, filters.category, filters.packageId, userPackages]);
 
   // Regroupement
   const groupedCourses = useMemo(() => {
@@ -160,24 +201,26 @@ export const CoursesListScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Searchbar
-          placeholder="Rechercher"
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchbar}
-        />
+      <FilterMenu
+        filters={filters}
+        onFiltersChange={setFilters}
+        categories={categories}
+        packages={packages}
+      />
 
-        <MemoizedSegmentedButtons
-          value={groupBy}
-          onValueChange={(value) => setGroupBy(value as GroupBy)}
-          buttons={[
-            { value: 'none', label: 'Tous', icon: 'view-list' },
-            { value: 'category', label: 'Par matière', icon: 'folder' },
-            { value: 'package', label: 'Par forfait', icon: 'package-variant' },
-          ]}
-        />
-      </View>
+      {filteredCourses.length > 0 && (
+        <View style={styles.header}>
+          <MemoizedSegmentedButtons
+            value={groupBy}
+            onValueChange={(value) => setGroupBy(value as GroupBy)}
+            buttons={[
+              { value: 'none', label: 'Tous', icon: 'view-list' },
+              { value: 'category', label: 'Par matière', icon: 'folder' },
+              { value: 'package', label: 'Par forfait', icon: 'package-variant' },
+            ]}
+          />
+        </View>
+      )}
 
       {filteredCourses.length === 0 ? (
         <EmptyState />

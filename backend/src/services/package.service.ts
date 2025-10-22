@@ -17,6 +17,7 @@ export class PackageService {
                 id: true,
                 title: true,
                 category: true,
+                niveauId: true,
               },
             },
           },

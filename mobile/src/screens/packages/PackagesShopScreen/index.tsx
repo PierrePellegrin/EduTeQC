@@ -1,14 +1,15 @@
 import React, { useMemo, useState, useCallback, useDeferredValue } from 'react';
 import { View, FlatList } from 'react-native';
-import { Text, Searchbar } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from '../../../services/api';
+import { adminApi, cyclesApi } from '../../../services/api';
 import { usePackageMutations } from '../PackagesListScreen/consts';
 import { AccordionGroup, PackageCard } from '../PackagesListScreen/components';
 import { styles } from '../PackagesListScreen/styles';
 import { MemoizedSegmentedButtons } from '../../../components';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { FilterMenu, FilterState } from './components';
 
  type Props = {
    navigation: NativeStackNavigationProp<any>;
@@ -19,8 +20,13 @@ import { useTheme } from '../../../contexts/ThemeContext';
  export const PackagesShopScreen = ({ navigation }: Props) => {
    const { theme } = useTheme();
    const queryClient = useQueryClient();
-   const [searchQuery, setSearchQuery] = useState('');
-   const deferredSearchQuery = useDeferredValue(searchQuery);
+   const [filters, setFilters] = useState<FilterState>({
+     search: '',
+     cycleId: null,
+     category: null,
+     niveauId: null,
+   });
+   const deferredSearchQuery = useDeferredValue(filters.search);
    const [groupBy, setGroupBy] = useState<GroupBy>('none');
    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
  
@@ -33,21 +39,78 @@ import { useTheme } from '../../../contexts/ThemeContext';
      queryKey: ['userPackages', 'v2'],
      queryFn: adminApi.getUserPackages,
    });
+
+   const { data: cyclesData } = useQuery({
+     queryKey: ['cycles'],
+     queryFn: cyclesApi.getAllCycles,
+   });
+
+   const { data: niveauxData } = useQuery({
+     queryKey: ['niveaux'],
+     queryFn: cyclesApi.getAllNiveaux,
+   });
  
    const { buyMutation } = usePackageMutations(queryClient);
+
+   const cycles = cyclesData?.cycles || [];
+   const niveaux = niveauxData?.niveaux || [];
  
    const availablePackages = useMemo(() => {
      const all = packages?.packages || [];
      return all.filter((pkg: any) => !userPackages?.some((up: any) => up.packageId === pkg.id));
    }, [packages?.packages, userPackages]);
+
+   // Extract unique categories from packages
+   const categories = useMemo(() => {
+     const cats = new Set<string>();
+     availablePackages.forEach((pkg: any) => {
+       pkg.courses?.forEach((pc: any) => {
+         if (pc.course?.category) {
+           cats.add(pc.course.category);
+         }
+       });
+     });
+     return Array.from(cats).sort();
+   }, [availablePackages]);
  
    const filteredPackages = useMemo(() => {
-     if (!deferredSearchQuery) return availablePackages;
-     const q = deferredSearchQuery.toLowerCase();
-     return availablePackages.filter((pkg: any) =>
-       pkg.name.toLowerCase().includes(q) || pkg.description?.toLowerCase().includes(q)
-     );
-   }, [availablePackages, deferredSearchQuery]);
+     let filtered = availablePackages;
+
+     // Search filter
+     if (deferredSearchQuery) {
+       const q = deferredSearchQuery.toLowerCase();
+       filtered = filtered.filter((pkg: any) =>
+         pkg.name.toLowerCase().includes(q) || pkg.description?.toLowerCase().includes(q)
+       );
+     }
+
+     // Category filter
+     if (filters.category) {
+       filtered = filtered.filter((pkg: any) =>
+         pkg.courses?.some((pc: any) => pc.course?.category === filters.category)
+       );
+     }
+
+     // Niveau filter (year/grade)
+     if (filters.niveauId) {
+       filtered = filtered.filter((pkg: any) =>
+         pkg.courses?.some((pc: any) => pc.course?.niveauId === filters.niveauId)
+       );
+     }
+
+     // Cycle filter (if niveau not selected)
+     if (filters.cycleId && !filters.niveauId) {
+       const cycleNiveauxIds = niveaux
+         .filter((n: any) => n.cycleId === filters.cycleId)
+         .map((n: any) => n.id);
+       
+       filtered = filtered.filter((pkg: any) =>
+         pkg.courses?.some((pc: any) => cycleNiveauxIds.includes(pc.course?.niveauId))
+       );
+     }
+
+     return filtered;
+   }, [availablePackages, deferredSearchQuery, filters, niveaux]);
  
    const groupedPackages = useMemo(() => {
      if (groupBy === 'none') {
@@ -127,22 +190,27 @@ import { useTheme } from '../../../contexts/ThemeContext';
  
    return (
      <View style={{ flex: 1 }}>
-       <View style={{ padding: 16 }}>
-         <Searchbar
-           placeholder="Rechercher"
-           onChangeText={setSearchQuery}
-           value={searchQuery}
-           style={{ marginBottom: 8 }}
-         />
-          <MemoizedSegmentedButtons
-            value={groupBy}
-            onValueChange={(value) => setGroupBy(value as GroupBy)}
-            buttons={[
-              { value: 'none', label: 'Tous', icon: 'view-list' },
-              { value: 'type', label: 'Type', icon: 'shape' },
-            ]}
-          />
-       </View>
+       <FilterMenu
+         filters={filters}
+         onFiltersChange={setFilters}
+         cycles={cycles}
+         niveaux={niveaux}
+         categories={categories}
+         filteredPackagesCount={filteredPackages.length}
+       />
+
+       {filteredPackages.length > 0 && (
+         <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+           <MemoizedSegmentedButtons
+             value={groupBy}
+             onValueChange={(value) => setGroupBy(value as GroupBy)}
+             buttons={[
+               { value: 'none', label: 'Tous', icon: 'view-list' },
+               { value: 'type', label: 'Type', icon: 'shape' },
+             ]}
+           />
+         </View>
+       )}
  
        {filteredPackages.length > 0 && groupBy === 'none' && (
          <FlatList

@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useCallback, useDeferredValue } from 'react';
 import { View, FlatList, InteractionManager } from 'react-native';
-import { Text, Searchbar, FAB } from 'react-native-paper';
+import { Text, FAB } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../../../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { MemoizedSegmentedButtons } from '../../../components';
+import { MemoizedSegmentedButtons, CustomSearchbar } from '../../../components';
 import { PackageForm, PackagesList, EmptyState, AccordionGroup } from './components';
 import { styles } from './styles';
 import { usePackageMutations } from './consts';
@@ -265,7 +265,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Searchbar
+        <CustomSearchbar
           placeholder="Rechercher"
           onChangeText={setSearchQuery}
           value={searchQuery}

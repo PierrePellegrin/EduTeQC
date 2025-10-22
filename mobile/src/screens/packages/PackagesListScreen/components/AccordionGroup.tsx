@@ -18,40 +18,34 @@ type AccordionGroupProps = {
   count?: number;
 };
 
-export const AccordionGroup: React.FC<AccordionGroupProps> = React.memo(
-  ({ title, icon, expanded, onToggle, children, themeColors, count }) => {
-    const rotateInterpolate = useAccordionRotation(expanded);
+export const AccordionGroup: React.FC<AccordionGroupProps> = ({ title, icon, expanded, onToggle, children, themeColors, count }) => {
+  const rotateInterpolate = useAccordionRotation(expanded);
 
-    const cardBg = themeColors?.cardBackground || '#FFFFFF';
-    const onCard = themeColors?.onCardBackground || '#000000';
-    const primary = themeColors?.primary || '#6200EE';
+  const cardBg = themeColors?.cardBackground || '#FFFFFF';
+  const onCard = themeColors?.onCardBackground || '#000000';
+  const primary = themeColors?.primary || '#6200EE';
 
-    return (
-      <View style={styles.container}>
-        <TouchableOpacity
-          style={[accordionStyles.header, { backgroundColor: cardBg }]}
-          onPress={onToggle}
-          activeOpacity={0.7}
-        >
-          <View style={accordionStyles.leftContent}>
-            <MaterialCommunityIcons name={icon} size={24} color={primary} style={accordionStyles.icon} />
-            <Text style={[accordionStyles.title, { color: onCard }]}>
-              {typeof count === 'number' ? `${title} (${count})` : title}
-            </Text>
-          </View>
-          <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
-            <MaterialCommunityIcons name="chevron-down" size={24} color={onCard} />
-          </Animated.View>
-        </TouchableOpacity>
-        {expanded && <View style={styles.content}>{children}</View>}
-      </View>
-    );
-  },
-  (prevProps, nextProps) =>
-    prevProps.expanded === nextProps.expanded &&
-    prevProps.title === nextProps.title &&
-    prevProps.icon === nextProps.icon
-);
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={[accordionStyles.header, { backgroundColor: cardBg }]}
+        onPress={onToggle}
+        activeOpacity={0.7}
+      >
+        <View style={accordionStyles.leftContent}>
+          <MaterialCommunityIcons name={icon} size={24} color={primary} style={accordionStyles.icon} />
+          <Text style={[accordionStyles.title, { color: onCard }]}>
+            {typeof count === 'number' ? `${title} (${count})` : title}
+          </Text>
+        </View>
+        <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
+          <MaterialCommunityIcons name="chevron-down" size={24} color={onCard} />
+        </Animated.View>
+      </TouchableOpacity>
+      {expanded && <View style={styles.content}>{children}</View>}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: accordionStyles.container,

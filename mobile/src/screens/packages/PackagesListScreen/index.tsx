@@ -1,13 +1,13 @@
 import React, { useMemo, useState, useCallback, useDeferredValue } from 'react';
 import { View, FlatList } from 'react-native';
-import { Text, Searchbar, FAB } from 'react-native-paper';
+import { Text, FAB } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { adminApi } from '../../../services/api';
 import { styles } from './styles';
 import { AccordionGroup, PackageCard } from './components';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { MemoizedSegmentedButtons } from '../../../components';
+import { MemoizedSegmentedButtons, CustomSearchbar } from '../../../components';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -130,11 +130,11 @@ export const PackagesListScreen = ({ navigation }: Props) => {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ padding: 16 }}>
-        <Searchbar
+        <CustomSearchbar
           placeholder="Rechercher"
           onChangeText={setSearchQuery}
           value={searchQuery}
-          style={{ marginBottom: 8 }}
+          style={{ marginBottom: 16 }}
         />
         <MemoizedSegmentedButtons
           value={groupBy}

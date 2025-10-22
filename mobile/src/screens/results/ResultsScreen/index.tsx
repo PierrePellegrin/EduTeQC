@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Text, ActivityIndicator, Card, Chip, Searchbar, SegmentedButtons, List } from 'react-native-paper';
+import { Text, ActivityIndicator, Card, Chip, SegmentedButtons, List } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { testsApi } from '../../../services/api';
+import { CustomSearchbar } from '../../../components';
 import { styles } from './styles';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -153,7 +154,7 @@ export const ResultsScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Searchbar
+        <CustomSearchbar
           placeholder="Rechercher"
           onChangeText={setSearchQuery}
           value={searchQuery}
