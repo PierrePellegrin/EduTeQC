@@ -32,7 +32,8 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
   const [editingPackage, setEditingPackage] = useState<any>(null);
   const [filters, setFilters] = useState<PackageAdminFilterState>({
     search: '',
-    type: null,
+    category: null,
+    cycle: null,
   });
   const deferredSearchQuery = useDeferredValue(filters.search);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
@@ -140,31 +141,26 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     resetForm();
   }, [resetForm]);
 
-  // Extraire types uniques
-  const types = useMemo(() => {
-    const typeSet = new Set<string>();
+  // Extraire catégories et cycles uniques depuis les cours des packages
+  const { categories, cycles } = useMemo(() => {
+    const catsSet = new Set<string>();
+    const cyclesSet = new Set<string>();
+    
     (packages?.packages || []).forEach((pkg: any) => {
-      const name = pkg.name.toLowerCase();
-      let type = 'Autre';
-      
-      if (name.includes('primaire') || name.includes('collège') || name.includes('lycée')) {
-        if (name.includes('français') || name.includes('mathématiques') || name.includes('histoire')) {
-          type = 'Par cycle et matière';
-        } else {
-          type = 'Par cycle';
+      pkg.courses?.forEach((pc: any) => {
+        if (pc.course?.category) {
+          catsSet.add(pc.course.category);
         }
-      } else if (name.includes('cp') || name.includes('ce1') || name.includes('ce2') || 
-                 name.includes('cm1') || name.includes('cm2') || name.includes('6ème') || 
-                 name.includes('5ème') || name.includes('4ème') || name.includes('3ème') ||
-                 name.includes('2nd') || name.includes('1ère') || name.includes('terminale')) {
-        type = 'Par niveau';
-      } else if (name.includes('français') || name.includes('mathématiques') || name.includes('histoire')) {
-        type = 'Par matière';
-      }
-      
-      typeSet.add(type);
+        if (pc.course?.cycle) {
+          cyclesSet.add(pc.course.cycle);
+        }
+      });
     });
-    return Array.from(typeSet).sort();
+    
+    return {
+      categories: Array.from(catsSet).sort(),
+      cycles: Array.from(cyclesSet).sort(),
+    };
   }, [packages?.packages]);
 
   // Filter packages avancé
@@ -180,33 +176,22 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
       );
     }
     
-    // Filtre type
-    if (filters.type) {
-      filtered = filtered.filter((pkg: any) => {
-        const name = pkg.name.toLowerCase();
-        let type = 'Autre';
-        
-        if (name.includes('primaire') || name.includes('collège') || name.includes('lycée')) {
-          if (name.includes('français') || name.includes('mathématiques') || name.includes('histoire')) {
-            type = 'Par cycle et matière';
-          } else {
-            type = 'Par cycle';
-          }
-        } else if (name.includes('cp') || name.includes('ce1') || name.includes('ce2') || 
-                   name.includes('cm1') || name.includes('cm2') || name.includes('6ème') || 
-                   name.includes('5ème') || name.includes('4ème') || name.includes('3ème') ||
-                   name.includes('2nd') || name.includes('1ère') || name.includes('terminale')) {
-          type = 'Par niveau';
-        } else if (name.includes('français') || name.includes('mathématiques') || name.includes('histoire')) {
-          type = 'Par matière';
-        }
-        
-        return type === filters.type;
-      });
+    // Filtre catégorie
+    if (filters.category) {
+      filtered = filtered.filter((pkg: any) =>
+        pkg.courses?.some((pc: any) => pc.course?.category === filters.category)
+      );
+    }
+    
+    // Filtre cycle
+    if (filters.cycle) {
+      filtered = filtered.filter((pkg: any) =>
+        pkg.courses?.some((pc: any) => pc.course?.cycle === filters.cycle)
+      );
     }
     
     return filtered;
-  }, [packages?.packages, deferredSearchQuery, filters.type]);
+  }, [packages?.packages, deferredSearchQuery, filters.category, filters.cycle]);
 
   // Group packages
   const groupedPackages = useMemo(() => {
@@ -326,7 +311,8 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
       <FilterMenu
         filters={filters}
         onFiltersChange={setFilters}
-        types={types}
+        categories={categories}
+        cycles={cycles}
       />
 
       {!showCreateForm && filteredPackages.length > 0 && (
