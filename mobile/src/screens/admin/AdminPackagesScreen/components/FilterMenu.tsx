@@ -9,6 +9,7 @@ export type PackageAdminFilterState = {
   search: string;
   category: string | null;
   cycle: string | null;
+  niveau: string | null;
 };
 
 type FilterMenuProps = {
@@ -16,6 +17,7 @@ type FilterMenuProps = {
   onFiltersChange: (filters: PackageAdminFilterState) => void;
   categories: string[];
   cycles: string[];
+  niveaux: string[];
 };
 
 export const FilterMenu: React.FC<FilterMenuProps> = ({
@@ -23,10 +25,11 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
   onFiltersChange,
   categories,
   cycles,
+  niveaux,
 }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [openAccordion, setOpenAccordion] = useState<'category' | 'cycle' | null>(null);
+  const [openAccordion, setOpenAccordion] = useState<'category' | 'cycle' | 'niveau' | null>(null);
 
   const handleSearchChange = (text: string) => {
     onFiltersChange({ ...filters, search: text });
@@ -39,7 +42,17 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
 
   const handleCycleSelect = (cycle: string) => {
     const newCycle = filters.cycle === cycle ? null : cycle;
-    onFiltersChange({ ...filters, cycle: newCycle });
+    // Reset niveau when cycle changes
+    onFiltersChange({
+      ...filters,
+      cycle: newCycle,
+      niveau: newCycle ? filters.niveau : null,
+    });
+  };
+
+  const handleNiveauSelect = (niveau: string) => {
+    const newNiveau = filters.niveau === niveau ? null : niveau;
+    onFiltersChange({ ...filters, niveau: newNiveau });
   };
 
   const handleClearFilters = () => {
@@ -47,10 +60,11 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
       search: '',
       category: null,
       cycle: null,
+      niveau: null,
     });
   };
 
-  const hasActiveFilters = filters.category || filters.cycle;
+  const hasActiveFilters = filters.category || filters.cycle || filters.niveau;
 
   return (
     <View style={styles.filterContainer}>
@@ -134,6 +148,32 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
                 ))}
               </ScrollView>
             </List.Accordion>
+
+            {filters.cycle && (
+              <List.Accordion
+                title={`Année (${niveaux.length})`}
+                expanded={openAccordion === 'niveau'}
+                onPress={() => setOpenAccordion(openAccordion === 'niveau' ? null : 'niveau')}
+                left={(props) => <List.Icon {...props} icon="calendar" />}
+                style={{ paddingVertical: 0, marginVertical: 0 }}
+                titleStyle={{ fontSize: 14 }}
+              >
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+                  {niveaux.map((niveau) => (
+                    <Chip
+                      key={niveau}
+                      selected={filters.niveau === niveau}
+                      onPress={() => handleNiveauSelect(niveau)}
+                      style={styles.chip}
+                      mode={filters.niveau === niveau ? 'flat' : 'outlined'}
+                      textStyle={styles.chipText}
+                    >
+                      {niveau}
+                    </Chip>
+                  ))}
+                </ScrollView>
+              </List.Accordion>
+            )}
           </View>
         </View>
       )}

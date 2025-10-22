@@ -34,6 +34,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     search: '',
     category: null,
     cycle: null,
+    niveau: null,
   });
   const deferredSearchQuery = useDeferredValue(filters.search);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
@@ -163,6 +164,22 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
     };
   }, [packages?.packages]);
 
+  // Extraire niveaux filtrés par cycle sélectionné
+  const niveaux = useMemo(() => {
+    if (!filters.cycle) return [];
+    
+    const niveauxSet = new Set<string>();
+    (packages?.packages || []).forEach((pkg: any) => {
+      pkg.courses?.forEach((pc: any) => {
+        if (pc.course?.cycle === filters.cycle && pc.course?.niveau?.name) {
+          niveauxSet.add(pc.course.niveau.name);
+        }
+      });
+    });
+    
+    return Array.from(niveauxSet).sort();
+  }, [packages?.packages, filters.cycle]);
+
   // Filter packages avancé
   const filteredPackages = useMemo(() => {
     let filtered = packages?.packages || [];
@@ -190,8 +207,15 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
       );
     }
     
+    // Filtre niveau
+    if (filters.niveau) {
+      filtered = filtered.filter((pkg: any) =>
+        pkg.courses?.some((pc: any) => pc.course?.niveau?.name === filters.niveau)
+      );
+    }
+    
     return filtered;
-  }, [packages?.packages, deferredSearchQuery, filters.category, filters.cycle]);
+  }, [packages?.packages, deferredSearchQuery, filters.category, filters.cycle, filters.niveau]);
 
   // Group packages
   const groupedPackages = useMemo(() => {
@@ -313,6 +337,7 @@ export const AdminPackagesScreen = ({ navigation }: Props) => {
         onFiltersChange={setFilters}
         categories={categories}
         cycles={cycles}
+        niveaux={niveaux}
       />
 
       {!showCreateForm && filteredPackages.length > 0 && (
