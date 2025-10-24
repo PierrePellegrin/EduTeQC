@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, FlatList, Alert } from 'react-native';
 import {
   Text,
   FAB,
@@ -20,7 +20,7 @@ import { CourseSection } from '../../types';
 import { SectionTreeItem } from '../../components/SectionTreeItem';
 import { SectionEditor } from '../../components/SectionEditor';
 import { SectionTestsManager } from '../../components/SectionTestsManager';
-import { SectionTreeDraggable } from '../../components/SectionTreeDraggable';
+// import { SectionTreeDraggable } from '../../components/SectionTreeDraggable'; // Désactivé temporairement
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -169,21 +169,21 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
     );
   };
 
-  const handleReorder = async (reorderedSections: CourseSection[]) => {
-    // Mettre à jour l'ordre des sections
-    const sectionsWithOrder = reorderedSections.map((section, index) => ({
+  const handleReorder = useCallback((reorderedSections: CourseSection[]) => {
+    const sectionsData = reorderedSections.map((section, index) => ({
       id: section.id,
       order: index,
       parentId: section.parentId || null,
     }));
 
-    try {
-      await adminApi.reorderSections(sectionsWithOrder);
-      queryClient.invalidateQueries({ queryKey: ['admin-course-sections', courseId] });
-    } catch (error: any) {
-      Alert.alert('Erreur', 'Impossible de réorganiser les sections');
-    }
-  };
+    adminApi.reorderSections(sectionsData)
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['admin-course-sections', courseId] });
+      })
+      .catch((error: any) => {
+        Alert.alert('Erreur', 'Impossible de réorganiser les sections');
+      });
+  }, [courseId, queryClient]);
 
   const buildTree = (sections: CourseSection[]): CourseSection[] => {
     const map = new Map<string, CourseSection>();
@@ -262,6 +262,7 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
         </Card.Content>
       </Card>
 
+      {/* Mode drag temporairement désactivé à cause d'un problème avec Reanimated
       <View style={styles.viewModeToggle}>
         <SegmentedButtons
           value={viewMode}
@@ -272,9 +273,10 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
           ]}
         />
       </View>
+      */}
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {tree.length === 0 ? (
+      {tree.length === 0 ? (
+        <View style={styles.scrollContent}>
           <Card style={[styles.emptyCard, { backgroundColor: theme.colors.surfaceVariant }]}>
             <Card.Content>
               <Text variant="titleMedium" style={{ textAlign: 'center', marginBottom: 8 }}>
@@ -288,11 +290,14 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
               </Text>
             </Card.Content>
           </Card>
-        ) : viewMode === 'tree' ? (
-          tree.map((section, index) => (
+        </View>
+      ) : viewMode === 'tree' ? (
+        <FlatList
+          data={tree}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item, index }) => (
             <SectionTreeItem
-              key={section.id}
-              section={section}
+              section={item}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onAddChild={handleAddChild}
@@ -301,19 +306,23 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
               canMoveUp={index > 0}
               canMoveDown={index < tree.length - 1}
             />
-          ))
-        ) : (
-          <SectionTreeDraggable
-            sections={tree}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onAddChild={handleAddChild}
-            onDuplicate={handleDuplicate}
-            onManageTests={handleManageTests}
-            onReorder={handleReorder}
-          />
-        )}
-      </ScrollView>
+          )}
+          contentContainerStyle={styles.scrollContent}
+        />
+      ) : null}
+      {/* Mode drag désactivé temporairement
+      ) : (
+        <SectionTreeDraggable
+          sections={tree}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAddChild={handleAddChild}
+          onDuplicate={handleDuplicate}
+          onManageTests={handleManageTests}
+          onReorder={handleReorder}
+        />
+      )}
+      */}
 
       <FAB
         icon="plus"
@@ -388,9 +397,6 @@ const styles = StyleSheet.create({
   viewModeToggle: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-  },
-  scrollView: {
-    flex: 1,
   },
   scrollContent: {
     padding: 16,

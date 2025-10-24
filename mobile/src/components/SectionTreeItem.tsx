@@ -157,7 +157,7 @@ export const SectionTreeItem: React.FC<SectionTreeItemProps> = ({
                   setMenuVisible(false);
                   onManageTests(section);
                 }}
-                leadingIcon="file-document-check"
+                leadingIcon="file-document-edit"
                 title="Gérer les tests"
               />
             )}

@@ -8,6 +8,7 @@ import DraggableFlatList, {
 import { CourseSection } from '../types';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 type SectionTreeDraggableProps = {
   sections: CourseSection[];
@@ -48,11 +49,16 @@ export const SectionTreeDraggable: React.FC<SectionTreeDraggableProps> = ({
     );
   };
 
+  const handleDragEnd = ({ data }: { data: CourseSection[] }) => {
+    'worklet';
+    runOnJS(onReorder)(data);
+  };
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <DraggableFlatList
         data={sections}
-        onDragEnd={({ data }) => onReorder(data)}
+        onDragEnd={handleDragEnd}
         keyExtractor={(item) => item.id}
         renderItem={renderSectionItem}
         containerStyle={styles.list}
@@ -180,7 +186,7 @@ const SectionDraggableItem: React.FC<SectionDraggableItemProps> = ({
             setMenuVisible(false);
             onManageTests(section);
           }}
-          leadingIcon="file-document-check"
+          leadingIcon="file-document-edit"
           title="Gérer les tests"
         />
         <Divider />
