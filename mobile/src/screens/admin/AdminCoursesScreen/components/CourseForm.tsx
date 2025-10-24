@@ -97,12 +97,11 @@ const CourseFormComponent: React.FC<CourseFormProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  // États pour les accordéons - seul "Informations générales" ouvert par défaut
+  // États pour les accordéons - tous fermés par défaut
   const [expandedSections, setExpandedSections] = useState({
-    general: true,
+    general: false,
     classification: false,
     image: false,
-    content: false,
   });
 
   // États pour les menus déroulants
@@ -352,25 +351,6 @@ const CourseFormComponent: React.FC<CourseFormProps> = ({
               </Text>
             </View>
           )}
-        </AccordionSection>
-
-        {/* Section: Contenu */}
-        <AccordionSection
-          title="Contenu"
-          icon="text-box-outline"
-          isExpanded={expandedSections.content}
-          onToggle={() => toggleSection('content')}
-          themeColors={theme.colors}
-        >
-          <TextInput
-            label="Contenu du cours *"
-            value={formData.content}
-            onChangeText={(text) => onFormChange({ ...formData, content: text })}
-            mode="outlined"
-            multiline
-            numberOfLines={8}
-            style={styles.input}
-          />
         </AccordionSection>
 
         {/* Gestion des sections (uniquement en mode édition) */}

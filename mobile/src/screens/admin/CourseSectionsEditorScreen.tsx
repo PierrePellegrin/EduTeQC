@@ -185,6 +185,40 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
       });
   }, [courseId, queryClient]);
 
+  const handleMoveUp = useCallback((section: CourseSection) => {
+    const parentSections = section.parentId
+      ? sections.filter((s: CourseSection) => s.parentId === section.parentId)
+      : sections.filter((s: CourseSection) => !s.parentId);
+
+    const sortedSiblings = [...parentSections].sort((a, b) => a.order - b.order);
+    const currentIndex = sortedSiblings.findIndex((s) => s.id === section.id);
+
+    if (currentIndex > 0) {
+      const updatedSections = [...sortedSiblings];
+      [updatedSections[currentIndex - 1], updatedSections[currentIndex]] = 
+        [updatedSections[currentIndex], updatedSections[currentIndex - 1]];
+      
+      handleReorder(updatedSections);
+    }
+  }, [sections, handleReorder]);
+
+  const handleMoveDown = useCallback((section: CourseSection) => {
+    const parentSections = section.parentId
+      ? sections.filter((s: CourseSection) => s.parentId === section.parentId)
+      : sections.filter((s: CourseSection) => !s.parentId);
+
+    const sortedSiblings = [...parentSections].sort((a, b) => a.order - b.order);
+    const currentIndex = sortedSiblings.findIndex((s) => s.id === section.id);
+
+    if (currentIndex < sortedSiblings.length - 1) {
+      const updatedSections = [...sortedSiblings];
+      [updatedSections[currentIndex], updatedSections[currentIndex + 1]] = 
+        [updatedSections[currentIndex + 1], updatedSections[currentIndex]];
+      
+      handleReorder(updatedSections);
+    }
+  }, [sections, handleReorder]);
+
   const buildTree = (sections: CourseSection[]): CourseSection[] => {
     const map = new Map<string, CourseSection>();
     const roots: CourseSection[] = [];
@@ -303,6 +337,8 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
               onAddChild={handleAddChild}
               onDuplicate={handleDuplicate}
               onManageTests={handleManageTests}
+              onMoveUp={handleMoveUp}
+              onMoveDown={handleMoveDown}
               canMoveUp={index > 0}
               canMoveDown={index < tree.length - 1}
             />
@@ -414,7 +450,7 @@ const styles = StyleSheet.create({
   modal: {
     margin: 20,
     borderRadius: 8,
-    maxHeight: '90%',
+    height: '90%',
   },
   modalTitle: {
     padding: 16,

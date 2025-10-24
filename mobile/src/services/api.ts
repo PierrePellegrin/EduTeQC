@@ -226,7 +226,7 @@ export const adminApi = {
   },
 
   reorderSections: async (sections: { id: string; order: number; parentId?: string | null }[]) => {
-    const response = await api.post(`/sections/reorder`, { sections });
+    const response = await api.post(`/sections/reorder`, { updates: sections });
     return response.data;
   },
 };
