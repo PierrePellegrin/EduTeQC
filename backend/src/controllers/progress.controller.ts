@@ -61,9 +61,10 @@ export class ProgressController {
   async markSectionVisited(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { sectionId } = req.params;
+      const { visited = true } = req.body; // Permet de passer visited: true ou false
       const userId = req.user!.id;
 
-      const sectionProgress = await progressService.markSectionVisited(userId, sectionId);
+      const sectionProgress = await progressService.toggleSectionVisited(userId, sectionId, visited);
 
       res.json({ sectionProgress });
     } catch (error) {

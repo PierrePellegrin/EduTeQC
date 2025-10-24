@@ -4,6 +4,7 @@ import { Text, IconButton, Menu, Divider } from 'react-native-paper';
 import { useTheme } from '../contexts/ThemeContext';
 import { CourseSection } from '../types';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { sectionStyles, getSectionColors } from '../styles/sectionStyles';
 
 type SectionTreeItemProps = {
   section: CourseSection;
@@ -35,6 +36,7 @@ export const SectionTreeItem: React.FC<SectionTreeItemProps> = ({
   const { theme } = useTheme();
   const [expanded, setExpanded] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
+  const colors = getSectionColors(theme);
 
   const hasChildren = section.children && section.children.length > 0;
   const indent = level * 24;
@@ -59,30 +61,30 @@ export const SectionTreeItem: React.FC<SectionTreeItemProps> = ({
     <View style={styles.container}>
       <View
         style={[
-          styles.item,
-          { backgroundColor: theme.colors.surface, marginLeft: indent },
+          sectionStyles.treeItem,
+          { backgroundColor: colors.cardBackground, marginLeft: indent },
         ]}
       >
-        <View style={styles.leftContent}>
+        <View style={sectionStyles.treeItemLeftContent}>
           {hasChildren && (
             <TouchableOpacity onPress={() => setExpanded(!expanded)}>
               <MaterialCommunityIcons
                 name={expanded ? 'chevron-down' : 'chevron-right'}
                 size={24}
-                color={theme.colors.onSurface}
+                color={colors.textColor}
               />
             </TouchableOpacity>
           )}
-          {!hasChildren && <View style={styles.spacer} />}
+          {!hasChildren && <View style={sectionStyles.treeItemSpacer} />}
 
           <MaterialCommunityIcons
             name={hasChildren ? 'folder' : 'file-document-outline'}
             size={20}
-            color={theme.colors.primary}
-            style={styles.icon}
+            color={colors.iconColor}
+            style={sectionStyles.treeItemIcon}
           />
 
-          <View style={styles.textContent}>
+          <View style={sectionStyles.treeItemTextContent}>
             <Text variant="titleSmall" numberOfLines={1}>
               {section.title}
             </Text>
@@ -90,7 +92,7 @@ export const SectionTreeItem: React.FC<SectionTreeItemProps> = ({
               <Text
                 variant="bodySmall"
                 numberOfLines={1}
-                style={{ color: theme.colors.onSurfaceVariant }}
+                style={{ color: colors.visitedTextColor }}
               >
                 {section.content.substring(0, 50)}...
               </Text>
@@ -98,7 +100,7 @@ export const SectionTreeItem: React.FC<SectionTreeItemProps> = ({
           </View>
         </View>
 
-        <View style={styles.actions}>
+        <View style={sectionStyles.treeItemActions}>
           {canMoveUp && onMoveUp && (
             <IconButton
               icon="arrow-up"
@@ -199,33 +201,5 @@ export const SectionTreeItem: React.FC<SectionTreeItemProps> = ({
 const styles = StyleSheet.create({
   container: {
     marginVertical: 2,
-  },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 8,
-    paddingRight: 4,
-    borderRadius: 8,
-    marginVertical: 2,
-  },
-  leftContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  spacer: {
-    width: 24,
-  },
-  icon: {
-    marginHorizontal: 8,
-  },
-  textContent: {
-    flex: 1,
-    marginRight: 8,
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 });

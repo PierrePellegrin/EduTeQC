@@ -366,7 +366,7 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <FilterMenu
         filters={filters}
         onFiltersChange={setFilters}

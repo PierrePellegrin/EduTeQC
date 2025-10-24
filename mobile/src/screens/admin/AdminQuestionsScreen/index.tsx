@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { QuestionForm, QuestionsList, EmptyState, Header } from './components';
 import { styles } from './styles';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
@@ -16,6 +17,7 @@ type Props = {
 export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
   const { testId, testTitle } = route.params;
   const queryClient = useQueryClient();
+  const { theme } = useTheme();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
   
@@ -183,7 +185,7 @@ export const AdminQuestionsScreen = ({ navigation, route }: Props) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
         <Header testTitle={testTitle} onBack={() => navigation.goBack()} />
 

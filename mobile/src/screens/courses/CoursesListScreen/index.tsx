@@ -3,6 +3,7 @@ import { View, FlatList } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { coursesApi, adminApi } from '../../../services/api';
+import { progressApi } from '../../../services/progress.api';
 import { Course } from '../../../types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MemoizedSegmentedButtons, LoadingScreen } from '../../../components';
@@ -20,7 +21,8 @@ type GroupBy = 'none' | 'category' | 'package';
 const MemoizedCourseCard = React.memo(CourseCard, (prev, next) => 
   prev.course.id === next.course.id && 
   prev.course.title === next.course.title &&
-  prev.course.category === next.course.category
+  prev.course.category === next.course.category &&
+  prev.progress === next.progress
 );
 
 export const CoursesListScreen = ({ navigation }: Props) => {
@@ -52,6 +54,24 @@ export const CoursesListScreen = ({ navigation }: Props) => {
     queryKey: ['courses', 'v2'],
     queryFn: coursesApi.getAll,
   });
+
+  // Récupère toutes les progressions de l'utilisateur
+  const { data: allProgressData } = useQuery({
+    queryKey: ['all-progress'],
+    queryFn: progressApi.getAllProgress,
+    staleTime: 60000, // 1 minute
+  });
+
+  // Créer une map des progressions par courseId
+  const progressMap = useMemo(() => {
+    const map = new Map<string, number>();
+    if (allProgressData?.progress) {
+      allProgressData.progress.forEach((p: any) => {
+        map.set(p.courseId, p.completionPercent || 0);
+      });
+    }
+    return map;
+  }, [allProgressData]);
 
   // Filtre les cours selon les packages achetés
   let courses: Course[] = Array.isArray(data?.courses) ? data.courses! : [];
@@ -163,11 +183,12 @@ export const CoursesListScreen = ({ navigation }: Props) => {
   // FlatList renderItem for virtualization
   const renderCourseItem = useCallback(({ item }: { item: Course }) => (
     <MemoizedCourseCard
-        course={item}
-        onPress={() => handleCoursePress(item.id)}
+      course={item}
+      onPress={() => handleCoursePress(item.id)}
       theme={themeColors}
+      progress={progressMap.get(item.id)}
     />
-  ), [handleCoursePress, themeColors]);
+  ), [handleCoursePress, themeColors, progressMap]);
 
   const keyExtractor = useCallback((item: Course) => item.id.toString(), []);
 
@@ -200,7 +221,7 @@ export const CoursesListScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <FilterMenu
         filters={filters}
         onFiltersChange={setFilters}
@@ -233,12 +254,13 @@ export const CoursesListScreen = ({ navigation }: Props) => {
           windowSize={5}
           maxToRenderPerBatch={10}
           removeClippedSubviews={true}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { backgroundColor: theme.colors.background }]}
         />
       ) : (
         <FlatList
           data={flatListData}
           keyExtractor={(item: any) => item.key}
+          contentContainerStyle={[styles.scrollContent, { backgroundColor: theme.colors.background }]}
           renderItem={({ item }: any) => (
             <AccordionGroup
               title={item.key}
@@ -252,15 +274,15 @@ export const CoursesListScreen = ({ navigation }: Props) => {
                 <MemoizedCourseCard
                   key={course.id}
                   course={course}
-                    onPress={() => handleCoursePress(course.id)}
+                  onPress={() => handleCoursePress(course.id)}
                   theme={themeColors}
+                  progress={progressMap.get(course.id)}
                 />
               ))}
             </AccordionGroup>
           )}
           windowSize={5}
           removeClippedSubviews={true}
-          contentContainerStyle={styles.scrollContent}
         />
       )}
     </View>

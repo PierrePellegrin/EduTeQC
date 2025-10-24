@@ -65,8 +65,8 @@ export class ProgressService {
     return progress;
   }
 
-  // Marquer une section comme visitée
-  async markSectionVisited(userId: string, sectionId: string) {
+  // Marquer une section comme visitée ou non visitée
+  async toggleSectionVisited(userId: string, sectionId: string, visited: boolean) {
     const sectionProgress = await prisma.sectionProgress.upsert({
       where: {
         userId_sectionId: {
@@ -75,14 +75,14 @@ export class ProgressService {
         },
       },
       update: {
-        visited: true,
-        visitedAt: new Date(),
+        visited,
+        visitedAt: visited ? new Date() : null,
       },
       create: {
         userId,
         sectionId,
-        visited: true,
-        visitedAt: new Date(),
+        visited,
+        visitedAt: visited ? new Date() : null,
       },
       include: {
         section: {
@@ -104,7 +104,7 @@ export class ProgressService {
         },
       },
       data: {
-        lastSectionId: sectionId,
+        lastSectionId: visited ? sectionId : null,
         lastAccessedAt: new Date(),
       },
     });
@@ -113,6 +113,11 @@ export class ProgressService {
     await this.updateCourseCompletion(userId, sectionProgress.section.courseId);
 
     return sectionProgress;
+  }
+
+  // Marquer une section comme visitée (rétrocompatibilité)
+  async markSectionVisited(userId: string, sectionId: string) {
+    return this.toggleSectionVisited(userId, sectionId, true);
   }
 
   // Récupérer la progression sur toutes les sections d'un cours

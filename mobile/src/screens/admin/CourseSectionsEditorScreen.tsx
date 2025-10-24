@@ -279,8 +279,8 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
   const tree = buildTree(sections);
 
   return (
-    <View style={styles.container}>
-      <Card style={styles.headerCard}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Card style={[styles.headerCard, { backgroundColor: theme.colors.elevation.level2 }]}>
         <Card.Content>
           <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
             Édition des sections de :
@@ -311,7 +311,7 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
 
       {tree.length === 0 ? (
         <View style={styles.scrollContent}>
-          <Card style={[styles.emptyCard, { backgroundColor: theme.colors.surfaceVariant }]}>
+          <Card style={[styles.emptyCard, { backgroundColor: theme.colors.elevation.level2 }]}>
             <Card.Content>
               <Text variant="titleMedium" style={{ textAlign: 'center', marginBottom: 8 }}>
                 Aucune section
