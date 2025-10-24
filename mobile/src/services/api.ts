@@ -197,8 +197,8 @@ export const adminApi = {
 
   // Sections (Admin)
   getCourseSections: async (courseId: string) => {
-    const response = await api.get(`/admin/courses/${courseId}/sections`);
-    return response.data;
+    const response = await api.get(`/courses/${courseId}/sections`);
+    return response.data.sections || [];
   },
 
   createSection: async (courseId: string, data: {
@@ -207,7 +207,7 @@ export const adminApi = {
     parentId?: string;
     order: number;
   }) => {
-    const response = await api.post(`/admin/courses/${courseId}/sections`, data);
+    const response = await api.post(`/courses/${courseId}/sections`, data);
     return response.data;
   },
 
@@ -216,17 +216,17 @@ export const adminApi = {
     content?: string;
     order?: number;
   }) => {
-    const response = await api.put(`/admin/sections/${sectionId}`, data);
+    const response = await api.put(`/sections/${sectionId}`, data);
     return response.data;
   },
 
   deleteSection: async (sectionId: string) => {
-    const response = await api.delete(`/admin/sections/${sectionId}`);
+    const response = await api.delete(`/sections/${sectionId}`);
     return response.data;
   },
 
   reorderSections: async (sections: { id: string; order: number; parentId?: string | null }[]) => {
-    const response = await api.post(`/admin/sections/reorder`, { sections });
+    const response = await api.post(`/sections/reorder`, { sections });
     return response.data;
   },
 };
