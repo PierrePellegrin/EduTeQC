@@ -194,6 +194,41 @@ export const adminApi = {
     const response = await api.delete(`/admin/packages/${id}`);
     return response.data;
   },
+
+  // Sections (Admin)
+  getCourseSections: async (courseId: string) => {
+    const response = await api.get(`/admin/courses/${courseId}/sections`);
+    return response.data;
+  },
+
+  createSection: async (courseId: string, data: {
+    title: string;
+    content?: string;
+    parentId?: string;
+    order: number;
+  }) => {
+    const response = await api.post(`/admin/courses/${courseId}/sections`, data);
+    return response.data;
+  },
+
+  updateSection: async (sectionId: string, data: {
+    title?: string;
+    content?: string;
+    order?: number;
+  }) => {
+    const response = await api.put(`/admin/sections/${sectionId}`, data);
+    return response.data;
+  },
+
+  deleteSection: async (sectionId: string) => {
+    const response = await api.delete(`/admin/sections/${sectionId}`);
+    return response.data;
+  },
+
+  reorderSections: async (sections: { id: string; order: number; parentId?: string | null }[]) => {
+    const response = await api.post(`/admin/sections/reorder`, { sections });
+    return response.data;
+  },
 };
 
 // Cycles API

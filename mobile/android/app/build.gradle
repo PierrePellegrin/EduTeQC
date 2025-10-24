@@ -145,6 +145,16 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
+    // Force compatible androidx.core version with AGP 8.1.1
+    constraints {
+        implementation("androidx.core:core-ktx:1.13.1") {
+            because("androidx.core:core-ktx:1.16.0 requires AGP 8.6.0+")
+        }
+        implementation("androidx.core:core:1.13.1") {
+            because("androidx.core:core:1.16.0 requires AGP 8.6.0+")
+        }
+    }
+
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";

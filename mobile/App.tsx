@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -29,9 +30,10 @@ import {
   ResultsScreen,
 } from './src/screens';
 import { PackageDetailScreen } from './src/screens/packages/PackageDetailScreen';
-import PackagesShopScreen from './src/screens/packages/PackagesShopScreen';
+import { PackagesShopScreen } from './src/screens/packages/PackagesShopScreen';
 import { CourseSectionsScreen } from './src/screens/CourseSectionsScreen';
 import { SectionDetailScreen } from './src/screens/SectionDetailScreen';
+import { CourseSectionsEditorScreen } from './src/screens/admin/CourseSectionsEditorScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -250,6 +252,11 @@ function AdminCoursesStack() {
         name="CoursesList"
         component={AdminCoursesScreen}
         options={{ title: 'Gestion des Cours' }}
+      />
+      <Stack.Screen
+        name="CourseSectionsEditor"
+        component={CourseSectionsEditorScreen as React.ComponentType<any>}
+        options={{ title: 'Éditer les sections' }}
       />
     </Stack.Navigator>
   );

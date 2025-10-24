@@ -19,9 +19,11 @@ type CourseFormProps = {
   };
   isEditing: boolean;
   isLoading: boolean;
+  courseId?: string;
   onFormChange: (data: any) => void;
   onSubmit: () => void;
   onCancel: () => void;
+  onEditSections?: (courseId: string, courseTitle: string) => void;
 };
 
 
@@ -87,9 +89,11 @@ const CourseFormComponent: React.FC<CourseFormProps> = ({
   formData,
   isEditing,
   isLoading,
+  courseId,
   onFormChange,
   onSubmit,
   onCancel,
+  onEditSections,
 }) => {
   const { theme } = useTheme();
 
@@ -368,6 +372,31 @@ const CourseFormComponent: React.FC<CourseFormProps> = ({
             style={styles.input}
           />
         </AccordionSection>
+
+        {/* Gestion des sections (uniquement en mode édition) */}
+        {isEditing && courseId && onEditSections && (
+          <Card style={{ marginTop: 16, backgroundColor: theme.colors.primaryContainer }}>
+            <Card.Content>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <Icon source="file-tree" size={24} color={theme.colors.onPrimaryContainer} />
+                <Text variant="titleMedium" style={{ marginLeft: 8, color: theme.colors.onPrimaryContainer }}>
+                  Sections du cours
+                </Text>
+              </View>
+              <Text variant="bodyMedium" style={{ marginBottom: 12, color: theme.colors.onPrimaryContainer }}>
+                Organisez le contenu en sections hiérarchiques avec du texte formaté.
+              </Text>
+              <Button
+                mode="contained"
+                icon="pencil"
+                onPress={() => onEditSections(courseId, formData.title)}
+                style={{ backgroundColor: theme.colors.primary }}
+              >
+                Gérer les sections
+              </Button>
+            </Card.Content>
+          </Card>
+        )}
 
         {/* Actions */}
         <View style={styles.formActions}>

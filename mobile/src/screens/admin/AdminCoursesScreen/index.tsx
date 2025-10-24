@@ -392,9 +392,13 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
             formData={formData}
             isEditing={!!editingCourse}
             isLoading={(createMutation?.isPending || false) || (updateMutation?.isPending || false)}
+            courseId={editingCourse?.id}
             onFormChange={setFormData}
             onSubmit={handleSubmit}
             onCancel={handleCancelForm}
+            onEditSections={(courseId, courseTitle) => {
+              navigation.navigate('CourseSectionsEditor', { courseId, courseTitle });
+            }}
           />
         </ScrollView>
       ) : filteredCourses.length > 0 && groupBy === 'none' ? (

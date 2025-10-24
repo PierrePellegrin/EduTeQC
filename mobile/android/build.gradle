@@ -4,9 +4,9 @@ buildscript {
     ext {
         buildToolsVersion = findProperty('android.buildToolsVersion') ?: '34.0.0'
         minSdkVersion = Integer.parseInt(findProperty('android.minSdkVersion') ?: '23')
-        compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '34')
-        targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '34')
-        kotlinVersion = findProperty('android.kotlinVersion') ?: '1.8.10'
+        compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '35')
+        targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '35')
+    kotlinVersion = findProperty('android.kotlinVersion') ?: '1.9.22'
 
         ndkVersion = "25.1.8937393"
     }
@@ -36,5 +36,17 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
+    }
+
+    // Force androidx.core to a version compatible with AGP 8.1.1
+    configurations.all { cfg ->
+        resolutionStrategy {
+            force 'androidx.core:core:1.13.1', 'androidx.core:core-ktx:1.13.1'
+            eachDependency { details ->
+                if (details.requested.group == 'androidx.core' && details.requested.name.startsWith('core')) {
+                    details.useVersion '1.13.1'
+                }
+            }
+        }
     }
 }
