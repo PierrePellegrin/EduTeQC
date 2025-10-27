@@ -78,9 +78,12 @@ const SectionItem: React.FC<SectionItemProps> = ({
   onToggle,
   theme,
 }) => {
-  const [expanded, setExpanded] = useState(level === 0); // Premier niveau ouvert par défaut
   const hasChildren = section.children && section.children.length > 0;
   const isVisited = visitedSections.has(section.id);
+  const [expanded, setExpanded] = useState(() => {
+    if (isVisited) return false; // Fermée si validée
+    return level === 0; // Ouverte par défaut seulement pour racine non validée
+  });
   const indent = level * 6; // Indentation minimale pour économiser l'espace
   const colors = getSectionColors(theme, isVisited);
   
@@ -91,11 +94,9 @@ const SectionItem: React.FC<SectionItemProps> = ({
   const getBackgroundColor = () => {
     // Niveau 0 : couleur normale du thème
     if (level === 0) {
-      return isVisited ? colors.visitedBackground : colors.cardBackground;
+      return isVisited ? theme.colors.successContainer : colors.cardBackground;
     }
-    
     // Pour les enfants, on utilise les niveaux d'élévation du thème
-    // Plus le niveau est profond, plus on monte dans les niveaux d'élévation (plus clair)
     if (level === 1) {
       return theme.colors.elevation.level1;
     } else if (level === 2) {
@@ -285,6 +286,30 @@ const SectionItem: React.FC<SectionItemProps> = ({
                 theme={theme}
               />
             ))}
+          </Card.Content>
+        )}
+
+        {/* Bouton de validation pour les sections parent (après les enfants) */}
+        {expanded && isValidatable && hasChildren && (
+          <Card.Content style={{ paddingTop: 0, paddingBottom: 12, paddingHorizontal: 16 }}>
+            <View style={sectionStyles.actionButtonContainer}>
+              <Button
+                mode={isVisited ? 'outlined' : 'contained'}
+                onPress={handleToggleSection}
+                icon={() => (
+                  <MaterialCommunityIcons
+                    name={isVisited ? 'checkbox-marked-circle-outline' : 'checkbox-marked-circle'}
+                    size={20}
+                    color={isVisited ? theme.colors.primary : theme.colors.onPrimary}
+                  />
+                )}
+                style={sectionStyles.actionButton}
+                labelStyle={{ color: isVisited ? theme.colors.primary : theme.colors.onPrimary }}
+                disabled={section.children?.some(child => !visitedSections.has(child.id))}
+              >
+                {isVisited ? 'Marquer comme non terminée' : 'Marquer comme terminée'}
+              </Button>
+            </View>
           </Card.Content>
         )}
       </Card>

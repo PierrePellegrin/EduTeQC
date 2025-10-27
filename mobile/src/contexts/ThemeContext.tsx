@@ -54,8 +54,8 @@ const customLightColors = {
   onSurfaceDisabled: 'rgba(14, 20, 34, 0.38)',
   backdrop: 'rgba(13, 31, 71, 0.35)',
   // Couleurs de succès
-  successContainer: '#C8E6C9',
-  onSuccessContainer: '#1B5E20',
+  successContainer: '#396a98', // bleu plus foncé pour validé (ancien secondary)
+  onSuccessContainer: '#D6E4FF', // texte bleu très clair
   // Couleurs custom pour header/tab bars
   headerBackground: '#396a98',
   onHeaderBackground: '#FFFFFF',
@@ -115,8 +115,8 @@ const customDarkColors = {
   onSurfaceDisabled: 'rgba(229, 236, 248, 0.38)',
   backdrop: 'rgba(4, 10, 24, 0.5)',
   // Couleurs de succès
-  successContainer: '#2E7D32',
-  onSuccessContainer: '#C8E6C9',
+  successContainer: '#031e36ff', // bleu très foncé pour validé
+  onSuccessContainer: '#D6E4FF', // texte bleu très clair
   // Couleurs custom pour header/tab bars
   headerBackground: '#04294c',
   onHeaderBackground: '#FFFFFF',

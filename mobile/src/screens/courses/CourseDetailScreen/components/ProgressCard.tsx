@@ -35,7 +35,7 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
     if (completionPercent >= 100) return theme.colors.tertiary;
     if (completionPercent >= 70) return theme.colors.primary;
     if (completionPercent >= 30) return '#FFA726';
-    return theme.colors.error;
+    return '#b94c4cff'; // vrai rouge vif
   };
 
   const getProgressMessage = () => {
@@ -47,7 +47,7 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
   };
 
   return (
-    <Card style={[styles.card, { backgroundColor: theme.colors.elevation.level4 }]}>
+    <Card style={[styles.card, { backgroundColor: theme.colors.primaryContainer }]}> 
       <Card.Content>
         <View style={styles.header}>
           <MaterialCommunityIcons
@@ -120,32 +120,40 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: 16,
+    marginVertical: 0, // réduit
     elevation: 4,
+    paddingVertical: 1, // réduit
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 0, // réduit
   },
   title: {
-    marginLeft: 12,
+    marginLeft: 8,
     fontWeight: 'bold',
+    fontSize: 18,
   },
   progressContainer: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
+    marginTop: 0,
   },
   percentage: {
     fontWeight: 'bold',
+    fontSize: 24,
+    marginTop: 0,
+    marginBottom: 0,
   },
   progressBar: {
-    height: 12,
+    height: 8,
     borderRadius: 6,
-    marginBottom: 16,
+    marginBottom: 8,
+    marginTop: 0,
   },
   stats: {
-    gap: 12,
+    gap: 4,
+    marginTop: 4,
   },
   statItem: {
     flexDirection: 'row',
