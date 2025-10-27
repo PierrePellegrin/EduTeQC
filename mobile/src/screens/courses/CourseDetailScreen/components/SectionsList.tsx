@@ -70,6 +70,15 @@ type SectionItemProps = {
   theme: any;
 };
 
+// Helper récursif pour savoir si tous les enfants validables sont cochés
+const areAllChildrenValidated = (section: Section, visitedSections: Set<string>): boolean => {
+  if (section.isValidatable) {
+    return visitedSections.has(section.id);
+  }
+  if (!section.children || section.children.length === 0) return true;
+  return section.children.every(child => areAllChildrenValidated(child, visitedSections));
+};
+
 const SectionItem: React.FC<SectionItemProps> = ({
   section,
   index,
@@ -80,6 +89,7 @@ const SectionItem: React.FC<SectionItemProps> = ({
 }) => {
   const hasChildren = section.children && section.children.length > 0;
   const isVisited = visitedSections.has(section.id);
+  const allChildrenValidated = areAllChildrenValidated(section, visitedSections);
   const [expanded, setExpanded] = useState(() => {
     if (isVisited) return false; // Fermée si validée
     return level === 0; // Ouverte par défaut seulement pour racine non validée
@@ -135,10 +145,15 @@ const SectionItem: React.FC<SectionItemProps> = ({
   };
 
   return (
-    <View style={[sectionStyles.sectionWrapper, { marginLeft: indent }]}>
+    <View style={[sectionStyles.sectionWrapper, { marginLeft: indent }]}> 
       <Card
         style={{
-          backgroundColor: getBackgroundColor(),
+          backgroundColor:
+            (isValidatable && isVisited)
+              ? theme.colors.successContainer
+              : (!isValidatable && allChildrenValidated)
+                ? theme.colors.successContainer
+                : getBackgroundColor(),
           borderLeftWidth: level > 0 ? 3 : 0,
           borderLeftColor: level === 1 ? theme.colors.primary : level === 2 ? theme.colors.secondary : theme.colors.tertiary,
           marginLeft: level > 0 ? 4 : 0,
@@ -188,10 +203,18 @@ const SectionItem: React.FC<SectionItemProps> = ({
               <View style={{ flex: 1 }}>
                 <Text
                   variant={level === 0 ? 'bodyLarge' : level === 1 ? 'bodyMedium' : 'bodySmall'}
-                  style={{
-                    color: isVisited ? colors.visitedTextColor : colors.textColor,
-                    fontWeight: level === 0 ? '600' : level === 1 ? '500' : '400',
-                  }}
+                  style={[
+                    // Style par défaut
+                    {
+                      color: colors.textColor,
+                      fontWeight: level === 0 ? '600' : level === 1 ? '500' : '400',
+                    },
+                    // Style validé prioritaire (fond validé = texte validé)
+                    ((isValidatable && isVisited) || (!isValidatable && allChildrenValidated)) && {
+                      color: theme.colors.onSuccessContainer,
+                      fontWeight: 'bold',
+                    },
+                  ]}
                 >
                   {section.title}
                 </Text>
@@ -210,7 +233,8 @@ const SectionItem: React.FC<SectionItemProps> = ({
               </View>
             </View>
 
-            {isValidatable && isVisited && (
+            {/* Icône de validation à droite si validée OU tous enfants validés */}
+            {((isValidatable && isVisited) || (!isValidatable && allChildrenValidated)) && (
               <MaterialCommunityIcons
                 name="check-circle"
                 size={20}
@@ -222,11 +246,11 @@ const SectionItem: React.FC<SectionItemProps> = ({
 
         {/* Contenu de la section (si validatable et a du contenu) */}
         {expanded && section.content && isValidatable && (
-          <>
-            <Card.Content style={{ paddingTop: 8, paddingBottom: 16, paddingHorizontal: 16 }}>
-              <MarkdownRenderer content={getCleanedContent(section.content, section.title)} />
-              
-              {/* Bouton pour marquer/démarquer la section comme terminée */}
+          <Card.Content style={{ paddingTop: 8, paddingBottom: 16, paddingHorizontal: 16 }}>
+            <MarkdownRenderer content={getCleanedContent(section.content, section.title)} />
+            
+            {/* Bouton pour marquer/démarquer la section comme terminée (seulement si pas d'enfants) */}
+            {!hasChildren && (
               <View style={sectionStyles.actionButtonContainer}>
                 {isVisited ? (
                   <Button
@@ -261,8 +285,8 @@ const SectionItem: React.FC<SectionItemProps> = ({
                   </Button>
                 )}
               </View>
-            </Card.Content>
-          </>
+            )}
+          </Card.Content>
         )}
         
         {/* Contenu non-validatable (conteneur avec description) */}
@@ -274,43 +298,44 @@ const SectionItem: React.FC<SectionItemProps> = ({
 
         {/* Sous-sections (enfants) à l'intérieur de la Card parente */}
         {hasChildren && expanded && (
-          <Card.Content style={{ paddingTop: 0, paddingBottom: 4, paddingHorizontal: 4 }}>
-            {section.children?.map((child, childIndex) => (
-              <SectionItem
-                key={child.id}
-                section={child}
-                index={childIndex}
-                level={level + 1}
-                visitedSections={visitedSections}
-                onToggle={onToggle}
-                theme={theme}
-              />
-            ))}
-          </Card.Content>
-        )}
-
-        {/* Bouton de validation pour les sections parent (après les enfants) */}
-        {expanded && isValidatable && hasChildren && (
-          <Card.Content style={{ paddingTop: 0, paddingBottom: 12, paddingHorizontal: 16 }}>
-            <View style={sectionStyles.actionButtonContainer}>
-              <Button
-                mode={isVisited ? 'outlined' : 'contained'}
-                onPress={handleToggleSection}
-                icon={() => (
-                  <MaterialCommunityIcons
-                    name={isVisited ? 'checkbox-marked-circle-outline' : 'checkbox-marked-circle'}
-                    size={20}
-                    color={isVisited ? theme.colors.primary : theme.colors.onPrimary}
-                  />
-                )}
-                style={sectionStyles.actionButton}
-                labelStyle={{ color: isVisited ? theme.colors.primary : theme.colors.onPrimary }}
-                disabled={section.children?.some(child => !visitedSections.has(child.id))}
-              >
-                {isVisited ? 'Marquer comme non terminée' : 'Marquer comme terminée'}
-              </Button>
-            </View>
-          </Card.Content>
+          <>
+            <Card.Content style={{ paddingTop: 0, paddingBottom: 4, paddingHorizontal: 4 }}>
+              {section.children?.map((child, childIndex) => (
+                <SectionItem
+                  key={child.id}
+                  section={child}
+                  index={childIndex}
+                  level={level + 1}
+                  visitedSections={visitedSections}
+                  onToggle={onToggle}
+                  theme={theme}
+                />
+              ))}
+            </Card.Content>
+            {/* Bouton de validation pour les sections parent (après les enfants) */}
+            {isValidatable && (
+              <Card.Content style={{ paddingTop: 0, paddingBottom: 12, paddingHorizontal: 16 }}>
+                <View style={sectionStyles.actionButtonContainer}>
+                  <Button
+                    mode={isVisited ? 'outlined' : 'contained'}
+                    onPress={handleToggleSection}
+                    icon={() => (
+                      <MaterialCommunityIcons
+                        name={isVisited ? 'checkbox-marked-circle-outline' : 'checkbox-marked-circle'}
+                        size={20}
+                        color={isVisited ? theme.colors.primary : theme.colors.onPrimary}
+                      />
+                    )}
+                    style={sectionStyles.actionButton}
+                    labelStyle={{ color: isVisited ? theme.colors.primary : theme.colors.onPrimary }}
+                    disabled={section.children?.some(child => !visitedSections.has(child.id))}
+                  >
+                    {isVisited ? 'Marquer comme non terminée' : 'Marquer comme terminée'}
+                  </Button>
+                </View>
+              </Card.Content>
+            )}
+          </>
         )}
       </Card>
     </View>
