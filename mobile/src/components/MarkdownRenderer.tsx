@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -9,6 +9,28 @@ interface MarkdownRendererProps {
 
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   const { theme } = useTheme();
+
+  // Rendu personnalisé du blockquote pour forcer la couleur de la bordure
+  const rules = {
+    blockquote: (node: any, children: any, parent: any, styles: any) => (
+      <View
+        key={node.key}
+        style={{
+          backgroundColor: theme.colors.elevation.level1,
+          borderLeftWidth: 4,
+          borderLeftColor: '#FF6B6B',
+          paddingLeft: 12,
+          paddingVertical: 8,
+          marginVertical: 10,
+          borderRadius: 8,
+          // Pour éviter l'effet d'écrasement sur Android
+          ...Platform.select({ android: { overflow: 'hidden' } }),
+        }}
+      >
+        <Text style={{ color: theme.colors.onSurface, fontSize: 14 }}>{children}</Text>
+      </View>
+    ),
+  };
 
   const markdownStyles = {
     body: {
@@ -104,12 +126,18 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
       borderWidth: 0,
     },
     blockquote: {
-      backgroundColor: theme.colors.surfaceVariant,
-      borderLeftWidth: 3,
-      borderLeftColor: theme.colors.primary,
-      paddingLeft: 10,
-      paddingVertical: 6,
+      backgroundColor: theme.colors.elevation.level1,
+      borderLeftWidth: 4,
+      borderLeftColor: '#FF6B6B',
+      paddingLeft: 12,
+      paddingVertical: 8,
       marginVertical: 10,
+      borderRadius: 8,
+    },
+    blockquote_container: {
+      borderLeftWidth: 4,
+      borderLeftColor: '#FF6B6B',
+      borderRadius: 8,
     },
     link: {
       color: theme.colors.primary,
@@ -124,7 +152,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
 
   return (
     <View style={styles.container}>
-      <Markdown style={markdownStyles}>{content}</Markdown>
+      <Markdown style={markdownStyles} rules={rules}>{content}</Markdown>
     </View>
   );
 };
