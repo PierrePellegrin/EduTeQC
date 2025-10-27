@@ -12,6 +12,7 @@ type Section = {
   content?: string;
   order: number;
   parentId?: string | null;
+  isValidatable?: boolean; // Nouveau champ du backend
   children?: Section[];
   visited?: boolean;
 };
@@ -80,8 +81,29 @@ const SectionItem: React.FC<SectionItemProps> = ({
   const [expanded, setExpanded] = useState(level === 0); // Premier niveau ouvert par défaut
   const hasChildren = section.children && section.children.length > 0;
   const isVisited = visitedSections.has(section.id);
-  const indent = level * 16;
+  const indent = level * 6; // Indentation minimale pour économiser l'espace
   const colors = getSectionColors(theme, isVisited);
+  
+  // Utiliser le champ isValidatable du backend
+  const isValidatable = section.isValidatable !== false; // Default true si absent
+
+  // Fonction pour éclaircir le background selon le niveau de profondeur
+  const getBackgroundColor = () => {
+    // Niveau 0 : couleur normale du thème
+    if (level === 0) {
+      return isVisited ? colors.visitedBackground : colors.cardBackground;
+    }
+    
+    // Pour les enfants, on utilise les niveaux d'élévation du thème
+    // Plus le niveau est profond, plus on monte dans les niveaux d'élévation (plus clair)
+    if (level === 1) {
+      return theme.colors.elevation.level1;
+    } else if (level === 2) {
+      return theme.colors.elevation.level2;
+    } else {
+      return theme.colors.elevation.level3;
+    }
+  };
 
   const handleToggleSection = () => {
     onToggle(section.id, !isVisited);
@@ -114,49 +136,60 @@ const SectionItem: React.FC<SectionItemProps> = ({
   return (
     <View style={[sectionStyles.sectionWrapper, { marginLeft: indent }]}>
       <Card
-        style={[
-          sectionStyles.sectionCard,
-          {
-            backgroundColor: isVisited ? colors.visitedBackground : colors.cardBackground,
-          },
-        ]}
+        style={{
+          backgroundColor: getBackgroundColor(),
+          borderLeftWidth: level > 0 ? 3 : 0,
+          borderLeftColor: level === 1 ? theme.colors.primary : level === 2 ? theme.colors.secondary : theme.colors.tertiary,
+          marginLeft: level > 0 ? 4 : 0,
+          marginBottom: 8,
+          borderRadius: 12,
+          elevation: 0,
+          shadowColor: 'transparent',
+          borderTopWidth: 0,
+          borderRightWidth: 0,
+          borderBottomWidth: 0
+        }}
       >
         <TouchableOpacity
           onPress={() => {
-            if (hasChildren || !section.content) {
-              setExpanded(!expanded);
-            } else {
-              // Pour les sections avec contenu, on les ouvre sans les marquer comme visitées
-              setExpanded(!expanded);
-            }
+            setExpanded(!expanded);
           }}
           activeOpacity={0.7}
         >
           <Card.Content style={sectionStyles.sectionHeader}>
             <View style={sectionStyles.sectionLeft}>
-              {hasChildren && (
+              {/* Indicateur d'expansion pour les sections avec enfants */}
+              {hasChildren ? (
                 <MaterialCommunityIcons
                   name={expanded ? 'chevron-down' : 'chevron-right'}
-                  size={20}
-                  color={theme.colors.onSurface}
+                  size={24}
+                  color={theme.colors.primary}
                   style={{ marginRight: 8 }}
                 />
+              ) : (
+                <View style={{ width: level > 0 ? 4 : 8 }} />
               )}
-              {!hasChildren && <View style={{ width: 8 }} />}
               
+              {/* Icône de type de section */}
               <MaterialCommunityIcons
-                name={hasChildren ? 'folder-outline' : 'file-document-outline'}
-                size={18}
-                color={colors.iconColor}
+                name={
+                  hasChildren 
+                    ? (expanded ? 'folder-open-outline' : 'folder-outline')
+                    : level === 0 
+                    ? 'file-document-outline' 
+                    : 'file-outline'
+                }
+                size={level === 0 ? 20 : 18}
+                color={level === 0 ? colors.iconColor : theme.colors.onSurfaceVariant}
                 style={{ marginRight: 12 }}
               />
 
               <View style={{ flex: 1 }}>
                 <Text
-                  variant="bodyLarge"
+                  variant={level === 0 ? 'bodyLarge' : level === 1 ? 'bodyMedium' : 'bodySmall'}
                   style={{
                     color: isVisited ? colors.visitedTextColor : colors.textColor,
-                    fontWeight: '600',
+                    fontWeight: level === 0 ? '600' : level === 1 ? '500' : '400',
                   }}
                 >
                   {section.title}
@@ -166,17 +199,17 @@ const SectionItem: React.FC<SectionItemProps> = ({
                     variant="bodySmall"
                     style={{
                       color: theme.colors.onSurfaceVariant,
-                      marginTop: 4,
+                      marginTop: 2,
+                      fontSize: 11,
                     }}
                   >
-                    {section.children?.length} sous-section
-                    {(section.children?.length || 0) > 1 ? 's' : ''}
+                    {section.children?.length} sous-section{(section.children?.length || 0) > 1 ? 's' : ''}
                   </Text>
                 )}
               </View>
             </View>
 
-            {isVisited && (
+            {isValidatable && isVisited && (
               <MaterialCommunityIcons
                 name="check-circle"
                 size={20}
@@ -186,7 +219,8 @@ const SectionItem: React.FC<SectionItemProps> = ({
           </Card.Content>
         </TouchableOpacity>
 
-        {!hasChildren && expanded && section.content && (
+        {/* Contenu de la section (si validatable et a du contenu) */}
+        {expanded && section.content && isValidatable && (
           <>
             <Card.Content style={{ paddingTop: 8, paddingBottom: 16, paddingHorizontal: 16 }}>
               <MarkdownRenderer content={getCleanedContent(section.content, section.title)} />
@@ -229,23 +263,31 @@ const SectionItem: React.FC<SectionItemProps> = ({
             </Card.Content>
           </>
         )}
-      </Card>
+        
+        {/* Contenu non-validatable (conteneur avec description) */}
+        {expanded && section.content && !isValidatable && (
+          <Card.Content style={{ paddingTop: 8, paddingBottom: 16, paddingHorizontal: 16 }}>
+            <MarkdownRenderer content={getCleanedContent(section.content, section.title)} />
+          </Card.Content>
+        )}
 
-      {hasChildren && expanded && (
-        <View style={{ marginTop: 8 }}>
-          {section.children?.map((child, childIndex) => (
-            <SectionItem
-              key={child.id}
-              section={child}
-              index={childIndex}
-              level={level + 1}
-              visitedSections={visitedSections}
-              onToggle={onToggle}
-              theme={theme}
-            />
-          ))}
-        </View>
-      )}
+        {/* Sous-sections (enfants) à l'intérieur de la Card parente */}
+        {hasChildren && expanded && (
+          <Card.Content style={{ paddingTop: 0, paddingBottom: 4, paddingHorizontal: 4 }}>
+            {section.children?.map((child, childIndex) => (
+              <SectionItem
+                key={child.id}
+                section={child}
+                index={childIndex}
+                level={level + 1}
+                visitedSections={visitedSections}
+                onToggle={onToggle}
+                theme={theme}
+              />
+            ))}
+          </Card.Content>
+        )}
+      </Card>
     </View>
   );
 };

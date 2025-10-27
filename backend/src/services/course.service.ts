@@ -39,19 +39,60 @@ export class CourseService {
         },
         sections: {
           where: { parentId: null }, // Seulement les sections racines
-          include: {
+          select: {
+            id: true,
+            title: true,
+            content: true,
+            order: true,
+            parentId: true,
+            courseId: true,
+            isValidatable: true,
+            createdAt: true,
+            updatedAt: true,
+            tests: {
+              where: { isPublished: true },
+            },
             children: {
-              include: {
+              select: {
+                id: true,
+                title: true,
+                content: true,
+                order: true,
+                parentId: true,
+                courseId: true,
+                isValidatable: true,
+                createdAt: true,
+                updatedAt: true,
                 children: {
-                  include: {
-                    children: true,
+                  select: {
+                    id: true,
+                    title: true,
+                    content: true,
+                    order: true,
+                    parentId: true,
+                    courseId: true,
+                    isValidatable: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    children: {
+                      select: {
+                        id: true,
+                        title: true,
+                        content: true,
+                        order: true,
+                        parentId: true,
+                        courseId: true,
+                        isValidatable: true,
+                        createdAt: true,
+                        updatedAt: true,
+                      },
+                      orderBy: { order: 'asc' },
+                    },
                   },
+                  orderBy: { order: 'asc' },
                 },
               },
               orderBy: { order: 'asc' },
-            },
-            tests: {
-              where: { isPublished: true },
             },
           },
           orderBy: { order: 'asc' },

@@ -25,7 +25,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onPress, progres
   const defaultImage = 'https://via.placeholder.com/800x400/4A90E2/FFFFFF?text=' + encodeURIComponent(course.category);
   const imageSource = course.imageUrl || defaultImage;
 
-  const hasProgress = progress !== undefined && progress > 0;
+  const displayProgress = progress !== undefined ? progress : 0;
 
   return (
     <Card
@@ -46,23 +46,21 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onPress, progres
           {course.description}
         </Text>
         
-        {hasProgress && (
-          <View style={{ marginTop: 12 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-              <Text variant="bodySmall" style={{ color: textColor, opacity: 0.7 }}>
-                Progression
-              </Text>
-              <Text variant="bodySmall" style={{ color: primaryColor, fontWeight: 'bold' }}>
-                {Math.round(progress)}%
-              </Text>
-            </View>
-            <ProgressBar
-              progress={progress / 100}
-              color={primaryColor}
-              style={{ height: 6, borderRadius: 3 }}
-            />
+        <View style={{ marginTop: 12 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+            <Text variant="bodySmall" style={{ color: textColor, opacity: 0.7 }}>
+              Progression
+            </Text>
+            <Text variant="bodySmall" style={{ color: primaryColor, fontWeight: 'bold' }}>
+              {Math.round(displayProgress)}%
+            </Text>
           </View>
-        )}
+          <ProgressBar
+            progress={displayProgress / 100}
+            color={primaryColor}
+            style={{ height: 6, borderRadius: 3 }}
+          />
+        </View>
       </Card.Content>
     </Card>
   );

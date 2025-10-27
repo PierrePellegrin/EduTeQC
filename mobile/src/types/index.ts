@@ -40,6 +40,7 @@ export interface CourseSection {
   parentId?: string | null;
   title: string;
   content?: string | null;
+  isValidatable?: boolean; // true = section validable, false = conteneur uniquement
   order: number;
   createdAt?: Date;
   updatedAt?: Date;

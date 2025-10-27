@@ -98,6 +98,7 @@ export class SectionService {
     parentId?: string;
     title: string;
     content?: string;
+    isValidatable?: boolean;
     order?: number;
   }) {
     // Si l'ordre n'est pas spécifié, mettre la section à la fin
@@ -119,6 +120,7 @@ export class SectionService {
         parentId: data.parentId || null,
         title: data.title,
         content: data.content,
+        isValidatable: data.isValidatable !== undefined ? data.isValidatable : true, // Default true
         order,
       },
       include: {
@@ -137,6 +139,7 @@ export class SectionService {
     data: {
       title?: string;
       content?: string;
+      isValidatable?: boolean;
       order?: number;
     }
   ) {

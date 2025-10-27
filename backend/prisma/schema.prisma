@@ -128,14 +128,15 @@ model Course {
 
 // Nouvelle table pour les sections hiérarchiques
 model CourseSection {
-  id          String   @id @default(uuid())
-  courseId    String
-  parentId    String?  // null = section racine, sinon = sous-section
-  title       String
-  content     String?  @db.Text // Contenu de la section (peut être null si c'est juste un conteneur)
-  order       Int      @default(0) // Ordre d'affichage
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(uuid())
+  courseId      String
+  parentId      String?  // null = section racine, sinon = sous-section
+  title         String
+  content       String?  @db.Text // Contenu de la section (peut être null si c'est juste un conteneur)
+  isValidatable Boolean  @default(true) // true = section validable (avec bouton), false = conteneur uniquement
+  order         Int      @default(0) // Ordre d'affichage
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   course          Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
   parent          CourseSection?    @relation("SectionHierarchy", fields: [parentId], references: [id], onDelete: Cascade)

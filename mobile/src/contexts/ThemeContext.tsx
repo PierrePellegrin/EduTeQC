@@ -44,11 +44,11 @@ const customLightColors = {
   inversePrimary: '#396a98',
   elevation: {
     level0: 'transparent',
-    level1: '#F7FAFF',
-    level2: '#F1F6FF',
-    level3: '#ECF2FF',
-    level4: '#E7EEFF',
-    level5: '#E2EAFF',
+    level1: 'rgba(7, 69, 126, 0.03)', // Primary avec 3% d'opacité
+    level2: 'rgba(7, 69, 126, 0.05)', // Primary avec 5% d'opacité
+    level3: 'rgba(7, 69, 126, 0.08)', // Primary avec 8% d'opacité
+    level4: 'rgba(7, 69, 126, 0.12)', // Primary avec 12% d'opacité
+    level5: 'rgba(7, 69, 126, 0.15)', // Primary avec 15% d'opacité
   },
   surfaceDisabled: 'rgba(14, 20, 34, 0.12)',
   onSurfaceDisabled: 'rgba(14, 20, 34, 0.38)',
@@ -105,11 +105,11 @@ const customDarkColors = {
   inversePrimary: '#07457e',
   elevation: {
     level0: 'transparent',
-    level1: '#111827',
-    level2: '#0F1B3A',
-    level3: '#0D1A36',
-    level4: '#0D1832',
-    level5: '#0C162E',
+    level1: 'rgba(81, 125, 165, 0.08)', // Primary dark avec 8% d'opacité
+    level2: 'rgba(81, 125, 165, 0.12)', // Primary dark avec 12% d'opacité
+    level3: 'rgba(81, 125, 165, 0.16)', // Primary dark avec 16% d'opacité
+    level4: 'rgba(81, 125, 165, 0.20)', // Primary dark avec 20% d'opacité
+    level5: 'rgba(81, 125, 165, 0.24)', // Primary dark avec 24% d'opacité
   },
   surfaceDisabled: 'rgba(229, 236, 248, 0.12)',
   onSurfaceDisabled: 'rgba(229, 236, 248, 0.38)',

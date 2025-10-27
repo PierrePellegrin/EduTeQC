@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
@@ -27,9 +27,9 @@ app.use((req, res, next) => {
   res.on('finish', () => {
     const duration = Date.now() - start;
     if (duration > 100) {
-      console.log(`⚠️ SLOW: ${req.method} ${req.path} - ${duration}ms`);
+      console.log(`âš ï¸ SLOW: ${req.method} ${req.path} - ${duration}ms`);
     } else {
-      console.log(`✅ ${req.method} ${req.path} - ${duration}ms`);
+      console.log(`âœ… ${req.method} ${req.path} - ${duration}ms`);
     }
   });
   next();
@@ -54,8 +54,9 @@ app.get('/health', (req, res) => {
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📚 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`ðŸš€ Server running on port ${PORT}`);
+  console.log(`ðŸ“š Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 export default app;
+

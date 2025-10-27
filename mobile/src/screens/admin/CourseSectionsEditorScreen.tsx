@@ -51,7 +51,7 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
 
   // Mutation pour créer une section
   const createMutation = useMutation({
-    mutationFn: (data: { title: string; content: string; parentId?: string }) =>
+    mutationFn: (data: { title: string; content: string; parentId?: string; isValidatable?: boolean }) =>
       adminApi.createSection(courseId, {
         ...data,
         order: 0, // Le backend calculera l'ordre approprié
@@ -70,7 +70,7 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
 
   // Mutation pour mettre à jour une section
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { title: string; content: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { title: string; content: string; isValidatable?: boolean } }) =>
       adminApi.updateSection(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-course-sections', courseId] });
@@ -117,11 +117,11 @@ export const CourseSectionsEditorScreen = ({ navigation, route }: Props) => {
     },
   });
 
-  const handleSave = async (data: { title: string; content: string; parentId?: string }) => {
+  const handleSave = async (data: { title: string; content: string; parentId?: string; isValidatable?: boolean }) => {
     if (editingSection) {
       await updateMutation.mutateAsync({
         id: editingSection.id,
-        data: { title: data.title, content: data.content },
+        data: { title: data.title, content: data.content, isValidatable: data.isValidatable },
       });
     } else {
       await createMutation.mutateAsync(data);

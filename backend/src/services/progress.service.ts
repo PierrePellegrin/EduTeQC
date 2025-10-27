@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma';
 
+// Service de gestion de la progression
 export class ProgressService {
   // Récupérer la progression d'un utilisateur sur un cours
   async getCourseProgress(userId: string, courseId: string) {
@@ -38,6 +39,27 @@ export class ProgressService {
         },
       });
     }
+
+    // Recalculer la progression pour s'assurer qu'elle est à jour
+    await this.updateCourseCompletion(userId, courseId);
+
+    // Récupérer la progression mise à jour
+    progress = await prisma.courseProgress.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
 
     return progress;
   }
@@ -95,17 +117,24 @@ export class ProgressService {
       },
     });
 
-    // Mettre à jour la dernière section visitée et la date d'accès du cours
-    await prisma.courseProgress.update({
+    // Mettre à jour ou créer la progression du cours
+    await prisma.courseProgress.upsert({
       where: {
         userId_courseId: {
           userId,
           courseId: sectionProgress.section.courseId,
         },
       },
-      data: {
+      update: {
         lastSectionId: visited ? sectionId : null,
         lastAccessedAt: new Date(),
+      },
+      create: {
+        userId,
+        courseId: sectionProgress.section.courseId,
+        lastSectionId: visited ? sectionId : null,
+        lastAccessedAt: new Date(),
+        completionPercent: 0,
       },
     });
 
@@ -161,16 +190,82 @@ export class ProgressService {
 
   // Mettre à jour le pourcentage de complétion d'un cours
   async updateCourseCompletion(userId: string, courseId: string) {
-    // Récupérer tous les tests du cours (globaux et des sections)
+    console.log(`[updateCourseCompletion] userId: ${userId}, courseId: ${courseId}`);
+    
+    // Récupérer les sections exactement comme l'API /courses/:id (3 niveaux de profondeur)
+    // + le champ isValidatable pour savoir lesquelles compter
+    const rootSections = await prisma.courseSection.findMany({
+      where: { 
+        courseId,
+        parentId: null,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        parentId: true,
+        isValidatable: true,
+        children: {
+          select: {
+            id: true,
+            title: true,
+            content: true,
+            parentId: true,
+            isValidatable: true,
+            children: {
+              select: {
+                id: true,
+                title: true,
+                content: true,
+                parentId: true,
+                isValidatable: true,
+                children: {
+                  select: {
+                    id: true,
+                    title: true,
+                    content: true,
+                    parentId: true,
+                    isValidatable: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Aplatir la hiérarchie pour obtenir toutes les sections visibles
+    const flattenSections = (sections: any[]): any[] => {
+      const result: any[] = [];
+      sections.forEach((s) => {
+        result.push(s);
+        if (s.children && s.children.length > 0) {
+          result.push(...flattenSections(s.children));
+        }
+      });
+      return result;
+    };
+
+    const allSections = flattenSections(rootSections);
+    
+    // Filtrer uniquement les sections validables (avec le flag isValidatable = true)
+    // Plus besoin de la logique complexe feuilles/parents ou hasMeaningfulContent
+    const validatableSections = allSections.filter((s: any) => s.isValidatable === true);
+
+    console.log(`[updateCourseCompletion] Total sections: ${allSections.length}`);
+    console.log(`[updateCourseCompletion] Sections validables: ${validatableSections.length}`);
+    console.log(`[updateCourseCompletion] IDs des sections validables:`);
+    validatableSections.forEach((s: any) => {
+      const depth = s.parentId ? '→' : '';
+      console.log(`  ${depth} ${s.title} (ID: ${s.id.substring(0, 8)}...)`);
+    });
+
+    // Collecter tous les tests (globaux + sections)
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       include: {
         tests: true,
-        sections: {
-          include: {
-            tests: true,
-          },
-        },
       },
     });
 
@@ -178,75 +273,83 @@ export class ProgressService {
       throw new Error('Cours non trouvé');
     }
 
-    // Collecter tous les tests (globaux + sections)
     const allTests: string[] = [];
     course.tests.forEach((test) => allTests.push(test.id));
-    course.sections.forEach((section) => {
-      section.tests.forEach((test) => allTests.push(test.id));
-    });
+    // Note: les sections de l'arbre n'incluent pas les tests, on ignore donc cette partie
 
-    if (allTests.length === 0) {
-      // Pas de tests, la complétion est basée sur les sections visitées
-      const totalSections = course.sections.length;
-      if (totalSections === 0) {
-        return;
-      }
+    console.log(`[updateCourseCompletion] Total tests: ${allTests.length}`);
 
-      const visitedSections = await prisma.sectionProgress.count({
+  // Stratégie: si des sections avec contenu existent, base sur sections visitées; sinon, fallback sur tests
+  const totalSections = validatableSections.length;
+    if (totalSections === 0) {
+      // Aucun contenu de section: on retombe sur la progression à partir des tests
+      const passedTests = await prisma.testResult.count({
         where: {
           userId,
-          sectionId: {
-            in: course.sections.map((s) => s.id),
+          testId: {
+            in: allTests,
           },
-          visited: true,
+          passed: true,
         },
       });
 
-      const completionPercent = (visitedSections / totalSections) * 100;
+      const completionPercentFromTests = allTests.length > 0 ? (passedTests / allTests.length) * 100 : 0;
 
-      await prisma.courseProgress.update({
+      await prisma.courseProgress.upsert({
         where: {
           userId_courseId: {
             userId,
             courseId,
           },
         },
-        data: {
-          completionPercent: Math.round(completionPercent),
+        update: {
+          completionPercent: Math.round(completionPercentFromTests),
+        },
+        create: {
+          userId,
+          courseId,
+          completionPercent: Math.round(completionPercentFromTests),
         },
       });
 
+      console.log(`[updateCourseCompletion] Aucune section avec contenu. Progression basée sur tests: ${Math.round(completionPercentFromTests)}%`);
       return;
     }
 
-    // Récupérer les résultats des tests réussis
-    const passedTests = await prisma.testResult.count({
+    const visitedSections = await prisma.sectionProgress.count({
       where: {
         userId,
-        testId: {
-          in: allTests,
-        },
-        passed: true,
+          sectionId: {
+            in: validatableSections.map((s: any) => s.id),
+          },
+        visited: true,
       },
     });
 
-    // Calculer le pourcentage
-    const completionPercent = (passedTests / allTests.length) * 100;
+    console.log(`[updateCourseCompletion] Sections visitées: ${visitedSections}/${totalSections}`);
 
-    // Mettre à jour la progression du cours
-    await prisma.courseProgress.update({
+    const completionPercent = (visitedSections / totalSections) * 100;
+
+    console.log(`[updateCourseCompletion] Pourcentage calculé: ${completionPercent}%`);
+
+    await prisma.courseProgress.upsert({
       where: {
         userId_courseId: {
           userId,
           courseId,
         },
       },
-      data: {
+      update: {
+        completionPercent: Math.round(completionPercent),
+      },
+      create: {
+        userId,
+        courseId,
         completionPercent: Math.round(completionPercent),
       },
     });
 
-    return completionPercent;
+    console.log(`[updateCourseCompletion] Progression mise à jour: ${Math.round(completionPercent)}%`);
   }
 
   // Réinitialiser la progression d'un cours

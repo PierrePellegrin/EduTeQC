@@ -7,7 +7,7 @@ import { StyleSheet } from 'react-native';
 export const sectionStyles = StyleSheet.create({
   // Card de base pour les sections
   sectionCard: {
-    elevation: 1,
+    elevation: 0,
     marginVertical: 4,
   },
 

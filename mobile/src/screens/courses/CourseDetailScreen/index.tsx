@@ -23,9 +23,15 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
   const { theme } = useTheme();
   const queryClient = useQueryClient();
 
-  const { data: courseData, isLoading, error } = useQuery({
+  const { data: courseData, isLoading, error, refetch } = useQuery({
     queryKey: ['course', courseIdString],
-    queryFn: () => coursesApi.getById(courseIdString),
+    queryFn: async () => {
+      const data = await coursesApi.getById(courseIdString);
+      return data;
+    },
+    staleTime: 0, // Forcer le rechargement
+    refetchOnMount: 'always', // Toujours recharger au montage
+    refetchOnWindowFocus: false,
   });
 
   const { data: progressData, isLoading: isProgressLoading } = useQuery({
@@ -109,13 +115,43 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
     return sortByOrder(roots);
   };
 
-  // Compter le nombre total de sections (récursif)
-  const countSections = (sections: any[]): number => {
+  // Nettoyer un éventuel H1/H2 égal au titre en tête du contenu
+  const cleanContentAgainstTitle = (title?: string, content?: string) => {
+    if (typeof content !== 'string') return '';
+    const raw = content.trim();
+    if (!title) return raw;
+    const t = title.trim().toLowerCase();
+    let c = raw;
+    const lines = c.split(/\r?\n/);
+    if (lines.length > 0) {
+      const first = lines[0].trim().toLowerCase();
+      const headingLine = first.replace(/^#{1,6}\s*/, '').trim();
+      if (headingLine === t) {
+        lines.shift();
+        if (lines.length > 0 && /^(===+|---+)$/.test(lines[0].trim())) {
+          lines.shift();
+        }
+        c = lines.join('\n').trim();
+      } else if (lines.length > 1) {
+        const line0 = lines[0].trim().toLowerCase();
+        const line1 = lines[1].trim();
+        if (line0 === t && /^(===+|---+)$/.test(line1)) {
+          c = lines.slice(2).join('\n').trim();
+        }
+      }
+    }
+    return c.trim();
+  };
+
+  // Compter le nombre total de sections avec contenu (récursif, titre nettoyé)
+  const countContentSections = (sections: any[]): number => {
     let count = 0;
     sections.forEach((section) => {
-      count++;
+      const cleaned = cleanContentAgainstTitle(section.title, section.content);
+      const hasContent = cleaned.length > 0;
+      if (hasContent) count++;
       if (section.children && section.children.length > 0) {
-        count += countSections(section.children);
+        count += countContentSections(section.children);
       }
     });
     return count;
@@ -150,9 +186,26 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
 
   const course = courseData?.course;
   const sections = course?.sections || [];
-  const sectionTree = buildSectionTree(sections);
-  const totalSections = countSections(sectionTree);
-  const visitedCount = visitedSections.size;
+  
+  // L'API retourne déjà un arbre hiérarchique, pas besoin de buildSectionTree
+  const sectionTree = sections;
+  // Construire l'ensemble des IDs de sections avec contenu pour compter de façon cohérente
+  const collectContentSectionIds = (sections: any[], acc: Set<string>) => {
+    sections.forEach((section) => {
+      // Utiliser le champ isValidatable du backend au lieu de la logique client
+      if (section.isValidatable) {
+        acc.add(section.id);
+      }
+      if (section.children && section.children.length > 0) {
+        collectContentSectionIds(section.children, acc);
+      }
+    });
+    return acc;
+  };
+
+  const contentSectionIds = collectContentSectionIds(sectionTree, new Set<string>());
+  const totalSections = contentSectionIds.size;
+  const visitedCount = Array.from(contentSectionIds).filter((id) => visitedSections.has(id)).length;
   const completionPercent = progressData?.progress?.completionPercent || 0;
   const lastAccessedAt = progressData?.progress?.lastAccessedAt;
 

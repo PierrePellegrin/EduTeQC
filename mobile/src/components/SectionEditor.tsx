@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text, Card, HelperText, Chip, SegmentedButtons } from 'react-native-paper';
+import { TextInput, Button, Text, Card, HelperText, Chip, SegmentedButtons, Checkbox } from 'react-native-paper';
 import { useTheme } from '../contexts/ThemeContext';
 import { CourseSection } from '../types';
 import { MarkdownRenderer } from './MarkdownRenderer';
@@ -8,7 +8,7 @@ import { MarkdownRenderer } from './MarkdownRenderer';
 type SectionEditorProps = {
   section?: CourseSection;
   parentSection?: CourseSection;
-  onSave: (data: { title: string; content: string; parentId?: string }) => Promise<void>;
+  onSave: (data: { title: string; content: string; parentId?: string; isValidatable?: boolean }) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
 };
@@ -23,6 +23,7 @@ export const SectionEditor: React.FC<SectionEditorProps> = ({
   const { theme } = useTheme();
   const [title, setTitle] = useState(section?.title || '');
   const [content, setContent] = useState(section?.content || '');
+  const [isValidatable, setIsValidatable] = useState(section?.isValidatable !== false); // Default true
   const [errors, setErrors] = useState<{ title?: string; content?: string }>({});
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
 
@@ -44,6 +45,7 @@ export const SectionEditor: React.FC<SectionEditorProps> = ({
       title: title.trim(),
       content: content.trim(),
       parentId: parentSection?.id,
+      isValidatable,
     });
   };
 
@@ -81,6 +83,24 @@ export const SectionEditor: React.FC<SectionEditorProps> = ({
             </HelperText>
           )}
         </View>
+
+        <Card style={[styles.optionCard, { backgroundColor: theme.colors.surfaceVariant }]}>
+          <Card.Content>
+            <View style={styles.checkboxRow}>
+              <View style={styles.checkboxLabel}>
+                <Text variant="bodyMedium">Section validable</Text>
+                <HelperText type="info" style={{ marginTop: 0, paddingTop: 0 }}>
+                  Si activée, l'utilisateur pourra marquer cette section comme terminée.
+                  Désactiver pour les conteneurs/chapitres sans contenu validable.
+                </HelperText>
+              </View>
+              <Checkbox
+                status={isValidatable ? 'checked' : 'unchecked'}
+                onPress={() => setIsValidatable(!isValidatable)}
+              />
+            </View>
+          </Card.Content>
+        </Card>
 
         <View style={styles.field}>
           <SegmentedButtons
@@ -197,6 +217,18 @@ const styles = StyleSheet.create({
   },
   field: {
     marginBottom: 16,
+  },
+  optionCard: {
+    marginBottom: 16,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  checkboxLabel: {
+    flex: 1,
+    marginRight: 16,
   },
   segmentedButtons: {
     marginBottom: 8,
