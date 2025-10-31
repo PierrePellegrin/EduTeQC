@@ -89,6 +89,19 @@ export class ProgressService {
 
   // Marquer une section comme visitée ou non visitée
   async toggleSectionVisited(userId: string, sectionId: string, visited: boolean) {
+
+    // 1. Dévalider tous les parents si visited === false
+    let parentIds: string[] = [];
+    if (!visited) {
+      // On récupère la hiérarchie des parents
+      let currentSection = await prisma.courseSection.findUnique({ where: { id: sectionId }, select: { parentId: true } });
+      while (currentSection && currentSection.parentId) {
+        parentIds.push(currentSection.parentId);
+        currentSection = await prisma.courseSection.findUnique({ where: { id: currentSection.parentId }, select: { parentId: true } });
+      }
+    }
+
+    // 2. Upsert la section cliquée
     const sectionProgress = await prisma.sectionProgress.upsert({
       where: {
         userId_sectionId: {
@@ -116,6 +129,20 @@ export class ProgressService {
         },
       },
     });
+
+    // 3. Dévalider tous les parents trouvés
+    if (!visited && parentIds.length > 0) {
+      await prisma.sectionProgress.updateMany({
+        where: {
+          userId,
+          sectionId: { in: parentIds },
+        },
+        data: {
+          visited: false,
+          visitedAt: null,
+        },
+      });
+    }
 
     // Mettre à jour ou créer la progression du cours
     await prisma.courseProgress.upsert({
