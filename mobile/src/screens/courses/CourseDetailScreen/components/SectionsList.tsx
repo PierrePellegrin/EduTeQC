@@ -328,8 +328,8 @@ const SectionItem: React.FC<SectionItemProps> = ({
                     )}
                     style={sectionStyles.actionButton}
                     labelStyle={{ color: isVisited ? theme.colors.primary : theme.colors.onPrimary }}
-                    // Désactive le bouton si une sous-section (à n'importe quel niveau) n'est pas terminée OU si déjà visité
-                    disabled={isVisited || !(section.children && section.children.length > 0 && section.children.every(child => areAllChildrenValidated(child, visitedSections)))}
+                    // Désactive le bouton si une sous-section (à n'importe quel niveau) n'est pas terminée
+                    disabled={!(section.children && section.children.length > 0 && section.children.every(child => areAllChildrenValidated(child, visitedSections)))}
                   >
                     {isVisited ? 'Marquer comme non terminée' : 'Marquer comme terminée'}
                   </Button>
