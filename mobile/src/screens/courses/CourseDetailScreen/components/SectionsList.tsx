@@ -1,3 +1,28 @@
+// Trouve le chemin d'IDs jusqu'à la première section non validée (DFS)
+// Si un parent est déjà validé, on ne descend pas plus loin (on ne l'expand pas)
+function findPathToFirstUnvisitedSection(sections: Section[], visitedSections: Set<string>): string[] {
+  for (const section of sections) {
+    if (!visitedSections.has(section.id)) return [section.id];
+    // Si le parent est validé, on ne descend pas plus loin
+    if (visitedSections.has(section.id)) continue;
+    if (section.children && section.children.length > 0) {
+      const childPath = findPathToFirstUnvisitedSection(section.children, visitedSections);
+      if (childPath.length > 0) return [section.id, ...childPath];
+    }
+  }
+  return [];
+}
+// Trouve récursivement la première section non validée (DFS)
+function findFirstUnvisitedSectionId(sections: Section[], visitedSections: Set<string>): string | null {
+  for (const section of sections) {
+    if (!visitedSections.has(section.id)) return section.id;
+    if (section.children && section.children.length > 0) {
+      const child = findFirstUnvisitedSectionId(section.children, visitedSections);
+      if (child) return child;
+    }
+  }
+  return null;
+}
 import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text, Card, Icon, ProgressBar, Divider, Button } from 'react-native-paper';
@@ -44,6 +69,9 @@ export const SectionsList: React.FC<SectionsListProps> = ({
     );
   }
 
+  // Calculer l'id de la première section non validée une seule fois
+  const autoExpandPath = findPathToFirstUnvisitedSection(sections, visitedSections);
+
   return (
     <View style={styles.container}>
       {sections.map((section, index) => (
@@ -55,6 +83,7 @@ export const SectionsList: React.FC<SectionsListProps> = ({
           visitedSections={visitedSections}
           onToggle={onSectionToggle}
           theme={theme}
+          autoExpandPath={autoExpandPath}
         />
       ))}
     </View>
@@ -68,6 +97,7 @@ type SectionItemProps = {
   visitedSections: Set<string>;
   onToggle: (sectionId: string, visited: boolean) => void;
   theme: any;
+  autoExpandPath: string[];
 };
 
 // Helper récursif pour savoir si tous les enfants validables sont cochés
@@ -85,15 +115,14 @@ const SectionItem: React.FC<SectionItemProps> = ({
   level,
   visitedSections,
   onToggle,
+  autoExpandPath,
   theme,
 }) => {
   const hasChildren = section.children && section.children.length > 0;
   const isVisited = visitedSections.has(section.id);
   const allChildrenValidated = areAllChildrenValidated(section, visitedSections);
-  const [expanded, setExpanded] = useState(() => {
-    if (isVisited) return false; // Fermée si validée
-    return level === 0; // Ouverte par défaut seulement pour racine non validée
-  });
+  // Ouvre toute section dont l'id est dans le chemin d'expansion
+  const [expanded, setExpanded] = useState(() => autoExpandPath.includes(section.id));
   const indent = level * 6; // Indentation minimale pour économiser l'espace
   const colors = getSectionColors(theme, isVisited);
   
@@ -203,7 +232,7 @@ const SectionItem: React.FC<SectionItemProps> = ({
               <View style={{ flex: 1 }}>
                 <Text
                   variant={level === 0 ? 'bodyLarge' : level === 1 ? 'bodyMedium' : 'bodySmall'}
-                  style={[
+                  style={[ 
                     // Style par défaut
                     {
                       color: colors.textColor,
@@ -264,7 +293,6 @@ const SectionItem: React.FC<SectionItemProps> = ({
                       />
                     )}
                     style={[sectionStyles.actionButton, { borderColor: theme.colors.primary }]}
-                    labelStyle={{ color: theme.colors.primary }}
                   >
                     Marquer comme non terminée
                   </Button>
@@ -300,17 +328,18 @@ const SectionItem: React.FC<SectionItemProps> = ({
         {hasChildren && expanded && (
           <>
             <Card.Content style={{ paddingTop: 0, paddingBottom: 4, paddingHorizontal: 4 }}>
-              {section.children?.map((child, childIndex) => (
-                <SectionItem
-                  key={child.id}
-                  section={child}
-                  index={childIndex}
-                  level={level + 1}
-                  visitedSections={visitedSections}
-                  onToggle={onToggle}
-                  theme={theme}
-                />
-              ))}
+               {section.children?.map((child, childIndex) => (
+                   <SectionItem
+                     key={child.id}
+                     section={child}
+                     index={childIndex}
+                     level={level + 1}
+                     visitedSections={visitedSections}
+                     onToggle={onToggle}
+                     theme={theme}
+                     autoExpandPath={autoExpandPath}
+                   />
+                 ))}
             </Card.Content>
             {/* Bouton de validation pour les sections parent (après les enfants) */}
             {isValidatable && (
