@@ -54,14 +54,35 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
   const toggleSectionMutation = useMutation({
     mutationFn: ({ sectionId, visited }: { sectionId: string; visited: boolean }) =>
       progressApi.toggleSectionVisited(sectionId, visited),
-    onSuccess: () => {
-      // Invalider la progression du cours ET des sections
-      queryClient.invalidateQueries({ queryKey: ['course-progress', courseIdString] });
-      queryClient.invalidateQueries({ queryKey: ['section-progress', courseIdString] });
-      queryClient.invalidateQueries({ queryKey: ['all-progress'] }); // Pour mettre à jour la liste des cours
+    onMutate: async ({ sectionId, visited }) => {
+      // Annule les requêtes en cours pour éviter les conflits
+      await queryClient.cancelQueries({ queryKey: ['section-progress', courseIdString] });
+      // Sauvegarde l'état précédent
+      const previousSectionProgress = queryClient.getQueryData(['section-progress', courseIdString]);
+      // Mise à jour optimiste
+      queryClient.setQueryData(['section-progress', courseIdString], (old: any) => {
+        if (!old || !old.sections) return old;
+        return {
+          ...old,
+          sections: old.sections.map((section: any) =>
+            section.id === sectionId
+              ? { ...section, progress: { ...section.progress, visited } }
+              : section
+          ),
+        };
+      });
+      return { previousSectionProgress };
     },
-    onError: (error: any) => {
+    onError: (error: any, _variables, context: any) => {
+      // Restaure l'état précédent en cas d'erreur
+      if (context?.previousSectionProgress) {
+        queryClient.setQueryData(['section-progress', courseIdString], context.previousSectionProgress);
+      }
       console.error('Erreur lors de la mise à jour de la progression:', error);
+    },
+    onSettled: () => {
+      // Rafraîchit la progression des sections (léger)
+      queryClient.invalidateQueries({ queryKey: ['section-progress', courseIdString] });
     },
   });
 
