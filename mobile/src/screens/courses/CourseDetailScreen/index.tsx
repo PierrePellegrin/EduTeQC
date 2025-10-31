@@ -59,13 +59,35 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
       await queryClient.cancelQueries({ queryKey: ['section-progress', courseIdString] });
       // Sauvegarde l'état précédent
       const previousSectionProgress = queryClient.getQueryData(['section-progress', courseIdString]);
-      // Mise à jour optimiste
+      // Mise à jour optimiste avec propagation de la dévalidation aux parents
       queryClient.setQueryData(['section-progress', courseIdString], (old: any) => {
         if (!old || !old.sections) return old;
+        // On construit une map id -> section pour retrouver les parents
+        const sectionMap = new Map();
+        old.sections.forEach((section: any) => {
+          sectionMap.set(section.id, section);
+        });
+
+        // Fonction pour remonter et dévalider tous les parents
+        const getAllParentIds = (id: string, acc: Set<string> = new Set()) => {
+          const section = sectionMap.get(id);
+          if (section && section.parentId) {
+            acc.add(section.parentId);
+            getAllParentIds(section.parentId, acc);
+          }
+          return acc;
+        };
+
+        let idsToUpdate = [sectionId];
+        if (visited === false) {
+          // Si on dévalide, on dévalide tous les parents
+          idsToUpdate = [sectionId, ...Array.from(getAllParentIds(sectionId))];
+        }
+
         return {
           ...old,
           sections: old.sections.map((section: any) =>
-            section.id === sectionId
+            idsToUpdate.includes(section.id)
               ? { ...section, progress: { ...section.progress, visited } }
               : section
           ),
