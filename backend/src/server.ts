@@ -46,8 +46,23 @@ app.use('/api', sectionRoutes);
 app.use('/api', progressRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+app.get('/health', async (req, res) => {
+  try {
+    // Test basic server health
+    const healthStatus = {
+      status: 'OK',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    };
+    
+    res.json(healthStatus);
+  } catch (error) {
+    res.status(500).json({
+      status: 'ERROR',
+      timestamp: new Date().toISOString(),
+      error: 'Health check failed'
+    });
+  }
 });
 
 // Error handler
