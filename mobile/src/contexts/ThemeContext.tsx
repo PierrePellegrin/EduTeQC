@@ -92,7 +92,7 @@ const customDarkColors = {
   onErrorContainer: 'rgb(255, 180, 171)',
   background: '#0B1220',
   onBackground: '#E5ECF8',
-  surface: '#0F1724',
+  surface: '#062e53ff',
   onSurface: '#E5ECF8',
   surfaceVariant: '#1A2436',
   onSurfaceVariant: '#396a98',

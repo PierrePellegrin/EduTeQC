@@ -183,7 +183,7 @@ const CourseFormComponent: React.FC<CourseFormProps> = ({
   const selectedNiveauName = niveauxData?.niveaux?.find((n: any) => n.id === formData.niveauId)?.name || 'Sélectionner un niveau';
 
   return (
-    <Card style={[styles.formCard, { backgroundColor: theme.colors.cardBackground }]}>
+    <Card style={[styles.formCard, { backgroundColor: theme.colors.surface }]}>
       <Card.Content>
         <Text variant="titleLarge" style={styles.formTitle}>
           {isEditing ? 'Modifier le cours' : 'Créer un nouveau cours'}
