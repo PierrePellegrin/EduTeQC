@@ -61,6 +61,11 @@ export class CourseController {
   // Update course (admin)
   static async update(req: Request, res: Response, next: NextFunction) {
     try {
+      // Si on tente de publier le cours, vérifier qu'il a des tests globaux
+      if (req.body.isPublished === true) {
+        await CourseService.validateCourseForPublication(req.params.id);
+      }
+      
       const course = await CourseService.update(req.params.id, req.body);
       res.json({ course });
     } catch (error) {
@@ -73,6 +78,16 @@ export class CourseController {
     try {
       await CourseService.delete(req.params.id);
       res.json({ message: 'Course deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Check if course has global tests (admin)
+  static async checkGlobalTests(req: Request, res: Response, next: NextFunction) {
+    try {
+      const hasGlobalTests = await CourseService.hasGlobalTests(req.params.id);
+      res.json({ hasGlobalTests });
     } catch (error) {
       next(error);
     }

@@ -53,7 +53,7 @@ const AccordionSection: React.FC<AccordionSectionProps> = ({
         style={[
           accordionStyles.header,
           { 
-            backgroundColor: themeColors.surfaceVariant,
+            backgroundColor: themeColors.cardBackground,
             paddingVertical: 12,
           }
         ]}

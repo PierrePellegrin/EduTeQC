@@ -170,6 +170,27 @@ export class CourseService {
     return prisma.course.update({ where: { id }, data });
   }
 
+  // Vérifier qu'un cours a au moins un test global
+  static async hasGlobalTests(courseId: string) {
+    const globalTestsCount = await prisma.test.count({
+      where: {
+        courseId,
+        sectionId: null, // Tests globaux uniquement (pas associés à une section)
+        isPublished: true,
+      },
+    });
+    return globalTestsCount > 0;
+  }
+
+  // Valider qu'un cours peut être publié (doit avoir au moins un test global)
+  static async validateCourseForPublication(courseId: string) {
+    const hasGlobalTests = await this.hasGlobalTests(courseId);
+    if (!hasGlobalTests) {
+      throw new Error('Le cours doit avoir au moins un test global (non associé à une section) pour être publié.');
+    }
+    return true;
+  }
+
   static async delete(id: string) {
     return prisma.course.delete({ where: { id } });
   }

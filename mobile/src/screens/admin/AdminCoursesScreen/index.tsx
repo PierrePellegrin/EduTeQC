@@ -130,9 +130,33 @@ export const AdminCoursesScreen = ({ navigation }: Props) => {
     );
   }, [deleteMutation]);
 
-  const handleTogglePublish = useCallback((id: string, currentStatus: boolean, title: string) => {
+  const handleTogglePublish = useCallback(async (id: string, currentStatus: boolean, title: string) => {
     const newStatus = !currentStatus;
     const action = newStatus ? 'publier' : 'dépublier';
+    
+    // Si on veut publier, vérifier d'abord qu'il y a des tests globaux
+    if (newStatus) {
+      try {
+        const { hasGlobalTests } = await adminApi.checkCourseGlobalTests(id);
+        if (!hasGlobalTests) {
+          Alert.alert(
+            'Impossible de publier',
+            `Le cours "${title}" doit avoir au minimum un test global (non associé à une section) pour être publié.\n\nVeuillez d'abord créer un test pour ce cours.`,
+            [
+              { text: 'Compris', style: 'default' }
+            ]
+          );
+          return;
+        }
+      } catch (error) {
+        Alert.alert(
+          'Erreur',
+          'Impossible de vérifier les tests du cours. Veuillez réessayer.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+    }
     
     Alert.alert(
       'Confirmer',

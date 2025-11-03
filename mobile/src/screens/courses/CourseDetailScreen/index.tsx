@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { View, ScrollView, Alert, Animated } from 'react-native';
 import { Text, Card, Button, Divider } from 'react-native-paper';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { coursesApi } from '../../../services/api';
+import { coursesApi, testsApi } from '../../../services/api';
 import { progressApi } from '../../../services/progress.api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { CourseContent, TestsList, SectionsList, ProgressCard } from './components';
+import { MemoizedSegmentedButtons } from '../../../components';
 import { styles } from './styles';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -22,6 +23,13 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
   const { showImages } = useSettings();
   const { theme } = useTheme();
   const queryClient = useQueryClient();
+
+  // État pour gérer les tabs
+  const [activeTab, setActiveTab] = useState<'course' | 'tests'>('course');
+
+  // Refs pour l'animation sticky
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [showStickyTabs, setShowStickyTabs] = useState(false);
 
   const { data: courseData, isLoading, error, refetch } = useQuery({
     queryKey: ['course', courseIdString],
@@ -46,6 +54,16 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
     queryFn: async () => {
       const response = await progressApi.getCourseSectionProgress(courseIdString);
       return response;
+    },
+    staleTime: 30000,
+  });
+
+  // Récupérer les résultats des tests pour vérifier les tests réussis
+  const { data: testResultsData } = useQuery({
+    queryKey: ['test-results'],
+    queryFn: async () => {
+      const response = await testsApi.getAllResultsForUser();
+      return response?.results || [];
     },
     staleTime: 30000,
   });
@@ -200,8 +218,131 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
     return count;
   };
 
+  // Fonction pour vérifier si un test est réussi
+  const isTestPassed = (testId: string) => {
+    if (!testResultsData) return false;
+    const testResults = testResultsData.filter((result: any) => result.testId === testId);
+    if (testResults.length === 0) return false;
+    // Prendre le meilleur résultat
+    const bestResult = testResults.reduce((best: any, current: any) => 
+      current.score > best.score ? current : best
+    );
+    return bestResult.passed;
+  };
+
+  // Fonction pour trouver les tests associés à une section
+  const getTestsForSection = (sectionId: string, sectionsArray: any[]): any[] => {
+    for (const section of sectionsArray) {
+      if (section.id === sectionId) {
+        return section.tests || [];
+      }
+      if (section.children && section.children.length > 0) {
+        const found = getTestsForSection(sectionId, section.children);
+        if (found.length > 0) return found;
+      }
+    }
+    return [];
+  };
+
   const handleSectionToggle = (sectionId: string, visited: boolean) => {
+    // Si on essaie de valider la section (visited = true), vérifier les tests
+    if (visited) {
+      const sectionTests = getTestsForSection(sectionId, sectionTree);
+      if (sectionTests.length > 0) {
+        const unpassedTests = sectionTests.filter(test => !isTestPassed(test.id));
+        if (unpassedTests.length > 0) {
+          Alert.alert(
+            'Tests requis',
+            `Vous devez réussir ${unpassedTests.length === 1 ? 'le test associé' : 'les tests associés'} à cette section avant de pouvoir la valider.\n\nTest${unpassedTests.length > 1 ? 's' : ''} non réussi${unpassedTests.length > 1 ? 's' : ''} :\n${unpassedTests.map(test => `• ${test.title}`).join('\n')}`,
+            [
+              { text: 'Annuler', style: 'cancel' },
+              { 
+                text: 'Aller aux tests', 
+                onPress: () => setActiveTab('tests')
+              }
+            ]
+          );
+          return;
+        }
+      }
+    }
+    
     toggleSectionMutation.mutate({ sectionId, visited });
+  };
+
+  const handleFinishCourse = () => {
+    // Vérifier les tests globaux du cours
+    const courseTests = course.tests || [];
+    const globalTests = courseTests.filter((test: any) => !test.sectionId); // Tests globaux (non associés à une section)
+    const unpassedGlobalTests = globalTests.filter((test: any) => !isTestPassed(test.id));
+
+    // Vérifier les sections non validées
+    const allSections = sectionTree;
+    const unvalidatedSections: any[] = [];
+    
+    const checkSectionsValidation = (sections: any[]) => {
+      sections.forEach(section => {
+        if (section.isValidatable && !visitedSections.has(section.id)) {
+          unvalidatedSections.push(section);
+        }
+        if (section.children && section.children.length > 0) {
+          checkSectionsValidation(section.children);
+        }
+      });
+    };
+    
+    checkSectionsValidation(allSections);
+
+    // S'il y a des éléments non complétés, demander confirmation
+    if (unpassedGlobalTests.length > 0 || unvalidatedSections.length > 0) {
+      let message = 'Le cours ne semble pas être complètement terminé :\n\n';
+      
+      if (unpassedGlobalTests.length > 0) {
+        message += `• ${unpassedGlobalTests.length} test${unpassedGlobalTests.length > 1 ? 's' : ''} global${unpassedGlobalTests.length > 1 ? 'aux' : ''} non réussi${unpassedGlobalTests.length > 1 ? 's' : ''}\n`;
+      }
+      
+      if (unvalidatedSections.length > 0) {
+        message += `• ${unvalidatedSections.length} section${unvalidatedSections.length > 1 ? 's' : ''} non validée${unvalidatedSections.length > 1 ? 's' : ''}\n`;
+      }
+      
+      message += '\nÊtes-vous sûr de vouloir terminer le cours ?';
+
+      Alert.alert(
+        'Terminer le cours',
+        message,
+        [
+          { text: 'Annuler', style: 'cancel' },
+          { 
+            text: 'Terminer quand même', 
+            style: 'destructive',
+            onPress: () => finalizeCourse()
+          }
+        ]
+      );
+    } else {
+      // Tout est complété, terminer directement
+      Alert.alert(
+        'Félicitations !',
+        'Vous avez terminé tous les éléments du cours. Voulez-vous marquer ce cours comme terminé ?',
+        [
+          { text: 'Pas maintenant', style: 'cancel' },
+          { 
+            text: 'Terminer le cours', 
+            onPress: () => finalizeCourse()
+          }
+        ]
+      );
+    }
+  };
+
+  const finalizeCourse = () => {
+    // Pour l'instant, on affiche juste un message
+    // Plus tard, on pourrait ajouter une API pour marquer le cours comme terminé
+    Alert.alert(
+      'Cours terminé !',
+      'Félicitations ! Vous avez terminé ce cours. Vous pouvez toujours y revenir pour réviser.',
+      [{ text: 'OK' }]
+    );
   };
 
   const handleResetProgress = () => {
@@ -279,50 +420,153 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
   const defaultImage = 'https://via.placeholder.com/800x400/4A90E2/FFFFFF?text=' + encodeURIComponent(course.category);
   const imageSource = course.imageUrl || defaultImage;
 
-  return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {showImages && (
-        <Card.Cover source={{ uri: imageSource }} style={styles.cover} />
-      )}
+  // Calculer la hauteur approximative avant les tabs
+  const headerHeight = useMemo(() => {
+    let height = 0;
+    if (showImages) height += 250; // hauteur de l'image
+    height += 150; // hauteur approximative du CourseContent (titre + description + chips)
+    height += 56; // hauteur des tabs eux-mêmes
+    return height;
+  }, [showImages]);
 
-      <CourseContent course={course} />
+  // Gestion du scroll pour sticky tabs
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    {
+      useNativeDriver: false,
+      listener: (event: any) => {
+        const scrollOffset = event.nativeEvent.contentOffset.y;
+        // Les tabs sticky apparaissent exactement quand les tabs normaux disparaissent
+        setShowStickyTabs(scrollOffset >= headerHeight);
+      },
+    }
+  );
 
-      <View style={{ paddingHorizontal: 16, backgroundColor: theme.colors.background }}>
-        <ProgressCard
-          completionPercent={completionPercent}
-          visitedSectionsCount={visitedCount}
-          totalSectionsCount={totalSections}
-          lastAccessedAt={lastAccessedAt}
-        />
+  // Rendu des tabs (composant réutilisable)
+  const renderTabs = (isSticky = false) => (
+    <View style={[
+      { paddingHorizontal: 16, paddingVertical: 8 },
+      isSticky && {
+        backgroundColor: theme.colors.background,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.outline,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      }
+    ]}>
+      <MemoizedSegmentedButtons
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as 'course' | 'tests')}
+        buttons={[
+          { value: 'course', label: 'Cours', icon: 'book-open' },
+          { value: 'tests', label: 'Tests', icon: 'file-document' },
+        ]}
+        style={{ marginBottom: isSticky ? 0 : 8 }}
+      />
+    </View>
+  );
 
-        <Divider style={{ marginVertical: 16 }} />
+  // Rendu du contenu de l'onglet Cours
+  const renderCourseTab = () => (
+    <View style={{ 
+      paddingHorizontal: 16, 
+      backgroundColor: theme.colors.background,
+      // Pas de padding top conditionnel - on laisse le contenu normal
+    }}>
+      <ProgressCard
+        completionPercent={completionPercent}
+        visitedSectionsCount={visitedCount}
+        totalSectionsCount={totalSections}
+        lastAccessedAt={lastAccessedAt}
+      />
 
-        <Text variant="titleLarge" style={styles.sectionTitle}>
-          Contenu du cours
-        </Text>
+      <Divider style={{ marginVertical: 16 }} />
 
-        <SectionsList
-          sections={sectionTree}
-          visitedSections={visitedSections}
-          onSectionToggle={handleSectionToggle}
-        />
+      <Text variant="titleLarge" style={styles.sectionTitle}>
+        Contenu du cours
+      </Text>
 
-        <Button
-          mode="outlined"
-          onPress={handleResetProgress}
-          style={{ marginTop: 16, marginBottom: 8 }}
-          icon="refresh"
-        >
-          Réinitialiser la progression
-        </Button>
-      </View>
+      <SectionsList
+        sections={sectionTree}
+        visitedSections={visitedSections}
+        onSectionToggle={handleSectionToggle}
+        onNavigateToTest={(testId) => navigation.navigate('TestDetail', { testId })}
+      />
 
-      <Divider style={{ marginVertical: 16, marginHorizontal: 16 }} />
+      <Button
+        mode="outlined"
+        onPress={handleResetProgress}
+        style={{ marginTop: 16, marginBottom: 8 }}
+        icon="refresh"
+      >
+        Réinitialiser la progression
+      </Button>
 
+      <Button
+        mode="contained"
+        onPress={handleFinishCourse}
+        style={{ marginTop: 8, marginBottom: 16 }}
+        icon="check-circle"
+      >
+        Terminer le cours
+      </Button>
+    </View>
+  );
+
+  // Rendu du contenu de l'onglet Tests
+  const renderTestsTab = () => (
+    <View style={{ 
+      paddingHorizontal: 16, 
+      backgroundColor: theme.colors.background, 
+      paddingTop: 16,
+    }}>
       <TestsList
         tests={course.tests}
         onNavigateToTest={(testId) => navigation.navigate('TestDetail', { testId })}
+        sections={sectionTree}
       />
-    </ScrollView>
+    </View>
+  );
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Animated.ScrollView
+        style={{ flex: 1 }}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={true}
+      >
+        {showImages && (
+          <Card.Cover source={{ uri: imageSource }} style={styles.cover} />
+        )}
+
+        <CourseContent course={course} />
+
+        {/* Tabs intégrés dans le scroll - masqués quand sticky est actif */}
+        {!showStickyTabs && renderTabs(false)}
+
+        {/* Contenu des onglets */}
+        <View style={showStickyTabs ? { paddingTop: 64 } : {}}>
+          {activeTab === 'course' && renderCourseTab()}
+          {activeTab === 'tests' && renderTestsTab()}
+        </View>
+      </Animated.ScrollView>
+
+      {/* Tabs sticky en position absolue */}
+      {showStickyTabs && (
+        <View style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+        }}>
+          {renderTabs(true)}
+        </View>
+      )}
+    </View>
   );
 };

@@ -40,18 +40,21 @@ type Section = {
   isValidatable?: boolean; // Nouveau champ du backend
   children?: Section[];
   visited?: boolean;
+  tests?: any[]; // Tests associés à cette section
 };
 
 type SectionsListProps = {
   sections: Section[];
   visitedSections: Set<string>;
   onSectionToggle: (sectionId: string, visited: boolean) => void;
+  onNavigateToTest?: (testId: string) => void; // Nouvelle prop pour naviguer vers un test
 };
 
 export const SectionsList: React.FC<SectionsListProps> = ({
   sections,
   visitedSections,
   onSectionToggle,
+  onNavigateToTest,
 }) => {
   const { theme } = useTheme();
   const colors = getSectionColors(theme);
@@ -82,6 +85,7 @@ export const SectionsList: React.FC<SectionsListProps> = ({
           level={0}
           visitedSections={visitedSections}
           onToggle={onSectionToggle}
+          onNavigateToTest={onNavigateToTest}
           theme={theme}
           autoExpandPath={autoExpandPath}
         />
@@ -96,6 +100,7 @@ type SectionItemProps = {
   level: number;
   visitedSections: Set<string>;
   onToggle: (sectionId: string, visited: boolean) => void;
+  onNavigateToTest?: (testId: string) => void;
   theme: any;
   autoExpandPath: string[];
 };
@@ -115,6 +120,7 @@ const SectionItem: React.FC<SectionItemProps> = ({
   level,
   visitedSections,
   onToggle,
+  onNavigateToTest,
   autoExpandPath,
   theme,
 }) => {
@@ -262,14 +268,41 @@ const SectionItem: React.FC<SectionItemProps> = ({
               </View>
             </View>
 
-            {/* Icône de validation à droite si validée OU tous enfants validés */}
-            {((isValidatable && isVisited) || (!isValidatable && allChildrenValidated)) && (
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={20}
-                color={colors.checkColor}
-              />
-            )}
+            {/* Boutons d'action à droite */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              {/* Bouton de test si la section a des tests associés */}
+              {section.tests && section.tests.length > 0 && onNavigateToTest && (
+                <TouchableOpacity
+                  onPress={() => {
+                    // Pour l'instant, navigue vers le premier test associé
+                    // Plus tard, on pourrait afficher un menu si plusieurs tests
+                    if (section.tests && section.tests.length > 0) {
+                      onNavigateToTest(section.tests[0].id);
+                    }
+                  }}
+                  style={{
+                    padding: 4,
+                    borderRadius: 12,
+                    backgroundColor: theme.colors.primaryContainer,
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="file-document"
+                    size={16}
+                    color={theme.colors.onPrimaryContainer}
+                  />
+                </TouchableOpacity>
+              )}
+
+              {/* Icône de validation à droite si validée OU tous enfants validés */}
+              {((isValidatable && isVisited) || (!isValidatable && allChildrenValidated)) && (
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={20}
+                  color={colors.checkColor}
+                />
+              )}
+            </View>
           </Card.Content>
         </TouchableOpacity>
 
@@ -336,6 +369,7 @@ const SectionItem: React.FC<SectionItemProps> = ({
                      level={level + 1}
                      visitedSections={visitedSections}
                      onToggle={onToggle}
+                     onNavigateToTest={onNavigateToTest}
                      theme={theme}
                      autoExpandPath={autoExpandPath}
                    />

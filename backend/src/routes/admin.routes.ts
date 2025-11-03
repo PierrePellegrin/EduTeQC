@@ -24,6 +24,7 @@ router.get('/courses', CourseController.getAllAdmin);
 router.post('/courses', validate(courseSchema), CourseController.create);
 router.put('/courses/:id', validate(courseSchema.partial()), CourseController.update);
 router.delete('/courses/:id', CourseController.delete);
+router.get('/courses/:id/global-tests', CourseController.checkGlobalTests);
 
 // ========== TESTS ==========
 router.get('/tests', TestController.getAllAdmin);

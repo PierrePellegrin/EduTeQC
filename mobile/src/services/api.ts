@@ -131,6 +131,11 @@ export const adminApi = {
     return response.data;
   },
 
+  checkCourseGlobalTests: async (id: string) => {
+    const response = await api.get(`/admin/courses/${id}/global-tests`);
+    return response.data;
+  },
+
   // Tests
   getAllTests: async () => {
     const response = await api.get('/admin/tests');

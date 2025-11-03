@@ -13,9 +13,11 @@ type TestCardProps = {
     passingScore: number;
   };
   onPress: () => void;
+  associatedSection?: any; // Section associée au test
+  testNumber?: number; // Numéro du test dans la liste
 };
 
-export const TestCard: React.FC<TestCardProps> = ({ test, onPress }) => {
+export const TestCard: React.FC<TestCardProps> = ({ test, onPress, associatedSection, testNumber }) => {
   const { theme } = useTheme();
 
   return (
@@ -28,8 +30,32 @@ export const TestCard: React.FC<TestCardProps> = ({ test, onPress }) => {
           <Text variant="titleMedium" style={[styles.testTitle, { color: theme.colors.onCardBackground }]}>
             {test.title}
           </Text>
-          <Chip compact>{test.duration} min</Chip>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Chip compact>{test.duration} min</Chip>
+            {testNumber && (
+              <Chip compact>Test #{testNumber}</Chip>
+            )}
+          </View>
         </View>
+        
+        {/* Afficher la section associée si elle existe */}
+        {associatedSection && (
+          <View style={{ marginBottom: 8 }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.primary, fontWeight: '500' }}>
+              📖 Section associée: {associatedSection.title}
+            </Text>
+          </View>
+        )}
+        
+        {/* Si le test n'est pas associé à une section, indiquer qu'il est global */}
+        {!associatedSection && (
+          <View style={{ marginBottom: 8 }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.secondary, fontWeight: '500' }}>
+              🌍 Test global du cours
+            </Text>
+          </View>
+        )}
+        
         {test.description && (
           <Text variant="bodyMedium" style={[styles.testDescription, { color: theme.colors.onCardBackground }]}>
             {test.description}
