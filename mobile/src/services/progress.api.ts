@@ -3,19 +3,19 @@ import api from './api';
 export const progressApi = {
   // Récupérer la progression d'un cours
   getCourseProgress: async (courseId: string) => {
-    const response = await api.get(`/progress/courses/${courseId}`);
+    const response = await api.get(`/api/progress/courses/${courseId}`);
     return response.data;
   },
 
   // Récupérer la progression détaillée des sections d'un cours
   getCourseSectionProgress: async (courseId: string) => {
-    const response = await api.get(`/progress/courses/${courseId}/sections`);
+    const response = await api.get(`/api/progress/courses/${courseId}/sections`);
     return response.data;
   },
 
   // Marquer une section comme visitée ou non visitée
   toggleSectionVisited: async (sectionId: string, visited: boolean) => {
-    const response = await api.post(`/progress/sections/${sectionId}/visit`, {
+    const response = await api.post(`/api/progress/sections/${sectionId}/visit`, {
       visited,
     });
     return response.data;
@@ -23,7 +23,7 @@ export const progressApi = {
 
   // Marquer une section comme visitée (rétrocompatibilité)
   markSectionVisited: async (sectionId: string) => {
-    const response = await api.post(`/progress/sections/${sectionId}/visit`, {
+    const response = await api.post(`/api/progress/sections/${sectionId}/visit`, {
       visited: true,
     });
     return response.data;
@@ -31,7 +31,7 @@ export const progressApi = {
 
   // Mettre à jour le pourcentage de complétion (calculé automatiquement par le backend)
   updateCourseProgress: async (courseId: string, lastSectionId?: string) => {
-    const response = await api.put(`/progress/courses/${courseId}`, {
+    const response = await api.put(`/api/progress/courses/${courseId}`, {
       lastSectionId,
     });
     return response.data;
@@ -39,13 +39,13 @@ export const progressApi = {
 
   // Réinitialiser la progression d'un cours
   resetCourseProgress: async (courseId: string) => {
-    const response = await api.delete(`/progress/courses/${courseId}`);
+    const response = await api.delete(`/api/progress/courses/${courseId}`);
     return response.data;
   },
 
   // Récupérer toutes les progressions de l'utilisateur
   getAllProgress: async () => {
-    const response = await api.get('/progress');
+    const response = await api.get('/api/progress');
     return response.data;
   },
 };
