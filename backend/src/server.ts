@@ -41,9 +41,9 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/packages', packageRoutes);
+app.use('/api/progress', progressRoutes); // Specific prefix to avoid auth conflicts
 app.use('/api', cycleRoutes);
 app.use('/api', sectionRoutes);
-app.use('/api', progressRoutes);
 
 // Health check
 app.get('/health', async (req, res) => {
