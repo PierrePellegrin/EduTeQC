@@ -1,6 +1,51 @@
 import { prisma } from '../lib/prisma';
 
 export class PackageService {
+  // Get all active packages (public - for client shop)
+  static async getAllPublic() {
+    return prisma.package.findMany({
+      where: {
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        imageUrl: true,
+        courses: {
+          select: {
+            course: {
+              select: {
+                id: true,
+                title: true,
+                category: true,
+                niveau: {
+                  select: {
+                    id: true,
+                    name: true,
+                    cycle: {
+                      select: {
+                        id: true,
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            courses: true,
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
   static async getAllAdmin() {
     return prisma.package.findMany({
       select: {

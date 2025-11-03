@@ -2,6 +2,16 @@ import { Request, Response, NextFunction } from 'express';
 import { PackageService } from '../services/package.service';
 
 export class PackageController {
+  // Get all active packages (public - for shop)
+  static async getAllPublic(req: Request, res: Response, next: NextFunction) {
+    try {
+      const packages = await PackageService.getAllPublic();
+      res.json({ packages });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // Get all packages (admin)
   static async getAllAdmin(req: Request, res: Response, next: NextFunction) {
     try {

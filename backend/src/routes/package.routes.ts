@@ -4,6 +4,9 @@ import { PackageController } from '../controllers/package.controller';
 
 const router = Router();
 
+// Get all active packages (public - for shop)
+router.get('/', PackageController.getAllPublic);
+
 // Buy a package (client)
 router.post('/buy', authenticate, PackageController.buyPackage);
 
