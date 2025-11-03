@@ -228,6 +228,10 @@ const CourseFormComponent: React.FC<CourseFormProps> = ({
           <Menu
             visible={categoryMenuVisible}
             onDismiss={() => setCategoryMenuVisible(false)}
+            contentStyle={{
+              backgroundColor: theme.colors.surface,
+              borderRadius: 8,
+            }}
             anchor={
               <TouchableOpacity onPress={() => setCategoryMenuVisible(true)}>
                 <TextInput
@@ -254,6 +258,10 @@ const CourseFormComponent: React.FC<CourseFormProps> = ({
           <Menu
             visible={cycleMenuVisible}
             onDismiss={() => setCycleMenuVisible(false)}
+            contentStyle={{
+              backgroundColor: theme.colors.surface,
+              borderRadius: 8,
+            }}
             anchor={
               <TouchableOpacity onPress={() => setCycleMenuVisible(true)}>
                 <TextInput
@@ -280,6 +288,10 @@ const CourseFormComponent: React.FC<CourseFormProps> = ({
           <Menu
             visible={niveauMenuVisible}
             onDismiss={() => setNiveauMenuVisible(false)}
+            contentStyle={{
+              backgroundColor: theme.colors.surface,
+              borderRadius: 8,
+            }}
             anchor={
               <TouchableOpacity onPress={() => setNiveauMenuVisible(true)}>
                 <TextInput

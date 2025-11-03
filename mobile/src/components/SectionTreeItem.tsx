@@ -119,6 +119,10 @@ export const SectionTreeItem: React.FC<SectionTreeItemProps> = ({
           <Menu
             visible={menuVisible}
             onDismiss={() => setMenuVisible(false)}
+            contentStyle={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: 8,
+            }}
             anchor={
               <IconButton
                 icon="dots-vertical"

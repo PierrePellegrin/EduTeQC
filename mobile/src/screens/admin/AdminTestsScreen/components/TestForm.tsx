@@ -65,6 +65,10 @@ const TestFormComponent: React.FC<TestFormProps> = ({
         <Menu
           visible={courseMenuVisible}
           onDismiss={() => onCourseMenuToggle(false)}
+          contentStyle={{
+            backgroundColor: theme.colors.surface,
+            borderRadius: 8,
+          }}
           anchor={
             <Button
               mode="outlined"

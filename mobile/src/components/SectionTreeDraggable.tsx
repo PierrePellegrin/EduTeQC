@@ -153,6 +153,10 @@ const SectionDraggableItem: React.FC<SectionDraggableItemProps> = ({
       <Menu
         visible={menuVisible}
         onDismiss={() => setMenuVisible(false)}
+        contentStyle={{
+          backgroundColor: '#FFFFFF',
+          borderRadius: 8,
+        }}
         anchor={
           <IconButton icon="dots-vertical" size={20} onPress={() => setMenuVisible(true)} />
         }
