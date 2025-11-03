@@ -1,16 +1,9 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
+import { getApiUrl } from '../config/api.config';
 
-// Resolve API base URL:
-// 1) Prefer EXPO_PUBLIC_API_URL at build/run time
-// 2) Fallback to emulator-friendly defaults
-//    - Android emulator to host: http://10.0.2.2:3000
-//    - iOS simulator to host: http://127.0.0.1:3000
-//    - Physical devices: set EXPO_PUBLIC_API_URL to your LAN IP, e.g. http://192.168.x.x:3000
-const envUrl = process.env.EXPO_PUBLIC_API_URL;
-const fallbackHost = Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://127.0.0.1:3000';
-const API_URL = `${envUrl ?? fallbackHost}/api`;
+// Utiliser la configuration centralisée pour l'URL de l'API
+const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,

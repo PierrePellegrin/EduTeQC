@@ -2,12 +2,38 @@
 
 Application mobile React Native complète pour iOS et Android permettant l'apprentissage via des cours et des tests QCM.
 
+## 🎯 Quick Start
+
+### Déploiement Rapide (Recommandé)
+```powershell
+# 1. Cloner et installer
+git clone [votre-repo]
+cd EduTeQCV2
+npm run install:all
+
+# 2. Créer comptes gratuits
+# - Neon (PostgreSQL): https://neon.tech
+# - Railway (Backend): https://railway.app
+
+# 3. Déployer automatiquement
+# Suivez le guide: docs/DEPLOYMENT_GUIDE.md
+
+# 4. Générer APK production
+.\build-production.ps1
+```
+
+### Test Local
+```powershell
+# Démarrer backend + mobile ensemble
+.\test-local.ps1
+```
+
 ## 🚀 Technologies Utilisées
 
 ### Backend
 - **Node.js** + **Express** - Serveur API REST
 - **TypeScript** - Typage statique
-- **PostgreSQL** - Base de données relationnelle
+- **PostgreSQL** - Base de données relationnelle (Neon/Supabase)
 - **Prisma ORM** - Accès aux données type-safe
 - **JWT** - Authentification sécurisée
 - **Bcrypt** - Hashage des mots de passe
@@ -21,6 +47,12 @@ Application mobile React Native complète pour iOS et Android permettant l'appre
 - **TanStack Query** (React Query) - Gestion d'état serveur
 - **Expo Secure Store** - Stockage sécurisé des tokens
 - **Axios** - Client HTTP
+
+### Déploiement
+- **Railway/Render** - Hébergement backend
+- **Neon/Supabase** - Base de données PostgreSQL
+- **EAS Build** - Compilation mobile
+- **GitHub Actions** - CI/CD (optionnel)
 
 ## 📱 Fonctionnalités
 

@@ -15,9 +15,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath('com.android.tools.build:gradle:8.1.1')
+        classpath('com.android.tools.build:gradle')
         classpath('com.facebook.react:react-native-gradle-plugin')
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 
@@ -37,17 +36,5 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
-    }
-
-    // Force androidx.core to a version compatible with AGP 8.1.1
-    configurations.all { cfg ->
-        resolutionStrategy {
-            force 'androidx.core:core:1.13.1', 'androidx.core:core-ktx:1.13.1'
-            eachDependency { details ->
-                if (details.requested.group == 'androidx.core' && details.requested.name.startsWith('core')) {
-                    details.useVersion '1.13.1'
-                }
-            }
-        }
     }
 }
