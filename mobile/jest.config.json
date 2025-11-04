@@ -1,0 +1,19 @@
+{
+  "preset": "react-native",
+  "setupFilesAfterEnv": ["<rootDir>/tests/setup.ts"],
+  "transformIgnorePatterns": [
+    "node_modules/(?!(react-native|@react-native|react-native-vector-icons|@expo|expo-.*|@tanstack/react-query)/)"
+  ],
+  "testMatch": [
+    "**/__tests__/**/*.ts?(x)",
+    "**/?(*.)+(spec|test).ts?(x)"
+  ],
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx"],
+  "collectCoverageFrom": [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/**/*.test.{ts,tsx}",
+    "!src/**/*.spec.{ts,tsx}"
+  ],
+  "testTimeout": 10000
+}
