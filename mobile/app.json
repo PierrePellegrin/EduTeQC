@@ -5,20 +5,25 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon-1024x1024.png",
     "splash": {
+      "image": "./assets/icon-512x512.png",
       "resizeMode": "contain",
-      "backgroundColor": "#6200EE"
+      "backgroundColor": "#4A90E2"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
+      "icon": "./assets/icon-1024x1024.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.eduteqc.app"
     },
     "android": {
+      "icon": "./assets/icon-512x512.png",
       "adaptiveIcon": {
-        "backgroundColor": "#6200EE"
+        "foregroundImage": "./assets/icon-512x512.png",
+        "backgroundColor": "#4A90E2"
       },
       "package": "com.eduteqc.app",
       "permissions": [
@@ -28,7 +33,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon-48x48.png"
     },
     "plugins": []
   }
