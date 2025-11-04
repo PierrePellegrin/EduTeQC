@@ -4,13 +4,13 @@ import { CourseProgress, SectionProgress } from '../types';
 export const progressService = {
   // Récupérer la progression d'un utilisateur sur un cours
   async getCourseProgress(courseId: string): Promise<CourseProgress> {
-    const response = await api.get(`/api/progress/courses/${courseId}`);
+    const response = await api.get(`/progress/courses/${courseId}`);
     return response.data.progress;
   },
 
   // Récupérer toutes les progressions de l'utilisateur
   async getUserProgress(): Promise<CourseProgress[]> {
-    const response = await api.get('/api/progress');
+    const response = await api.get('/progress');
     return response.data.progress;
   },
 
@@ -22,7 +22,7 @@ export const progressService = {
     averageCompletion: number;
     courses: CourseProgress[];
   }> {
-    const response = await api.get('/api/progress/stats');
+    const response = await api.get('/progress/stats');
     return response.data.stats;
   },
 
@@ -36,18 +36,18 @@ export const progressService = {
       visitedAt: Date | null;
     };
   }>> {
-    const response = await api.get(`/api/progress/courses/${courseId}/sections`);
+    const response = await api.get(`/progress/courses/${courseId}/sections`);
     return response.data.sections;
   },
 
   // Marquer une section comme visitée
   async markSectionVisited(sectionId: string): Promise<SectionProgress> {
-    const response = await api.post(`/api/progress/sections/${sectionId}/visit`);
+    const response = await api.post(`/progress/sections/${sectionId}/visit`);
     return response.data.sectionProgress;
   },
 
   // Réinitialiser la progression d'un cours
   async resetCourseProgress(courseId: string): Promise<void> {
-    await api.delete(`/api/progress/courses/${courseId}`);
+    await api.delete(`/progress/courses/${courseId}`);
   },
 };

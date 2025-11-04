@@ -1,3 +1,12 @@
 {
-  "expo": {}
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "53e895fd-4439-4966-9fa6-ca1716ca3bc6"
+      }
+    },
+    "android": {
+      "package": "com.greattichonizuka.eduteqc"
+    }
+  }
 }

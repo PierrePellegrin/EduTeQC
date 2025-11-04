@@ -393,6 +393,28 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
   const completionPercent = progressData?.progress?.completionPercent || 0;
   const lastAccessedAt = progressData?.progress?.lastAccessedAt;
 
+  // Calculer la hauteur approximative avant les tabs - DÉPLACÉ AVANT LES EARLY RETURNS
+  const headerHeight = useMemo(() => {
+    let height = 0;
+    if (showImages) height += 250; // hauteur de l'image
+    height += 150; // hauteur approximative du CourseContent (titre + description + chips)
+    height += 56; // hauteur des tabs eux-mêmes
+    return height;
+  }, [showImages]);
+
+  // Gestion du scroll pour sticky tabs - DÉPLACÉ AVANT LES EARLY RETURNS
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    {
+      useNativeDriver: false,
+      listener: (event: any) => {
+        const scrollOffset = event.nativeEvent.contentOffset.y;
+        // Les tabs sticky apparaissent exactement quand les tabs normaux disparaissent
+        setShowStickyTabs(scrollOffset >= headerHeight);
+      },
+    }
+  );
+
   if (isLoading || isProgressLoading) {
     return (
       <View style={styles.centerContainer}>
@@ -419,28 +441,6 @@ export const CourseDetailScreen = ({ navigation, route }: Props) => {
 
   const defaultImage = 'https://via.placeholder.com/800x400/4A90E2/FFFFFF?text=' + encodeURIComponent(course.category);
   const imageSource = course.imageUrl || defaultImage;
-
-  // Calculer la hauteur approximative avant les tabs
-  const headerHeight = useMemo(() => {
-    let height = 0;
-    if (showImages) height += 250; // hauteur de l'image
-    height += 150; // hauteur approximative du CourseContent (titre + description + chips)
-    height += 56; // hauteur des tabs eux-mêmes
-    return height;
-  }, [showImages]);
-
-  // Gestion du scroll pour sticky tabs
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    {
-      useNativeDriver: false,
-      listener: (event: any) => {
-        const scrollOffset = event.nativeEvent.contentOffset.y;
-        // Les tabs sticky apparaissent exactement quand les tabs normaux disparaissent
-        setShowStickyTabs(scrollOffset >= headerHeight);
-      },
-    }
-  );
 
   // Rendu des tabs (composant réutilisable)
   const renderTabs = (isSticky = false) => (

@@ -59,6 +59,25 @@ export const SectionsList: React.FC<SectionsListProps> = ({
   const { theme } = useTheme();
   const colors = getSectionColors(theme);
 
+  // Calculer l'id de la première section non validée une seule fois
+  const autoExpandPath = findPathToFirstUnvisitedSection(sections, visitedSections);
+  
+  // Gérer l'état d'expansion pour toutes les sections dans le composant parent
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    autoExpandPath.forEach(sectionId => {
+      initial[sectionId] = true;
+    });
+    return initial;
+  });
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
+
   if (!sections || sections.length === 0) {
     return (
       <Card style={[sectionStyles.emptyCard, { backgroundColor: theme.colors.elevation.level2 }]}>
@@ -72,9 +91,6 @@ export const SectionsList: React.FC<SectionsListProps> = ({
     );
   }
 
-  // Calculer l'id de la première section non validée une seule fois
-  const autoExpandPath = findPathToFirstUnvisitedSection(sections, visitedSections);
-
   return (
     <View style={styles.container}>
       {sections.map((section, index) => (
@@ -87,7 +103,10 @@ export const SectionsList: React.FC<SectionsListProps> = ({
           onToggle={onSectionToggle}
           onNavigateToTest={onNavigateToTest}
           theme={theme}
-          autoExpandPath={autoExpandPath}
+          expanded={expandedSections[section.id] || false}
+          onExpandToggle={() => toggleSection(section.id)}
+          expandedSections={expandedSections}
+          toggleSection={toggleSection}
         />
       ))}
     </View>
@@ -102,7 +121,10 @@ type SectionItemProps = {
   onToggle: (sectionId: string, visited: boolean) => void;
   onNavigateToTest?: (testId: string) => void;
   theme: any;
-  autoExpandPath: string[];
+  expanded: boolean;
+  onExpandToggle: () => void;
+  expandedSections: Record<string, boolean>;
+  toggleSection: (sectionId: string) => void;
 };
 
 // Helper récursif pour savoir si tous les enfants validables sont cochés
@@ -121,14 +143,15 @@ const SectionItem: React.FC<SectionItemProps> = ({
   visitedSections,
   onToggle,
   onNavigateToTest,
-  autoExpandPath,
   theme,
+  expanded,
+  onExpandToggle,
+  expandedSections,
+  toggleSection,
 }) => {
   const hasChildren = section.children && section.children.length > 0;
   const isVisited = visitedSections.has(section.id);
   const allChildrenValidated = areAllChildrenValidated(section, visitedSections);
-  // Ouvre toute section dont l'id est dans le chemin d'expansion
-  const [expanded, setExpanded] = useState(() => autoExpandPath.includes(section.id));
   const indent = level * 6; // Indentation minimale pour économiser l'espace
   const colors = getSectionColors(theme, isVisited);
   
@@ -203,7 +226,7 @@ const SectionItem: React.FC<SectionItemProps> = ({
       >
         <TouchableOpacity
           onPress={() => {
-            setExpanded(!expanded);
+            onExpandToggle();
           }}
           activeOpacity={0.7}
         >
@@ -371,7 +394,10 @@ const SectionItem: React.FC<SectionItemProps> = ({
                      onToggle={onToggle}
                      onNavigateToTest={onNavigateToTest}
                      theme={theme}
-                     autoExpandPath={autoExpandPath}
+                     expanded={expandedSections[child.id] || false}
+                     onExpandToggle={() => toggleSection(child.id)}
+                     expandedSections={expandedSections}
+                     toggleSection={toggleSection}
                    />
                  ))}
             </Card.Content>

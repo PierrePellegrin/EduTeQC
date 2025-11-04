@@ -17,11 +17,8 @@ cd mobile
 # 2. Générer les fichiers natifs Android (si pas déjà fait)
 npx expo prebuild --platform android
 
-# 3. Aller dans le dossier android
-cd android
-
-# 4. Générer l'APK debug
-.\gradlew assembleDebug
+# 3. Générer l'APK debug en spécifiant le répertoire de travail
+Set-Location "C:\Projet\EduTeQCV2\mobile\android"; .\gradlew.bat assembleDebug
 ```
 
 **Fichier généré** : `mobile/android/app/build/outputs/apk/debug/app-debug.apk`
@@ -31,9 +28,8 @@ cd android
 **Utilisation** : Distribution publique, Play Store
 
 ```powershell
-# 1. Générer l'APK release
-cd mobile/android
-.\gradlew assembleRelease
+# 1. Générer l'APK release en spécifiant le répertoire de travail
+Set-Location "C:\Projet\EduTeQCV2\mobile\android"; .\gradlew.bat assembleRelease
 ```
 
 **Fichier généré** : `mobile/android/app/build/outputs/apk/release/app-release.apk`
@@ -157,8 +153,8 @@ npm install -g @expo/cli
 
 ### Erreur : "gradlew command not found"
 ```powershell
-# Vérifier que vous êtes dans le dossier mobile/android/
-cd mobile/android
+# Utiliser le chemin complet au lieu du chemin relatif
+C:\Projet\EduTeQCV2\mobile\android\gradlew.bat assembleDebug
 ```
 
 ### APK ne s'installe pas
