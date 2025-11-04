@@ -44,8 +44,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (email: string, password: string) => {
-    const response = await authApi.login(email, password);
-    setUser(response.user);
+    try {
+      console.log('AuthContext: Début de la connexion...');
+      const response = await authApi.login(email, password);
+      console.log('AuthContext: Réponse reçue, mise à jour de l\'utilisateur...');
+      setUser(response.user);
+      console.log('AuthContext: Utilisateur connecté:', response.user.email);
+    } catch (error) {
+      console.error('AuthContext: Erreur lors de la connexion:', error);
+      throw error; // Re-lancer l'erreur pour la gestion dans le composant
+    }
   };
 
   const register = async (data: {

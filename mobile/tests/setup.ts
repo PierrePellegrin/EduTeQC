@@ -7,6 +7,18 @@ require('@testing-library/jest-native/extend-expect');
 jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
 jest.mock('react-native-vector-icons/FontAwesome', () => 'Icon');
 
+// Mock Expo SecureStore
+jest.mock('expo-secure-store', () => ({
+  getItemAsync: jest.fn(() => Promise.resolve(null)),
+  setItemAsync: jest.fn(() => Promise.resolve()),
+  deleteItemAsync: jest.fn(() => Promise.resolve()),
+}));
+
+// Mock API config
+jest.mock('../src/config/api.config', () => ({
+  getApiUrl: jest.fn(() => 'http://localhost:3000/api'),
+}));
+
 // Mock TanStack Query
 jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(() => ({

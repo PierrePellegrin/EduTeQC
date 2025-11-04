@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { TextInput, Button, Text, Surface, SegmentedButtons } from 'react-native-paper';
 import { useAuth } from '../../../contexts/AuthContext';
 import { styles } from './styles';
@@ -11,22 +11,66 @@ export const LoginScreen = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Nouvelle protection
   const { login, register } = useAuth();
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
+    // Protection contre les double-clics
+    if (loading || isSubmitting) {
+      console.log('Soumission déjà en cours, ignorer...');
+      return;
+    }
+
+    // Validation des champs
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    if (mode === 'register' && (!firstName.trim() || !lastName.trim())) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
     setLoading(true);
+    setIsSubmitting(true);
+    
     try {
       if (mode === 'login') {
-        await login(email, password);
+        console.log('Tentative de connexion pour:', email);
+        await login(email.trim(), password);
+        console.log('Connexion réussie');
       } else {
-        await register({ email, password, firstName, lastName });
+        console.log('Tentative d\'inscription pour:', email);
+        await register({ 
+          email: email.trim(), 
+          password, 
+          firstName: firstName.trim(), 
+          lastName: lastName.trim() 
+        });
+        console.log('Inscription réussie');
       }
     } catch (error: any) {
-      alert(error.message || 'Une erreur est survenue');
+      console.error('Erreur d\'authentification:', error);
+      
+      // Gestion d'erreur améliorée
+      const errorMessage = error?.response?.data?.message || 
+                          error?.message || 
+                          'Une erreur est survenue lors de la connexion';
+      
+      Alert.alert(
+        'Erreur de connexion',
+        errorMessage,
+        [{ text: 'OK', style: 'default' }]
+      );
     } finally {
       setLoading(false);
+      // Petit délai pour éviter les double-clics rapides
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 500);
     }
-  };
+  }, [mode, email, password, firstName, lastName, login, register, loading, isSubmitting]);
 
   return (
     <KeyboardAvoidingView
@@ -94,7 +138,7 @@ export const LoginScreen = () => {
             mode="contained"
             onPress={handleSubmit}
             loading={loading}
-            disabled={loading}
+            disabled={loading || isSubmitting}
             style={styles.button}
           >
             {mode === 'login' ? 'Se connecter' : "S'inscrire"}

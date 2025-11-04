@@ -21,14 +21,40 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+// Add response interceptor for better error handling
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    console.error('API Error:', error.response?.status, error.response?.data);
+    
+    // Si token expiré, déconnecter l'utilisateur
+    if (error.response?.status === 401) {
+      await SecureStore.deleteItemAsync('token');
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 // Auth API
 export const authApi = {
   login: async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
-    if (response.data.token) {
-      await SecureStore.setItemAsync('token', response.data.token);
+    try {
+      console.log('API: Envoi de la requête de connexion...');
+      const response = await api.post('/auth/login', { email, password });
+      console.log('API: Réponse reçue:', response.status);
+      
+      if (response.data.token) {
+        console.log('API: Sauvegarde du token...');
+        await SecureStore.setItemAsync('token', response.data.token);
+        console.log('API: Token sauvegardé');
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('API: Erreur lors de la connexion:', error);
+      throw error;
     }
-    return response.data;
   },
 
   register: async (data: {
