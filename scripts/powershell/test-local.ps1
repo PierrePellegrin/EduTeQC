@@ -2,9 +2,14 @@
 
 Write-Host "🧪 Test Local EduTeQC - Démarrage..." -ForegroundColor Green
 
+# Obtenir le chemin racine du projet (2 niveaux au-dessus)
+$rootPath = Split-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) -Parent
+Set-Location $rootPath
+
 # Vérifier que nous sommes dans le bon dossier
 if (-not (Test-Path "mobile\package.json") -or -not (Test-Path "backend\package.json")) {
-    Write-Host "❌ Erreur: Ce script doit être exécuté depuis la racine du projet EduTeQCV2" -ForegroundColor Red
+    Write-Host "❌ Erreur: Impossible de trouver les dossiers mobile et backend" -ForegroundColor Red
+    Write-Host "📁 Chemin actuel: $rootPath" -ForegroundColor Yellow
     exit 1
 }
 

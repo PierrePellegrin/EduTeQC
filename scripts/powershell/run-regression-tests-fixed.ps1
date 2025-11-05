@@ -167,7 +167,8 @@ if ($failedTests -eq 0) {
     Write-Host "🛠️ Corrigez les problèmes avant de continuer." -ForegroundColor Red
 }
 
-Write-Host "`n" + "=" * 50 -ForegroundColor Blue
+Write-Host ""
+Write-Host ("=" * 50) -ForegroundColor Blue
 
 # Exit avec le code approprié
 if ($failedTests -gt 0) {

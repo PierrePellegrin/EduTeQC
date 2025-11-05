@@ -11,10 +11,10 @@ param(
 Write-Host "🔒 Tests de Non-Régression EduTeQC" -ForegroundColor Blue
 Write-Host ("=" * 50) -ForegroundColor Blue
 
-$rootPath = Split-Path $MyInvocation.MyCommand.Path
+$rootPath = Split-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) -Parent
 $backendPath = Join-Path $rootPath "backend"
 $mobilePath = Join-Path $rootPath "mobile"
-$testsPath = Join-Path $rootPath "tests"
+$testsPath = Join-Path $rootPath "tools"
 
 $totalTests = 0
 $passedTests = 0

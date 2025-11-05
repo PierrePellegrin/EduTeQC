@@ -7,7 +7,8 @@
  * 3. Migre les tests existants vers les tests globaux du cours
  * 4. Génère un rapport de migration
  * 
- * Usage: ts-node prisma/migrate-to-sections.ts
+ * Usage: npx ts-node ../scripts/database/migrate-to-sections.ts
+ * (depuis le dossier backend/)
  */
 
 import { PrismaClient } from '@prisma/client';
