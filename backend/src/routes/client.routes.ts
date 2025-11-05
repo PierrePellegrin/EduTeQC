@@ -9,35 +9,65 @@ router.get('/stats', authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
 
-    // Récupérer les statistiques d'apprentissage de l'utilisateur
+    // Récupérer les forfaits achetés par l'utilisateur
+    const userPackages = await prisma.userPackage.findMany({
+      where: { userId },
+      include: {
+        package: {
+          include: {
+            courses: {
+              include: {
+                course: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Courses accessibles via les forfaits achetés
+    const accessibleCourses = new Set<string>();
+    userPackages.forEach(up => {
+      up.package.courses.forEach(pc => {
+        accessibleCourses.add(pc.course.id);
+      });
+    });
+
+    // Nombre de cours accessibles (uniquement ceux dans les forfaits achetés)
+    const accessibleCoursesCount = accessibleCourses.size;
+
+    // Total de tous les cours disponibles (pour découverte)
+    const allCoursesCount = await prisma.course.count();
+
     const [
-      totalCourses,
       userProgress,
       completedCourses,
       inProgressCourses
     ] = await Promise.all([
-      // Nombre total de cours disponibles
-      prisma.course.count(),
-      
-      // Progrès de l'utilisateur
+      // Progrès de l'utilisateur (uniquement sur les cours accessibles)
       prisma.courseProgress.findMany({
-        where: { userId },
+        where: { 
+          userId,
+          ...(accessibleCoursesCount > 0 ? { courseId: { in: Array.from(accessibleCourses) } } : {})
+        },
         include: { course: true }
       }),
       
-      // Cours terminés (100% de complétion)
+      // Cours terminés (100% de complétion) - uniquement cours accessibles
       prisma.courseProgress.count({
         where: { 
           userId,
-          completionPercent: 100
+          completionPercent: 100,
+          ...(accessibleCoursesCount > 0 ? { courseId: { in: Array.from(accessibleCourses) } } : {})
         }
       }),
       
-      // Cours en cours (progression > 0 mais < 100%)
+      // Cours en cours (progression > 0 mais < 100%) - uniquement cours accessibles
       prisma.courseProgress.count({
         where: { 
           userId,
-          completionPercent: { gt: 0, lt: 100 }
+          completionPercent: { gt: 0, lt: 100 },
+          ...(accessibleCoursesCount > 0 ? { courseId: { in: Array.from(accessibleCourses) } } : {})
         }
       })
     ]);
@@ -59,13 +89,22 @@ router.get('/stats', authenticate, async (req: AuthRequest, res) => {
     // Calculer la série de jours consécutifs d'activité
     const streak = await calculateDailyStreak(userId);
 
+    // Calculer un pourcentage de progression globale basé sur les cours accessibles
+    const globalProgress = accessibleCoursesCount > 0 
+      ? Math.round(((completedCourses + (inProgressCourses * 0.5)) / accessibleCoursesCount) * 100)
+      : 0;
+
     const stats = {
-      totalCourses,
+      totalCourses: accessibleCoursesCount, // Cours dans les forfaits achetés
       completedCourses,
       inProgressCourses,
+      availableCourses: Math.max(accessibleCoursesCount - completedCourses - inProgressCourses, 0), // Cours non commencés dans les forfaits
+      allCoursesCount, // Total de tous les cours (pour découverte)
       totalHours: Math.round(totalStudyTime / 60), // Convertir minutes en heures
       weeklyProgress: Math.min(Math.round((weeklyProgress / 7) * 100), 100),
-      streak
+      globalProgress, // Progression globale
+      streak,
+      packagesCount: userPackages.length // Nombre de forfaits achetés
     };
 
     res.json(stats);
@@ -80,29 +119,112 @@ router.get('/recent-activity', authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
 
-    // Récupérer les activités récentes de l'utilisateur
-    const recentProgress = await prisma.courseProgress.findMany({
-      where: { userId },
-      include: { 
-        course: { select: { title: true } }
-      },
-      orderBy: { updatedAt: 'desc' },
-      take: 5
+    // Récupérer différents types d'activités récentes
+    const [recentProgress, recentTests, recentPackages] = await Promise.all([
+      // Progression des cours
+      prisma.courseProgress.findMany({
+        where: { userId },
+        include: { 
+          course: { select: { title: true, category: true } }
+        },
+        orderBy: { updatedAt: 'desc' },
+        take: 3
+      }),
+
+      // Tests récents
+      prisma.testResult.findMany({
+        where: { userId },
+        include: {
+          test: { 
+            select: { 
+              title: true,
+              course: { select: { title: true } }
+            }
+          }
+        },
+        orderBy: { completedAt: 'desc' },
+        take: 3
+      }),
+
+      // Forfaits achetés récemment
+      prisma.userPackage.findMany({
+        where: { userId },
+        include: {
+          package: { select: { name: true } }
+        },
+        orderBy: { purchasedAt: 'desc' },
+        take: 2
+      })
+    ]);
+
+    const activities: any[] = [];
+
+    // Ajouter les activités de progression de cours
+    recentProgress.forEach((progress) => {
+      activities.push({
+        id: `progress-${progress.id}`,
+        type: progress.completionPercent === 100 ? 'course_completed' : 'lesson_started',
+        title: progress.course.title,
+        subtitle: progress.completionPercent === 100
+          ? 'Cours terminé avec succès' 
+          : `Progression: ${Math.round(progress.completionPercent)}%`,
+        timestamp: getRelativeTime(progress.updatedAt),
+        icon: progress.completionPercent === 100 ? 'check-circle' : 'play-circle',
+        date: progress.updatedAt
+      });
     });
 
-    // Transformer en format d'activité
-    const activities = recentProgress.map((progress) => ({
-      id: progress.id.toString(),
-      type: progress.completionPercent === 100 ? 'course_completed' : 'lesson_started' as const,
-      title: progress.course.title,
-      subtitle: progress.completionPercent === 100
-        ? 'Cours terminé avec succès' 
-        : `Progression: ${Math.round(progress.completionPercent)}%`,
-      timestamp: getRelativeTime(progress.updatedAt),
-      icon: progress.completionPercent === 100 ? 'check-circle' : 'play-circle'
-    }));
+    // Ajouter les résultats de tests
+    recentTests.forEach((result) => {
+      activities.push({
+        id: `test-${result.id}`,
+        type: result.passed ? 'quiz_passed' : 'quiz_failed',
+        title: result.test.title,
+        subtitle: result.passed 
+          ? `Test réussi avec ${result.score}%` 
+          : `Test échoué (${result.score}%)`,
+        timestamp: getRelativeTime(result.completedAt),
+        icon: result.passed ? 'check-circle' : 'close-circle',
+        date: result.completedAt
+      });
+    });
 
-    res.json(activities);
+    // Ajouter les forfaits achetés
+    recentPackages.forEach((userPackage) => {
+      activities.push({
+        id: `package-${userPackage.id}`,
+        type: 'package_purchased',
+        title: userPackage.package.name,
+        subtitle: 'Forfait acheté',
+        timestamp: getRelativeTime(userPackage.purchasedAt),
+        icon: 'shopping',
+        date: userPackage.purchasedAt
+      });
+    });
+
+    // Trier toutes les activités par date et prendre les 10 plus récentes
+    const sortedActivities = activities
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 10)
+      .map(activity => {
+        // Supprimer la date de l'objet final
+        const { date, ...activityWithoutDate } = activity;
+        return activityWithoutDate;
+      });
+
+    // Si aucune activité, ajouter des suggestions
+    if (sortedActivities.length === 0) {
+      sortedActivities.push({
+        id: 'suggestion-1',
+        type: 'suggestion',
+        title: 'Commencez votre apprentissage',
+        subtitle: 'Explorez les cours disponibles',
+        timestamp: 'maintenant',
+        icon: 'lightbulb'
+      });
+    }
+
+    res.json(sortedActivities);
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'activité récente:', error);
     res.status(500).json({ error: 'Erreur interne du serveur' });
