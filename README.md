@@ -290,20 +290,69 @@ Consultez le **[Guide Complet des Optimisations](./docs/COMPLETE_PERFORMANCE_GUI
 
 **Résultat** : AdminCoursesScreen passe de 2-3s de chargement à 200ms, avec 60 FPS constant sur toutes les interactions.
 
+## � Structure du Projet
+
+```
+EduTeQCV2/
+├── 📱 mobile/           # Application React Native
+│   ├── src/
+│   ├── assets/
+│   └── tests/
+├── 🖥️ backend/          # API Node.js + Prisma
+│   ├── src/
+│   ├── prisma/
+│   └── tests/
+├── 📚 docs/             # Documentation organisée
+│   ├── deployment/      # Guides de déploiement
+│   ├── development/     # Guides de développement
+│   ├── features/        # Documentation des fonctionnalités
+│   ├── guides/          # Guides généraux
+│   └── testing/         # Documentation des tests
+├── 🔧 scripts/          # Scripts utilitaires
+│   ├── database/        # Scripts Prisma/DB
+│   │   ├── setup/       # Configuration système
+│   │   ├── content/     # Gestion contenu
+│   │   └── images/      # Gestion images
+│   └── powershell/      # Scripts PowerShell
+├── ⚙️ config/           # Fichiers de configuration
+└── 🛠️ tools/            # Outils et utilitaires
+```
+
 ## 📖 Documentation
 
-Toute la documentation du projet est disponible dans le dossier [`docs/`](./docs/) :
+Documentation complète organisée par thème dans [`docs/`](./docs/) :
 
-- **[Quickstart Guide](./docs/QUICKSTART.md)** - Démarrage rapide
-- **[Overview](./docs/OVERVIEW.md)** - Vue d'ensemble du projet
-- **[API Examples](./docs/API_EXAMPLES.md)** - Exemples d'utilisation de l'API
-- **[Android Setup](./docs/ANDROID_SETUP.md)** - Configuration Android
-- **[Design Guide](./docs/DESIGN_GUIDE.md)** - Guide de design
-- **[Deployment](./docs/DEPLOYMENT.md)** - Guide de déploiement
-- **[Performance Guide](./docs/COMPLETE_PERFORMANCE_GUIDE.md)** - Guide complet des optimisations
-- **[Refactoring Backend](./docs/REFACTORING_BACKEND.md)** - Documentation refactoring backend
-- **[Refactoring Frontend](./docs/REFACTORING_FRONTEND.md)** - Documentation refactoring frontend
-- **[React Hooks Rules](./docs/REACT_HOOKS_RULES.md)** - Règles des hooks React
+### 🚀 Démarrage
+- **[Quickstart Guide](./docs/guides/QUICKSTART.md)** - Démarrage rapide
+- **[Overview](./docs/guides/OVERVIEW.md)** - Vue d'ensemble du projet
+- **[API Examples](./docs/guides/API_EXAMPLES.md)** - Exemples d'utilisation de l'API
+
+### 🔧 Développement
+- **[Android Setup](./docs/development/ANDROID_SETUP.md)** - Configuration Android
+- **[Migration Guide](./docs/development/MIGRATION_GUIDE.md)** - Guide de migration
+- **[React Hooks Rules](./docs/development/REACT_HOOKS_RULES.md)** - Règles des hooks React
+- **[Refactoring Backend](./docs/development/REFACTORING_BACKEND.md)** - Documentation refactoring backend
+- **[Refactoring Frontend](./docs/development/REFACTORING_FRONTEND.md)** - Documentation refactoring frontend
+
+### 🚀 Déploiement
+- **[Deployment Guide](./docs/deployment/DEPLOYMENT_GUIDE.md)** - Guide de déploiement complet
+- **[Railway Deployment](./docs/deployment/RAILWAY_DEPLOYMENT.md)** - Déploiement Railway
+- **[APK Generation](./docs/deployment/APK_GENERATION_GUIDE.md)** - Génération APK
+- **[Test Deployment](./docs/deployment/TEST_DEPLOYMENT.md)** - Tests de déploiement
+
+### 🎯 Fonctionnalités
+- **[Admin Tabs Feature](./docs/features/ADMIN_TABS_FEATURE.md)** - Interface d'administration
+- **[Course Sections](./docs/features/COURSE_SECTIONS_ARCHITECTURE.md)** - Architecture des cours
+- **[Section Editor](./docs/features/SECTION_EDITOR_GUIDE.md)** - Éditeur de sections
+- **[Progression System](./docs/features/PROGRESSION_SYSTEM.md)** - Système de progression
+
+### 🧪 Tests
+- **[Regression Tests](./docs/testing/REGRESSION_TESTS.md)** - Tests de régression
+- **[Admin Tests](./docs/testing/ADMIN_GLOBAL_TESTS_CONSTRAINT.md)** - Tests administration
+- **[Sections Tests](./docs/testing/SECTIONS_TEST_GUIDE.md)** - Tests des sections
+
+### 📋 Scripts
+- **[Scripts README](./scripts/README.md)** - Documentation des scripts utilitaires
 
 ## 📄 License
 
