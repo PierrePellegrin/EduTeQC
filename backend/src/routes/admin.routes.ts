@@ -46,4 +46,8 @@ router.post('/packages', validate(packageSchema), PackageController.create);
 router.put('/packages/:id', validate(packageSchema.partial()), PackageController.update);
 router.delete('/packages/:id', PackageController.delete);
 
+// ========== ADMIN UTILITIES ==========
+router.get('/admin-client-stats', AdminController.getAdminClientStats);
+router.delete('/admin-client-data', AdminController.cleanAdminClientData);
+
 export default router;
