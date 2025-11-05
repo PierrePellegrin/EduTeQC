@@ -8,6 +8,7 @@ import { dashboardStyles as styles } from './dashboard/styles';
 type DashboardStatCardProps = {
   value: number | string;
   label: string;
+  subtitle?: string;
   icon: string;
   color?: string;
   onPress?: () => void;
@@ -16,6 +17,7 @@ type DashboardStatCardProps = {
 export const DashboardStatCard: React.FC<DashboardStatCardProps> = ({ 
   value, 
   label, 
+  subtitle,
   icon, 
   color,
   onPress 
@@ -43,6 +45,11 @@ export const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
           <Text variant="bodyMedium" style={[styles.statLabel, { color: theme.colors.onCardBackground }]}>
             {label}
           </Text>
+          {subtitle && (
+            <Text variant="bodySmall" style={[styles.statSubtitle, { color: theme.colors.onCardBackground, opacity: 0.7 }]}>
+              {subtitle}
+            </Text>
+          )}
         </Card.Content>
       </Card>
     </View>

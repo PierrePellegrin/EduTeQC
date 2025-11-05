@@ -53,15 +53,17 @@ router.get('/stats', authenticate, async (req: AuthRequest, res) => {
       }
     });
 
-    // Temps d'étude total et série de jours (simulés pour l'instant)
-    const totalStudyTime = 24; 
-    const streak = 7; 
+    // Calculer le temps d'étude total basé sur les tests réussis et l'activité
+    const totalStudyTime = await calculateStudyTime(userId);
+
+    // Calculer la série de jours consécutifs d'activité
+    const streak = await calculateDailyStreak(userId);
 
     const stats = {
       totalCourses,
       completedCourses,
       inProgressCourses,
-      totalHours: totalStudyTime,
+      totalHours: Math.round(totalStudyTime / 60), // Convertir minutes en heures
       weeklyProgress: Math.min(Math.round((weeklyProgress / 7) * 100), 100),
       streak
     };
@@ -120,6 +122,124 @@ function getRelativeTime(date: Date): string {
     return `${diffHours} heure${diffHours > 1 ? 's' : ''}`;
   } else {
     return `${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+  }
+}
+
+// Fonction pour calculer le temps d'étude total
+async function calculateStudyTime(userId: string): Promise<number> {
+  try {
+    // 1. Temps des tests réussis (durée réelle des tests)
+    const completedTests = await prisma.testResult.findMany({
+      where: { 
+        userId,
+        passed: true
+      },
+      include: {
+        test: { select: { duration: true } }
+      }
+    });
+
+    const testTime = completedTests.reduce((total, result) => {
+      return total + (result.test.duration || 0);
+    }, 0);
+
+    // 2. Estimation du temps basé sur les sections visitées
+    // On estime 10 minutes par section visitée (temps de lecture/compréhension)
+    const visitedSections = await prisma.sectionProgress.count({
+      where: { 
+        userId,
+        visited: true
+      }
+    });
+
+    const estimatedSectionTime = visitedSections * 10; // 10 minutes par section
+
+    // 3. Bonus pour les cours complétés (temps d'étude supplémentaire estimé)
+    const completedCoursesProgress = await prisma.courseProgress.findMany({
+      where: { 
+        userId,
+        completionPercent: 100
+      }
+    });
+
+    const completionBonusTime = completedCoursesProgress.length * 30; // 30 minutes bonus par cours terminé
+
+    // Total en minutes
+    const totalMinutes = testTime + estimatedSectionTime + completionBonusTime;
+    
+    return Math.max(totalMinutes, 0); // S'assurer que le temps n'est jamais négatif
+  } catch (error) {
+    console.error('Erreur lors du calcul du temps d\'étude:', error);
+    return 0;
+  }
+}
+
+// Fonction pour calculer la série de jours consécutifs d'activité
+async function calculateDailyStreak(userId: string): Promise<number> {
+  try {
+    // Récupérer toutes les activités de l'utilisateur (mises à jour de progression + tests réussis)
+    const [progressUpdates, testResults] = await Promise.all([
+      prisma.courseProgress.findMany({
+        where: { userId },
+        select: { lastAccessedAt: true, updatedAt: true },
+        orderBy: { lastAccessedAt: 'desc' }
+      }),
+      prisma.testResult.findMany({
+        where: { userId },
+        select: { completedAt: true },
+        orderBy: { completedAt: 'desc' }
+      })
+    ]);
+
+    // Combiner toutes les dates d'activité
+    const allActivities = [
+      ...progressUpdates.map(p => p.lastAccessedAt),
+      ...testResults.map(t => t.completedAt)
+    ].sort((a, b) => b.getTime() - a.getTime()); // Trier par date décroissante
+
+    if (allActivities.length === 0) {
+      return 0;
+    }
+
+    // Grouper les activités par jour
+    const activityDays = new Set<string>();
+    allActivities.forEach(date => {
+      const dayString = date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+      activityDays.add(dayString);
+    });
+
+    const sortedDays = Array.from(activityDays).sort().reverse(); // Trier par date décroissante
+
+    // Calculer la série à partir d'aujourd'hui
+    let streak = 0;
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    // Vérifier si l'utilisateur a été actif aujourd'hui ou hier
+    let currentCheckDate = today;
+    if (!sortedDays.includes(today) && sortedDays.includes(yesterday)) {
+      currentCheckDate = yesterday;
+    } else if (!sortedDays.includes(today) && !sortedDays.includes(yesterday)) {
+      return 0; // Aucune activité récente
+    }
+
+    // Compter les jours consécutifs
+    for (let i = 0; i < sortedDays.length; i++) {
+      const checkDate = new Date(currentCheckDate);
+      checkDate.setDate(checkDate.getDate() - i);
+      const expectedDay = checkDate.toISOString().split('T')[0];
+
+      if (sortedDays.includes(expectedDay)) {
+        streak++;
+      } else {
+        break; // Interruption dans la série
+      }
+    }
+
+    return streak;
+  } catch (error) {
+    console.error('Erreur lors du calcul de la série:', error);
+    return 0;
   }
 }
 

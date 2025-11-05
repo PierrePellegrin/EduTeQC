@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, RefreshControl } from 'react-native';
 import { Text } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { DashboardStatsGrid } from '../../components/DashboardStatsGrid';
@@ -30,6 +31,7 @@ type RecentActivityItem = {
 export const ClientDashboardScreen = () => {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const navigation = useNavigation<any>();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -94,8 +96,8 @@ export const ClientDashboardScreen = () => {
       description: 'Reprendre où vous vous êtes arrêté',
       icon: 'play-circle',
       onPress: () => {
-        // Navigation vers les cours en cours
-        console.log('Naviguer vers les cours en cours');
+        // Navigation vers l'onglet des cours
+        navigation.navigate('CoursesTab');
       },
       color: theme.colors.primary
     },
@@ -104,75 +106,71 @@ export const ClientDashboardScreen = () => {
       description: 'Découvrir de nouveaux contenus',
       icon: 'compass',
       onPress: () => {
-        // Navigation vers le catalogue
-        console.log('Naviguer vers le catalogue');
+        // Navigation vers l'onglet des forfaits pour explorer
+        navigation.navigate('PackagesTab');
       },
       color: theme.colors.secondary
     },
     {
-      title: 'Mes statistiques',
+      title: 'Mes résultats',
       description: 'Voir votre progression détaillée',
       icon: 'chart-line',
       onPress: () => {
-        // Navigation vers les statistiques
-        console.log('Naviguer vers les statistiques');
+        // Navigation vers l'onglet résultats
+        navigation.navigate('ResultsTab');
       },
       color: '#FF6B6B'
-    },
-    {
-      title: 'Paramètres',
-      description: 'Personnaliser votre expérience',
-      icon: 'cog',
-      onPress: () => {
-        // Navigation vers les paramètres
-        console.log('Naviguer vers les paramètres');
-      },
-      color: '#4ECDC4'
     }
   ];
 
   const statsItems = stats ? [
     {
-      title: 'Cours disponibles',
+      title: 'Total des cours',
+      subtitle: 'Cours disponibles dans vos forfaits',
       value: stats.totalCourses.toString(),
       icon: 'book-open-variant',
       color: theme.colors.primary,
-      onPress: () => console.log('Voir tous les cours')
+      onPress: () => navigation.navigate('PackagesTab')
     },
     {
-      title: 'Cours terminés',
+      title: 'Cours réussis',
+      subtitle: 'Cours terminés avec succès',
       value: stats.completedCourses.toString(),
       icon: 'check-circle',
       color: '#4CAF50',
-      onPress: () => console.log('Voir les cours terminés')
+      onPress: () => navigation.navigate('ResultsTab')
     },
     {
-      title: 'En cours',
+      title: 'Cours actifs',
+      subtitle: 'Cours commencés en progression',
       value: stats.inProgressCourses.toString(),
-      icon: 'clock',
+      icon: 'play-circle',
       color: '#FF9800',
-      onPress: () => console.log('Voir les cours en cours')
+      onPress: () => navigation.navigate('CoursesTab')
     },
     {
-      title: 'Heures d\'étude',
-      value: stats.totalHours.toString(),
-      icon: 'timer',
+      title: 'Temps d\'étude',
+      subtitle: 'Heures totales d\'apprentissage',
+      value: `${stats.totalHours}h`,
+      icon: 'clock-time-four',
       color: '#9C27B0',
-      onPress: () => console.log('Voir les statistiques de temps')
+      onPress: () => navigation.navigate('ResultsTab')
     },
     {
-      title: 'Progression hebdo',
+      title: 'Progrès semaine',
+      subtitle: 'Avancement cette semaine',
       value: `${stats.weeklyProgress}%`,
-      icon: 'trending-up',
+      icon: 'chart-line',
       color: '#2196F3',
-      onPress: () => console.log('Voir la progression')
+      onPress: () => navigation.navigate('ResultsTab')
     },
     {
-      title: 'Série actuelle',
+      title: 'Série quotidienne',
+      subtitle: 'Jours consécutifs d\'activité',
       value: `${stats.streak} jours`,
       icon: 'fire',
       color: '#FF5722',
-      onPress: () => console.log('Voir l\'historique')
+      onPress: () => navigation.navigate('ResultsTab')
     }
   ] : [];
 

@@ -46,6 +46,12 @@ export const dashboardStyles = StyleSheet.create({
     fontSize: 12,
     opacity: 0.8,
   },
+  statSubtitle: {
+    textAlign: 'center',
+    fontSize: 10,
+    opacity: 0.6,
+    marginTop: 2,
+  },
   sectionTitle: {
     marginBottom: 16,
     marginTop: 8,

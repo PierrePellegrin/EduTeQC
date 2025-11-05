@@ -18,10 +18,11 @@ export const DashboardStatsGrid: React.FC<DashboardStatsGridProps> = ({
         <DashboardStatCard
           key={index}
           value={stat.value}
-          label={stat.label}
+          label={stat.title}
+          subtitle={stat.subtitle}
           icon={stat.icon}
           color={stat.color}
-          onPress={() => onStatPress?.(stat)}
+          onPress={stat.onPress || (() => onStatPress?.(stat))}
         />
       ))}
     </View>
