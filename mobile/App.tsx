@@ -34,6 +34,7 @@ import { PackagesShopScreen } from './src/screens/packages/PackagesShopScreen';
 import { CourseSectionsScreen } from './src/screens/CourseSectionsScreen';
 import { SectionDetailScreen } from './src/screens/SectionDetailScreen';
 import { CourseSectionsEditorScreen } from './src/screens/admin/CourseSectionsEditorScreen';
+import { ClientDashboardScreen } from './src/screens/client/ClientDashboardScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -79,7 +80,9 @@ function ClientTabs() {
             screenOptions={({ route }) => ({
               tabBarIcon: ({ focused, color, size }) => {
                 let iconName: string = 'home';
-                if (route.name === 'CoursesTab') {
+                if (route.name === 'DashboardTab') {
+                  iconName = focused ? 'view-dashboard' : 'view-dashboard-outline';
+                } else if (route.name === 'CoursesTab') {
                   iconName = focused ? 'book-open' : 'book-open-outline';
                 } else if (route.name === 'PackagesTab') {
                   iconName = focused ? 'package-variant' : 'package-variant-closed';
@@ -108,6 +111,11 @@ function ClientTabs() {
               },
             })}
           >
+            <Tab.Screen
+              name="DashboardTab"
+              component={ClientDashboardScreen}
+              options={{ title: 'Accueil' }}
+            />
             <Tab.Screen
               name="CoursesTab"
               component={CoursesStack}

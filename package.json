@@ -13,7 +13,13 @@
     "prisma:generate": "cd backend && npm run prisma:generate",
     "prisma:migrate": "cd backend && npm run prisma:migrate",
     "prisma:seed": "cd backend && npm run prisma:seed",
-    "prisma:studio": "cd backend && npm run prisma:studio"
+    "prisma:studio": "cd backend && npm run prisma:studio",
+    "kill:all": "powershell -ExecutionPolicy Bypass -File ./kill-all-clean.ps1",
+    "kill:quick": "powershell -ExecutionPolicy Bypass -File ./kill-all-quick.ps1",
+    "restart": "powershell -ExecutionPolicy Bypass -File ./restart-dev.ps1",
+    "restart:backend": "powershell -ExecutionPolicy Bypass -File ./restart-dev.ps1 -BackendOnly",
+    "restart:mobile": "powershell -ExecutionPolicy Bypass -File ./restart-dev.ps1 -MobileOnly",
+    "clean": "powershell -ExecutionPolicy Bypass -File ./restart-dev.ps1 -NoStart"
   },
   "keywords": [
     "education",

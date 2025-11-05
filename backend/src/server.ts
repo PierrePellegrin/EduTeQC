@@ -9,6 +9,7 @@ import packageRoutes from './routes/package.routes';
 import cycleRoutes from './routes/cycle.routes';
 import sectionRoutes from './routes/section.routes';
 import progressRoutes from './routes/progress.routes';
+import clientRoutes from './routes/client.routes';
 import { errorHandler } from './middleware/error.middleware';
 
 dotenv.config();
@@ -42,6 +43,7 @@ app.use('/api/tests', testRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/packages', packageRoutes);
 app.use('/api/progress', progressRoutes); // Specific prefix to avoid auth conflicts
+app.use('/api/client', clientRoutes);
 app.use('/api', cycleRoutes);
 app.use('/api', sectionRoutes);
 

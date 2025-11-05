@@ -273,5 +273,18 @@ export const cyclesApi = {
   },
 };
 
+// Client API
+export const clientApi = {
+  getStats: async () => {
+    const response = await api.get('/client/stats');
+    return response.data;
+  },
+
+  getRecentActivity: async () => {
+    const response = await api.get('/client/recent-activity');
+    return response.data;
+  },
+};
+
 export default api;
 
