@@ -33,6 +33,15 @@ dist/
 .expo/
 .expo-shared/
 
+# Releases (binaries too large)
+releases/*.apk
+releases/*.ipa
+releases/*.aab
+
+# Backups (potentially sensitive data)
+backups/*.sql
+backups/*.dump
+
 # Misc
 .DS_Store
 .env

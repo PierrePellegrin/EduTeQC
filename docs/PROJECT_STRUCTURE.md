@@ -60,10 +60,15 @@ EduTeQCV2/
 │   │   ├── API_EXAMPLES.md
 │   │   ├── DESIGN_GUIDE.md
 │   │   └── COMPLETE_PERFORMANCE_GUIDE.md
-│   └── testing/                 # 🧪 Documentation des tests
-│       ├── REGRESSION_TESTS.md
-│       ├── ADMIN_GLOBAL_TESTS_CONSTRAINT.md
-│       └── SECTIONS_TEST_GUIDE.md
+│   ├── testing/                 # 🧪 Documentation des tests
+│   │   ├── REGRESSION_TESTS.md
+│   │   ├── ADMIN_GLOBAL_TESTS_CONSTRAINT.md
+│   │   └── SECTIONS_TEST_GUIDE.md
+│   ├── archive/                 # 📦 Anciens documents
+│   │   └── README.md
+│   ├── README.md                # Index navigation
+│   ├── PROJECT_STRUCTURE.md     # Ce document
+│   └── MIGRATION_STRUCTURE.md   # Guide migration
 │
 ├── 🔧 scripts/                   # Scripts utilitaires
 │   ├── database/                # Scripts Prisma/DB
@@ -79,8 +84,11 @@ EduTeQCV2/
 │   │       ├── update-packages-images.ts
 │   │       └── update-only-validated-images.ts
 │   ├── powershell/              # Scripts PowerShell
-│   │   └── [scripts].ps1
-│   └── README.md                # Documentation des scripts
+│   │   ├── build-production.ps1
+│   │   ├── test-local.ps1
+│   │   └── [autres scripts].ps1
+│   ├── README.md                # Documentation des scripts
+│   └── SCRIPTS_README.md        # Ancien README (à fusionner)
 │
 ├── ⚙️ config/                    # Fichiers de configuration
 │   ├── eas.json                 # Configuration EAS Build
@@ -89,18 +97,24 @@ EduTeQCV2/
 ├── 🛠️ tools/                     # Outils et utilitaires
 │   └── e2e-tests.js             # Tests end-to-end
 │
+├── 💾 backups/                   # Sauvegardes base de données
+│   ├── backup_avant_migration_20251022.sql
+│   └── README.md                # Guide des backups
+│
+├── 📦 releases/                  # Builds de production
+│   ├── EduTeQC-Production.apk
+│   └── README.md                # Guide des releases
+│
 ├── 📄 Fichiers racine
 │   ├── README.md                # Documentation principale
 │   ├── package.json             # Configuration npm racine
-│   ├── SCRIPTS_README.md        # Guide des scripts
-│   ├── FILTRES_PACKAGES_RESUME.md
-│   ├── CORRECTION_SYNTAXE.md
-│   ├── DEPLOY_NOW.md
-│   ├── GUIDE_SCRIPTS.md
+│   ├── .gitignore               # Exclusions Git
 │   └── LICENSE
 │
-└── 🗄️ Fichiers de base de données
-    └── backup_avant_migration_20251022.sql
+└── 📁 Dossiers système
+    ├── .git/                    # Dépôt Git
+    ├── .github/                 # Actions GitHub
+    └── node_modules/            # Dépendances npm
 ```
 
 ## 🎯 Principes d'Organisation
