@@ -71,6 +71,7 @@ function ProfileStack() {
 
 function ClientTabs() {
   const { theme } = useTheme();
+  const { user } = useAuth();
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -114,7 +115,10 @@ function ClientTabs() {
             <Tab.Screen
               name="DashboardTab"
               component={ClientDashboardScreen}
-              options={{ title: 'Accueil' }}
+              options={{ 
+                title: `Bonjour ${user?.firstName || 'Utilisateur'}`,
+                tabBarLabel: 'Accueil'
+              }}
             />
             <Tab.Screen
               name="CoursesTab"
@@ -134,7 +138,7 @@ function ClientTabs() {
             <Tab.Screen
               name="ProfileTab"
               component={ProfileStack}
-              options={{ title: 'Profil', headerShown: false }}
+              options={{ title: 'Profil' }}
             />
           </Tab.Navigator>
         )}
@@ -364,7 +368,7 @@ function AdminTabs() {
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStack}
-        options={{ title: 'Profil', headerShown: false }}
+        options={{ title: 'Profil' }}
       />
     </Tab.Navigator>
   );

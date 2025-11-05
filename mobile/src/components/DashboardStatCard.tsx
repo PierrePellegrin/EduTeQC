@@ -35,13 +35,13 @@ export const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
           <View style={styles.statHeader}>
             <Icon 
               name={icon} 
-              size={24} 
+              size={32} 
               color={color || theme.colors.primary} 
             />
+            <Text variant="headlineMedium" style={[styles.statNumber, { color: theme.colors.onCardBackground }]}>
+              {value}
+            </Text>
           </View>
-          <Text variant="headlineMedium" style={[styles.statNumber, { color: theme.colors.onCardBackground }]}>
-            {value}
-          </Text>
           <Text variant="bodyMedium" style={[styles.statLabel, { color: theme.colors.onCardBackground }]}>
             {label}
           </Text>

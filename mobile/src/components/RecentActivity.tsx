@@ -44,11 +44,11 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
 
   const renderActivityItem = ({ item }: { item: ActivityItem }) => (
     <Card style={[styles.activityCard, { backgroundColor: theme.colors.cardBackground }]}>
-      <Card.Content>
+      <Card.Content style={{ paddingVertical: 6, paddingHorizontal: 10 }}>
         <View style={styles.activityContent}>
           <Icon 
             name={item.icon} 
-            size={24} 
+            size={20} 
             color={getActivityColor(item.type)}
             style={styles.activityIcon}
           />
@@ -85,11 +85,11 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
         />
       ) : (
         <Card style={[styles.emptyCard, { backgroundColor: theme.colors.cardBackground }]}>
-          <Card.Content>
+          <Card.Content style={{ paddingVertical: 12, paddingHorizontal: 16 }}>
             <View style={styles.emptyContent}>
               <Icon 
                 name="history" 
-                size={32} 
+                size={24} 
                 color={theme.colors.onCardBackground} 
                 style={styles.emptyIcon}
               />

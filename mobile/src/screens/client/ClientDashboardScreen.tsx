@@ -14,9 +14,13 @@ type DashboardStats = {
   totalCourses: number;
   completedCourses: number;
   inProgressCourses: number;
+  availableCourses: number;
+  allCoursesCount: number;
   totalHours: number;
   weeklyProgress: number;
+  globalProgress: number;
   streak: number;
+  packagesCount: number;
 };
 
 type RecentActivityItem = {
@@ -39,42 +43,30 @@ export const ClientDashboardScreen = () => {
 
   const loadDashboardData = async () => {
     try {
-      // Chargement des statistiques client
+      // Chargement des statistiques client depuis l'API
       const statsResponse = await clientApi.getStats();
       setStats(statsResponse);
 
-      // Chargement de l'activité récente
+      // Chargement de l'activité récente depuis l'API
       const activityResponse = await clientApi.getRecentActivity();
       setRecentActivity(activityResponse);
+      
     } catch (error) {
       console.error('Erreur lors du chargement des données dashboard:', error);
-      // Données de fallback pour la démo
+      // En cas d'erreur, initialiser avec des valeurs vides pour éviter un écran blanc
       setStats({
-        totalCourses: 12,
-        completedCourses: 5,
-        inProgressCourses: 3,
-        totalHours: 24,
-        weeklyProgress: 75,
-        streak: 7
+        totalCourses: 0,
+        completedCourses: 0,
+        inProgressCourses: 0,
+        availableCourses: 0,
+        allCoursesCount: 0,
+        totalHours: 0,
+        weeklyProgress: 0,
+        globalProgress: 0,
+        streak: 0,
+        packagesCount: 0
       });
-      setRecentActivity([
-        {
-          id: '1',
-          type: 'course_completed',
-          title: 'Mathématiques Niveau 1',
-          subtitle: 'Cours terminé avec succès',
-          timestamp: '2 heures',
-          icon: 'check-circle'
-        },
-        {
-          id: '2',
-          type: 'lesson_started',
-          title: 'Les fractions',
-          subtitle: 'Nouvelle leçon commencée',
-          timestamp: '1 jour',
-          icon: 'play-circle'
-        }
-      ]);
+      setRecentActivity([]);
     } finally {
       setLoading(false);
     }
@@ -125,8 +117,7 @@ export const ClientDashboardScreen = () => {
 
   const statsItems = stats ? [
     {
-      title: 'Total des cours',
-      subtitle: 'Cours disponibles dans vos forfaits',
+      title: 'Mes cours (forfaits)',
       value: stats.totalCourses.toString(),
       icon: 'book-open-variant',
       color: theme.colors.primary,
@@ -134,40 +125,49 @@ export const ClientDashboardScreen = () => {
     },
     {
       title: 'Cours réussis',
-      subtitle: 'Cours terminés avec succès',
       value: stats.completedCourses.toString(),
       icon: 'check-circle',
       color: '#4CAF50',
       onPress: () => navigation.navigate('ResultsTab')
     },
     {
-      title: 'Cours actifs',
-      subtitle: 'Cours commencés en progression',
+      title: 'Cours en cours',
       value: stats.inProgressCourses.toString(),
       icon: 'play-circle',
       color: '#FF9800',
       onPress: () => navigation.navigate('CoursesTab')
     },
     {
-      title: 'Temps d\'étude',
-      subtitle: 'Heures totales d\'apprentissage',
+      title: 'Cours à obtenir',
+      value: stats.allCoursesCount.toString(),
+      icon: 'compass',
+      color: '#2196F3',
+      onPress: () => navigation.navigate('PackagesTab')
+    },
+    {
+      title: 'Heures d\'étude',
       value: `${stats.totalHours}h`,
       icon: 'clock-time-four',
       color: '#9C27B0',
       onPress: () => navigation.navigate('ResultsTab')
     },
     {
-      title: 'Progrès semaine',
-      subtitle: 'Avancement cette semaine',
-      value: `${stats.weeklyProgress}%`,
+      title: 'Progression globale',
+      value: `${stats.globalProgress}%`,
       icon: 'chart-line',
-      color: '#2196F3',
+      color: '#607D8B',
       onPress: () => navigation.navigate('ResultsTab')
     },
     {
+      title: 'Forfaits possédés',
+      value: stats.packagesCount.toString(),
+      icon: 'package-variant',
+      color: '#795548',
+      onPress: () => navigation.navigate('PackagesTab')
+    },
+    {
       title: 'Série quotidienne',
-      subtitle: 'Jours consécutifs d\'activité',
-      value: `${stats.streak} jours`,
+      value: `${stats.streak} jour${stats.streak > 1 ? 's' : ''}`,
       icon: 'fire',
       color: '#FF5722',
       onPress: () => navigation.navigate('ResultsTab')
@@ -191,16 +191,7 @@ export const ClientDashboardScreen = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <View style={styles.header}>
-        <Text variant="headlineMedium" style={[styles.welcomeText, { color: theme.colors.onBackground }]}>
-          Bonjour {user?.firstName || 'Étudiant'} !
-        </Text>
-        <Text variant="bodyLarge" style={[styles.subText, { color: theme.colors.onBackground }]}>
-          Prêt à continuer votre apprentissage ?
-        </Text>
-      </View>
-
-      <View style={styles.section}>
+      <View style={[styles.section, { marginTop: 16 }]}>
         <DashboardStatsGrid stats={statsItems} />
       </View>
 

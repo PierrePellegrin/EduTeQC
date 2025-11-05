@@ -30,14 +30,17 @@ export const PackageCard: React.FC<PackageCardProps> = ({
   const { theme } = useTheme();
   const { showImages } = useSettings();
 
-  // Image par défaut si pas d'imageUrl
-  const defaultImage = 'https://via.placeholder.com/800x400/2E7D32/FFFFFF?text=' + encodeURIComponent(pkg.name || 'Package');
+  // Utiliser l'image de la base de données avec une image par défaut simple en fallback
+  const defaultImage = 'https://via.placeholder.com/800x400/607D8B/FFFFFF?text=' + encodeURIComponent(pkg.name || 'Package');
   const imageSource = pkg.imageUrl || defaultImage;
 
   return (
     <Card style={[styles.packageCard, { backgroundColor: theme.colors.cardBackground }]}>
       {showImages && (
-        <Card.Cover source={{ uri: imageSource }} style={styles.cover} />
+        <Card.Cover 
+          source={{ uri: imageSource }} 
+          style={styles.cover}
+        />
       )}
       <Card.Content>
         <Text variant="titleMedium" style={styles.packageTitle}>

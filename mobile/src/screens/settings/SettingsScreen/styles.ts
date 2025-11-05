@@ -8,12 +8,12 @@ export const styles = StyleSheet.create({
     padding: 16,
   },
   sectionTitle: {
-    marginBottom: 8,
+    marginBottom: 12,
     fontWeight: '600',
-    opacity: 0.7,
+    opacity: 0.9,
   },
   helpText: {
-    opacity: 0.6,
+    opacity: 0.7,
     lineHeight: 20,
   },
 });

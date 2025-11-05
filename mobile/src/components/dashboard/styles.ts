@@ -18,13 +18,13 @@ export const dashboardStyles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -8,
-    marginBottom: 24,
+    marginHorizontal: -6,
+    marginBottom: 16,
   },
   statCell: {
     width: '50%',
-    paddingHorizontal: 8,
-    marginBottom: 16,
+    paddingHorizontal: 6,
+    marginBottom: 12,
   },
   statCard: {
     width: '100%',
@@ -32,18 +32,24 @@ export const dashboardStyles = StyleSheet.create({
   },
   statContent: {
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
   statHeader: {
-    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+    width: '100%',
   },
   statNumber: {
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginLeft: 8,
+    fontSize: 20,
   },
   statLabel: {
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: 11,
     opacity: 0.8,
   },
   statSubtitle: {
@@ -53,32 +59,34 @@ export const dashboardStyles = StyleSheet.create({
     marginTop: 2,
   },
   sectionTitle: {
-    marginBottom: 16,
-    marginTop: 8,
+    marginBottom: 8,
+    marginTop: 4,
     fontWeight: '600',
   },
   actionCard: {
-    marginBottom: 12,
+    marginBottom: 6,
     elevation: 1,
   },
   actionContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
   },
   actionIcon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   actionText: {
     flex: 1,
   },
   actionTitle: {
     fontWeight: '500',
+    fontSize: 14,
   },
   actionDescription: {
-    fontSize: 12,
+    fontSize: 11,
     opacity: 0.7,
-    marginTop: 2,
+    marginTop: 1,
   },
   recentSection: {
     marginTop: 8,
@@ -123,33 +131,34 @@ export const dashboardStyles = StyleSheet.create({
   },
   // Activité récente
   activityCard: {
-    marginBottom: 8,
+    marginBottom: 4,
     elevation: 2,
     borderRadius: 12,
   },
   activityContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
   },
   activityIcon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   activityText: {
     flex: 1,
-    marginRight: 8,
+    marginRight: 6,
   },
   activityTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   activitySubtitle: {
-    fontSize: 14,
+    fontSize: 11,
     opacity: 0.7,
   },
   activityTime: {
-    fontSize: 12,
+    fontSize: 10,
     opacity: 0.6,
   },
   // État vide pour activités
@@ -159,31 +168,31 @@ export const dashboardStyles = StyleSheet.create({
   },
   emptyContent: {
     alignItems: 'center',
-    padding: 24,
+    padding: 16,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
-    marginBottom: 4,
+    marginBottom: 2,
     textAlign: 'center',
   },
   emptySubtext: {
-    fontSize: 14,
+    fontSize: 12,
     opacity: 0.7,
     textAlign: 'center',
   },
   // En-tête dashboard
   header: {
-    padding: 16,
-    marginBottom: 8,
+    padding: 12,
+    marginBottom: 6,
   },
   subText: {
     opacity: 0.8,
-    marginTop: 4,
+    marginTop: 2,
   },
   section: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
+    paddingHorizontal: 12,
+    marginBottom: 16,
   },
   loadingContainer: {
     flex: 1,

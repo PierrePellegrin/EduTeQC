@@ -41,7 +41,9 @@ const LightCourseCardComponent: React.FC<LightCourseCardProps> = ({
           <View style={styles.chips}>
             <View style={[styles.chip, { backgroundColor: themeColors.primary + '20' }]}>
               <Icon name="tag" size={14} color={themeColors.primary} />
-              <Text style={[styles.chipText, { color: themeColors.primary }]}>{course.category}</Text>
+              <Text style={[styles.chipText, { color: themeColors.primary }]}>
+                {course.category}
+              </Text>
             </View>
             
             {course._count?.tests && course._count.tests > 0 && (

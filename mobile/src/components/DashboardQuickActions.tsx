@@ -35,11 +35,11 @@ export const DashboardQuickActions: React.FC<DashboardQuickActionsProps> = ({
           style={[styles.actionCard, { backgroundColor: theme.colors.cardBackground }]}
           onPress={action.onPress}
         >
-          <Card.Content>
+          <Card.Content style={{ paddingVertical: 8, paddingHorizontal: 12 }}>
             <View style={styles.actionContent}>
               <Icon 
                 name={action.icon} 
-                size={24} 
+                size={20} 
                 color={action.color || theme.colors.primary}
                 style={styles.actionIcon}
               />
@@ -53,7 +53,7 @@ export const DashboardQuickActions: React.FC<DashboardQuickActionsProps> = ({
               </View>
               <Icon 
                 name="chevron-right" 
-                size={20} 
+                size={16} 
                 color={theme.colors.onCardBackground}
               />
             </View>
