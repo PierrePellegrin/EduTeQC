@@ -107,5 +107,22 @@ npm test
 🟢 **Documentation mise à jour** avec nouveaux chemins  
 🟢 **Structure cohérente** et maintenable  
 🟢 **Workflow simplifié** pour utilisateurs  
+🟢 **Scripts de validation** créés et testés
+
+### 🔧 Scripts de Validation Disponibles
+
+```powershell
+# Validation rapide de la réorganisation
+.\scripts\powershell\check-reorganization.ps1
+
+# Validation simple sans dépendances
+.\scripts\powershell\check-reorganization.ps1 -Quick
+
+# Tests de régression complets  
+.\scripts\powershell\run-regression-tests-fixed.ps1
+
+# Tests backend seulement
+.\scripts\powershell\run-regression-tests-fixed.ps1 -SkipE2E -SkipFrontend
+```
 
 La réorganisation est maintenant **parfaitement fonctionnelle** ! 🎉
