@@ -74,10 +74,12 @@ Write-Host "📅 Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundCol
 Write-Host "💻 Environnement: $env:COMPUTERNAME" -ForegroundColor Gray
 
 # Définir les chemins
-$rootPath = Get-Location
+# Le script est maintenant dans scripts/powershell/, il faut remonter à la racine
+$scriptPath = $PSScriptRoot
+$rootPath = Split-Path (Split-Path $scriptPath -Parent) -Parent
 $backendPath = Join-Path $rootPath "backend"
 $mobilePath = Join-Path $rootPath "mobile"
-$testsPath = Join-Path $rootPath "tests"
+$testsPath = Join-Path $rootPath "tools"
 
 # Vérifier les dépendances
 Write-Host "`n🔍 Vérification des dépendances..." -ForegroundColor Yellow
@@ -159,12 +161,12 @@ if ($totalTests -gt 0) {
 }
 
 if ($failedTests -eq 0) {
-    Write-Host "`n🎉 TOUS LES TESTS DE NON-RÉGRESSION ONT RÉUSSI !" -ForegroundColor Green
-    Write-Host "✨ Votre code est prêt pour la production." -ForegroundColor Green
+    Write-Host "`nTOUS LES TESTS DE NON-REGRESSION ONT REUSSI !" -ForegroundColor Green
+    Write-Host "Votre code est pret pour la production." -ForegroundColor Green
 } else {
-    Write-Host "`n💥 CERTAINS TESTS ONT ÉCHOUÉ !" -ForegroundColor Red
-    Write-Host "🔍 Vérifiez les logs ci-dessus pour plus de détails." -ForegroundColor Red
-    Write-Host "🛠️ Corrigez les problèmes avant de continuer." -ForegroundColor Red
+    Write-Host "`nCERTAINS TESTS ONT ECHOUE !" -ForegroundColor Red
+    Write-Host "Verifiez les logs ci-dessus pour plus de details." -ForegroundColor Red
+    Write-Host "Corrigez les problemes avant de continuer." -ForegroundColor Red
 }
 
 Write-Host ""
