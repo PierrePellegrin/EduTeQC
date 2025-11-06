@@ -47,22 +47,24 @@ app.use('/api/client', clientRoutes);
 app.use('/api', cycleRoutes);
 app.use('/api', sectionRoutes);
 
-// Root endpoint for Railway health check fallback
+// Railway health check - exactly what Railway expects
 app.get('/', (req, res) => {
-  console.log('[ROOT] Root endpoint called for health check');
-  res.status(200).send('EduTeQC Backend is running');
+  console.log('[ROOT] Railway health check called');
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
 });
 
-// Ultra-simple health check for Railway (no dependencies at all)
+// Alternative health endpoints
 app.get('/ping', (req, res) => {
   console.log('[HEALTH] /ping endpoint called');
-  res.status(200).send('OK');
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
 });
 
-// Simple health check for Railway (minimal JSON)
 app.get('/health', (req, res) => {
   console.log('[HEALTH] /health endpoint called');
-  res.status(200).json({ status: 'OK' });
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end('{"status":"OK"}');
 });
 
 // Detailed health check
