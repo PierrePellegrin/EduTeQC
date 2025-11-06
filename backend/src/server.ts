@@ -47,18 +47,28 @@ app.use('/api/client', clientRoutes);
 app.use('/api', cycleRoutes);
 app.use('/api', sectionRoutes);
 
-// Simple health check for Railway (no database dependency)
-app.get('/ping', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    service: 'eduteqc-backend'
-  });
+// Root endpoint for Railway health check fallback
+app.get('/', (req, res) => {
+  console.log('[ROOT] Root endpoint called for health check');
+  res.status(200).send('EduTeQC Backend is running');
 });
 
-// Health check
-app.get('/health', async (req, res) => {
+// Ultra-simple health check for Railway (no dependencies at all)
+app.get('/ping', (req, res) => {
+  console.log('[HEALTH] /ping endpoint called');
+  res.status(200).send('OK');
+});
+
+// Simple health check for Railway (minimal JSON)
+app.get('/health', (req, res) => {
+  console.log('[HEALTH] /health endpoint called');
+  res.status(200).json({ status: 'OK' });
+});
+
+// Detailed health check
+app.get('/health/detailed', async (req, res) => {
   try {
+    console.log('[HEALTH] /health/detailed endpoint called');
     // Test basic server health
     const healthStatus: any = {
       status: 'OK',
@@ -95,11 +105,21 @@ app.get('/health', async (req, res) => {
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📚 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Health endpoints: /ping (simple), /health (detailed)`);
-  console.log(`💾 Database URL: ${process.env.DATABASE_URL ? 'configured' : 'not configured'}`);
-  console.log(`🌐 CORS origin: ${process.env.CORS_ORIGIN || 'default'}`);
+  console.log('='.repeat(50));
+  console.log('🚀 EDUTEQC BACKEND STARTING');
+  console.log('='.repeat(50));
+  console.log(`📍 Server running on port ${PORT}`);
+  console.log(`🏠 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Health endpoints:`);
+  console.log(`   • /ping (ultra-simple)`);
+  console.log(`   • /health (basic)`);
+  console.log(`   • /health/detailed (with DB check)`);
+  console.log(`💾 Database: ${process.env.DATABASE_URL ? 'URL configured' : 'NO DATABASE_URL'}`);
+  console.log(`🌐 CORS: ${process.env.CORS_ORIGIN || 'default (*)'}`);
+  console.log(`🔑 JWT Secret: ${process.env.JWT_SECRET ? 'configured' : 'NOT CONFIGURED'}`);
+  console.log('='.repeat(50));
+  console.log('✅ SERVER READY FOR REQUESTS');
+  console.log('='.repeat(50));
 });
 
 export default app;

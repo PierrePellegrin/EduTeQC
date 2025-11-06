@@ -14,6 +14,7 @@
     "deploy": "npm run build && npm run prisma:migrate:deploy && npm run prisma:seed",
     "railway:build": "npm install && npm run build && npx prisma generate",
     "railway:start": "npx prisma migrate deploy; npm start",
+    "railway:start:simple": "npm start",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
