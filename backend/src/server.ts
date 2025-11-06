@@ -47,18 +47,42 @@ app.use('/api/client', clientRoutes);
 app.use('/api', cycleRoutes);
 app.use('/api', sectionRoutes);
 
+// Simple health check for Railway (no database dependency)
+app.get('/ping', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    service: 'eduteqc-backend'
+  });
+});
+
 // Health check
 app.get('/health', async (req, res) => {
   try {
     // Test basic server health
-    const healthStatus = {
+    const healthStatus: any = {
       status: 'OK',
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
+      database: 'unknown'
     };
     
-    res.json(healthStatus);
+    // Test database connection
+    try {
+      const { PrismaClient } = require('@prisma/client');
+      const prisma = new PrismaClient();
+      await prisma.$queryRaw`SELECT 1`;
+      healthStatus.database = 'connected';
+      await prisma.$disconnect();
+    } catch (dbError) {
+      console.warn('Database health check failed:', dbError);
+      healthStatus.database = 'disconnected';
+      healthStatus.warning = 'Database not accessible';
+    }
+    
+    res.status(200).json(healthStatus);
   } catch (error) {
+    console.error('Health check error:', error);
     res.status(500).json({
       status: 'ERROR',
       timestamp: new Date().toISOString(),
@@ -71,8 +95,11 @@ app.get('/health', async (req, res) => {
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`ðŸš€ Server running on port ${PORT}`);
-  console.log(`ðŸ“š Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📚 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Health endpoints: /ping (simple), /health (detailed)`);
+  console.log(`💾 Database URL: ${process.env.DATABASE_URL ? 'configured' : 'not configured'}`);
+  console.log(`🌐 CORS origin: ${process.env.CORS_ORIGIN || 'default'}`);
 });
 
 export default app;
