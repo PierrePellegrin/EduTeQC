@@ -1,63 +1,63 @@
 ﻿{
-    "name":  "eduteqc-backend",
-    "version":  "1.0.0",
-    "description":  "Backend API pour EduTeQC - Application d\u0027apprentissage",
-    "main":  "dist/server.js",
-    "scripts":  {
-                    "dev":  "nodemon src/server.ts",
-                    "build":  "tsc",
-                    "start":  "node dist/server.js",
-                    "test":  "jest",
-                    "test:watch":  "jest --watch",
-                    "test:coverage":  "jest --coverage",
-                    "test:regression":  "jest --testPathPatterns=regression",
-                    "deploy":  "npm run build \u0026\u0026 npm run prisma:migrate:deploy \u0026\u0026 npm run prisma:seed",
-                    "railway:build":  "npm install \u0026\u0026 npm run build \u0026\u0026 npx prisma generate",
-                    "railway:start":  "npx prisma migrate deploy; npm start",
-                    "railway:start:simple":  "npm start",
-                    "prisma:generate":  "prisma generate",
-                    "prisma:migrate":  "prisma migrate dev",
-                    "prisma:migrate:deploy":  "prisma migrate deploy",
-                    "prisma:studio":  "prisma studio",
-                    "prisma:seed":  "ts-node prisma/seed.ts"
-                },
-    "prisma":  {
-                   "seed":  "ts-node prisma/seed.ts"
-               },
-    "keywords":  [
-                     "education",
-                     "api",
-                     "express",
-                     "typescript"
-                 ],
-    "author":  "",
-    "license":  "ISC",
-    "dependencies":  {
-                         "@prisma/client":  "^5.7.0",
-                         "bcryptjs":  "^2.4.3",
-                         "cors":  "^2.8.5",
-                         "dotenv":  "^16.3.1",
-                         "express":  "^4.18.2",
-                         "jsonwebtoken":  "^9.0.2",
-                         "multer":  "^1.4.5-lts.1",
-                         "zod":  "^3.22.4"
-                     },
-    "devDependencies":  {
-                            "@types/bcryptjs":  "^2.4.6",
-                            "@types/cors":  "^2.8.17",
-                            "@types/express":  "^4.17.21",
-                            "@types/jest":  "^30.0.0",
-                            "@types/jsonwebtoken":  "^9.0.5",
-                            "@types/multer":  "^1.4.11",
-                            "@types/node":  "^20.19.24",
-                            "@types/supertest":  "^6.0.3",
-                            "jest":  "^30.2.0",
-                            "node-fetch":  "^2.7.0",
-                            "nodemon":  "^3.0.2",
-                            "prisma":  "^5.7.0",
-                            "supertest":  "^7.1.4",
-                            "ts-jest":  "^29.4.5",
-                            "ts-node":  "^10.9.2",
-                            "typescript":  "^5.3.3"
-                        }
+  "name": "eduteqc-backend",
+  "version": "1.0.0",
+  "description": "Backend API pour EduTeQC - Application d'apprentissage",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:regression": "jest --testPathPatterns=regression",
+    "deploy": "npm run build && npm run prisma:migrate:deploy && npm run prisma:seed",
+    "railway:build": "npm install && npm run build && npx prisma generate",
+    "railway:start": "npx prisma migrate deploy; npm start",
+    "railway:start:simple": "npm start",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "ts-node prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "keywords": [
+    "education",
+    "api",
+    "express",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.19.24",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.2.0",
+    "node-fetch": "^2.7.0",
+    "nodemon": "^3.0.2",
+    "prisma": "^5.7.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
 }
