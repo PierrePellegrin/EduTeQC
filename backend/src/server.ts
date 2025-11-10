@@ -17,6 +17,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Railway Health Check - AVANT tous les middlewares pour éviter tout problème
+app.get('/', (req, res) => {
+  console.log('[RAILWAY] Root health check called');
+  res.status(200).send('OK');
+});
+
+app.get('/ping', (req, res) => {
+  console.log('[RAILWAY] Ping health check called');  
+  res.status(200).send('OK');
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -47,24 +58,10 @@ app.use('/api/client', clientRoutes);
 app.use('/api', cycleRoutes);
 app.use('/api', sectionRoutes);
 
-// Railway health check - exactly what Railway expects
-app.get('/', (req, res) => {
-  console.log('[ROOT] Railway health check called');
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('OK');
-});
-
-// Alternative health endpoints
-app.get('/ping', (req, res) => {
-  console.log('[HEALTH] /ping endpoint called');
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('OK');
-});
-
+// Health endpoint simple
 app.get('/health', (req, res) => {
   console.log('[HEALTH] /health endpoint called');
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end('{"status":"OK"}');
+  res.status(200).json({ status: 'OK' });
 });
 
 // Detailed health check
